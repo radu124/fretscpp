@@ -1,0 +1,43 @@
+interface
+
+void assume(int b, const char *err);
+
+double gettimenow();
+
+implementation
+		
+uses includes;
+
+double gettimefloat()
+{
+	timeval t;
+	gettimeofday(&t,NULL);
+	return t.tv_sec*1.0+t.tv_usec*0.000001;
+}
+
+double origtime=gettimefloat();
+
+double gettimenow()
+{ 
+	double v=gettimefloat();
+	return v-origtime;
+}
+
+void assume(int b, const char *err)
+{
+	if (b) return;
+	printf("Error: %s\n",err);
+	int v=errno;
+	printf("Errno: %d: %s\n",v, strerror(v));
+	printf("SDL err: %s\n", SDL_GetError());
+	exit(1);
+}
+
+template <typename T>
+T* dorealloc(T* &adr,int len)
+{
+	T* res=(T*) realloc(adr,len*sizeof(T));
+	if (!res) exit(1);
+	adr=res;
+}
+

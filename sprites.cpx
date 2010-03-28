@@ -1,0 +1,79 @@
+interface
+
+uses includes, utils;
+
+void init_sprites();
+
+class sprite
+{
+public:
+	void load(const char *, GLfloat cx=0.5f, GLfloat cy=0.5f);
+	void setCenter(GLfloat, GLfloat);
+	void draw(GLfloat x=0, GLfloat y=0);
+	int width, height;
+	GLuint tex;
+	GLfloat scale;
+	GLfloat centerx, centery;
+};
+
+struct tsprites
+{
+	sprite logo;
+	sprite back;
+	sprite guyk;
+} spc;
+
+implementation
+		
+void sprite::load(const char *fname, GLfloat cx, GLfloat cy)
+{
+	ILuint iname;
+	ilGenImages(1,&iname);
+	ilBindImage(iname);
+	ilLoadImage((char *) fname);
+	height =ilGetInteger(IL_IMAGE_HEIGHT);
+	width  =ilGetInteger(IL_IMAGE_WIDTH);
+	//tex= ilutGLLoadImage((char *) fname);
+	tex=ilutGLBindTexImage();
+	printf("iname: %d tex:%d\n",iname,tex);
+	ilDeleteImages(1,&iname);
+	/*
+	ilutEnable(ILUT_OPENGL_CONV);
+	ILboolean ilutOglBuildMipmaps(ILvoid);
+	GLuint ilutGLBindTexImage(ILvoid);
+	GLuint ilutOglBindTexImage(ILvoid);
+	*/
+	//height=200;
+	//width=500;
+	centerx=cx*width; centery=cy*height;
+}
+
+void sprite::draw(GLfloat x, GLfloat y)
+{
+	x-=centerx;
+	y-=centery;
+	glBindTexture(GL_TEXTURE_2D,tex);
+	glBegin(GL_QUADS);
+	glTexCoord2d(0,1);  glVertex2f(x         ,y);
+	glTexCoord2d(0,0);  glVertex2f(x         ,y+height);
+	glTexCoord2d(1,0);  glVertex2f(x+width   ,y+height);
+	glTexCoord2d(1,1);  glVertex2f(x+width   ,y);
+	glEnd();
+}
+
+void sprite::setCenter(GLfloat x, GLfloat y)
+{
+	centerx=x*width;
+	centery=y*height;
+}
+
+void init_sprites()
+{
+	ilInit();
+	iluInit();
+	ilutRenderer(ILUT_OPENGL);
+//	ilGenImages(1,&baseiname);
+	spc.logo.load("data/logo.png",0.5f,0.5f);
+	spc.back.load("data/keyboard.png",0.5f,0.5f);
+	spc.guyk.load("data/pose.png");
+}

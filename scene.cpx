@@ -1,0 +1,15 @@
+interface
+
+uses includes, Menu;
+
+struct tscene
+{
+	GLfloat fade;
+	GLfloat menufade;
+	GLfloat time;
+	double timestartsc;
+	GLfloat timesc;
+} scn;
+
+implementation
+

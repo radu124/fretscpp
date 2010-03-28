@@ -1,0 +1,33 @@
+interface
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/time.h>
+#include "SDL.h"
+#include "SDL_opengl.h" 
+
+#include <ft2build.h>
+#include <freetype/freetype.h>
+#include <freetype/ftglyph.h>
+#include <freetype/ftoutln.h>
+#include <freetype/fttrigon.h>
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <math.h>
+#define ILUT_USE_OPENGL
+#include <IL/il.h>
+#include <IL/ilu.h>
+#include <IL/ilut.h>
+
+#include <vorbis/vorbisfile.h>
+
+#include <string>
+#include <vector>
+
+using namespace std;
+
+implementation
+
