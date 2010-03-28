@@ -1,0 +1,7 @@
+interface
+
+const int INFOREADMID=1;
+
+#define INFO_READMID(msg) __COND_DBG_OUT(INFOREADMID,msg)
+
+implementation

@@ -2,6 +2,6 @@ uses midiparser;
 
 int main(int argc, char *argv[])
 {
-	Midiparser a;
+	MidiParser a;
 	a.openfile(argv[1]);
 }

@@ -1,0 +1,153 @@
+interface
+
+class MidiParser
+{
+	unsigned char *buffer;
+	int size;
+	int fd;
+	int pos;
+	int savedpos;
+	int nxmark;
+	int chunklen;
+	int format;
+	int tracks;
+	int ticksperbeat;
+	double tickduration;
+protected:
+	int FAIL;
+	void expect(const char *str);
+	int doparse();
+	int isthere(const char *str);
+	unsigned int readbyte();
+	unsigned int readshort();
+	unsigned int readlong();
+	unsigned int readvarlen();
+public:
+	int openfile(const char *name);
+};
+
+implementation
+
+uses includes,message,verbosity;
+
+void MidiParser::expect(const char *str)
+{
+	if (!isthere(str))
+	{
+		fprintf(stderr,"Midi did not contain expected string:%s\n",str);
+		FAIL=1;
+	}
+	pos+=strlen(str);
+}
+
+int MidiParser::isthere(const char *str)
+{
+	int i;
+	for (i=0; str[i]!=0; i++)
+		if (buffer[pos+i]!=str[i]) return 0;
+	return 1;
+}
+
+unsigned int MidiParser::readbyte()
+{
+	if (pos>=size) return 0;
+	return buffer[pos++];
+}
+
+unsigned int MidiParser::readshort()
+{
+	unsigned int res;
+	res =readbyte()*256;
+	res+=readbyte();
+	return res;
+}
+
+unsigned int MidiParser::readlong()
+{
+	unsigned int res;
+	res =readshort()*65536;
+	res+=readshort();
+	return res;
+}
+
+unsigned int MidiParser::readvarlen()
+{
+	unsigned int res=0;
+	unsigned char c;
+	do {
+		c=readbyte();
+		res=res*128+(c&0x7f);
+	} while (c&0x80);
+}
+
+
+int MidiParser::openfile(const char *name)
+{
+	fd=open(name,O_RDONLY);
+	if (fd<0) return 0;
+	size=lseek(fd,0,SEEK_END);
+	lseek(fd,0,SEEK_SET);
+	if (size>10000000) 
+	{
+		fprintf(stderr,"Problem, midi file unreasonably big!!\n");
+		close(fd);
+		return 0;
+	}
+	buffer=new unsigned char[size];
+	size=read(fd,buffer,size);
+	INFO_READMID("Read midi file of size %d\n" & size);
+	pos=0;
+	FAIL=0;
+	int res=doparse();
+	delete [] buffer;
+	close(fd);
+	return res;
+}
+
+int MidiParser::doparse()
+{
+	if (isthere("RIFF"))
+	{
+		pos+=20;
+		// this takes care of the most common RMI format
+		// a proper parse of RIFF would be necessary only 
+		// if such MIDs are encoutered
+	}
+	expect("MThd");
+	assret(!FAIL,"bad header marker, MThd expected");
+	chunklen=readlong();
+	warnif(chunklen!=6, "Expecting header chunk of size 6, but was %d instead" & chunklen);
+	savedpos=pos;
+	format=readshort();
+	tracks=readshort();
+	unsigned int bp0,bp1;
+	bp0=readbyte();
+	bp1=readbyte();
+	ticksperbeat=0;
+	if (bp0 & 0x80) 
+	{
+		bp0 &= 0x7f;
+		tickduration=bp0;
+		if ((bp0 & 0x7f)==29) tickduration=30/1001.0;
+		tickduration=1/tickduration/bp1;
+		INFO_READMID("Midi Tick fps:%d ticks/frame %d 1000ticks=%2.3fs\n" &bp0 &bp1 &(tickduration*1000));
+	}
+	else
+	{
+		ticksperbeat=bp0*256+bp1;
+		tickduration=0.5f/ticksperbeat;
+		// 120 bpm is standard if we get no other info
+		INFO_READMID("Midi ticks/beat %d  1000ticks=%2.3fs\n" &ticksperbeat &(tickduration*1000));
+	}
+	pos=savedpos+chunklen;
+	assret(!FAIL,"Could not read entire header, probably end-of-file");
+	assret(pos<size,"Header size sent us past end-of-file");
+	INFO_READMID("Midi file has %d tracks, format is %d\n" &tracks &format);
+	savedpos=pos;
+	while (tracks>0)
+	{
+		
+		tracks--;
+	}
+	return 1;
+}

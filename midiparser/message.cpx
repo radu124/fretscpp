@@ -1,0 +1,120 @@
+interface
+
+uses includes;
+
+class MESSAGEWRITER
+{
+public:
+	MESSAGEWRITER(FILE *f):fou(f),contents(""),pos(0){;}
+	MESSAGEWRITER & operator &(const string b);
+	MESSAGEWRITER & operator &(const char * b);
+	MESSAGEWRITER & operator &(unsigned int b);
+	MESSAGEWRITER & operator &(int b);
+	MESSAGEWRITER & operator &(float b);
+	MESSAGEWRITER & operator &(double b);
+	~MESSAGEWRITER();
+	int skiptochar(char c);
+	FILE *fou;
+	string contents;
+	int pos;
+	int ipos;
+	int lpos;
+	string modifier;
+};
+
+#define __COND_DBG_OUT(cond,msg) do { if (!cond) break; { MESSAGEWRITER __MW(stderr); __MW & msg; }} while(0)
+
+#define __FILE_OUT(fou,msg) do { {MESSAGEWRITER __MW(fou); __MW & msg;} } while(0)
+
+#define assume(cond,msg) \
+	do { if (cond) break; \
+	{ MESSAGEWRITER __MW(stderr); __MW & "\n!!! ERROR !!! in " &__func__ &"() at " & __FILE__ &":"&__LINE__ & "\n" & msg & "\n\n"; \
+	} assert(0); } while(0)
+
+#define assret(cond,msg) \
+	do { if (cond) break; \
+	{ MESSAGEWRITER __MW(stderr); __MW & "\n!!! FAIL !!! in " &__func__ &"() at " & __FILE__ &":"&__LINE__ & "\n" & msg & "\n\n"; \
+	} return 0; } while(0)
+	
+#define warnif(cond,msg) \
+	do { if (!cond) break; \
+	{ MESSAGEWRITER __MW(stderr); __MW & "\n!!! WARNING !!! in " &__func__ &"() at " & __FILE__ &":"&__LINE__ & "\n" & msg & "\n\n"; \
+	} } while(0)
+
+#define assume_paranoid(cond,msg) assume(cond,msg
+
+implementation
+
+int MESSAGEWRITER::skiptochar(char c)
+{
+	ipos=pos;
+	modifier="%";
+	modifier+=c;
+	while (pos<contents.length())
+	{
+		if (contents[pos++]!='%') continue;
+		lpos=pos-1;
+		if (contents[pos]=='%') { pos++; continue; }
+		while (isdigit(contents[pos]) || contents[pos]=='.') pos++;
+		if (contents[pos]!=c)
+		{
+			fprintf(fou,"!!! bad output qualifier %c-%c!!!",c,contents[pos]);
+			return 0;
+		}
+		modifier=contents.substr(lpos,pos-lpos+1);
+		fprintf(fou,"%s",contents.substr(ipos,lpos-ipos).c_str());
+		pos++;
+		return 1;
+	}
+	fprintf(fou,"%s",contents.substr(ipos).c_str());
+	contents="";
+	pos=0;
+	return 0;
+}
+
+MESSAGEWRITER & MESSAGEWRITER::operator &(const string b)
+{
+	if (skiptochar('s')) fprintf(fou,modifier.c_str(),b.c_str());
+	else contents+=b;
+	return *this;
+}
+
+MESSAGEWRITER & MESSAGEWRITER::operator &(const char * b)
+{
+	if (skiptochar('s')) fprintf(fou,modifier.c_str(),b);
+	else contents+=b;
+	return *this;
+}
+
+MESSAGEWRITER & MESSAGEWRITER::operator &(unsigned int b)
+{
+	skiptochar('d');
+	fprintf(fou,modifier.c_str(),b);
+	return *this;
+}
+
+MESSAGEWRITER & MESSAGEWRITER::operator &(int b)
+{
+	skiptochar('d');
+	fprintf(fou,modifier.c_str(),b);
+	return *this;
+}
+
+MESSAGEWRITER & MESSAGEWRITER::operator &(float b)
+{
+	skiptochar('f');
+	fprintf(fou,modifier.c_str(),b);
+	return *this;
+}
+
+MESSAGEWRITER & MESSAGEWRITER::operator &(double b)
+{
+	skiptochar('f');
+	fprintf(fou,modifier.c_str(),b);
+	return *this;
+}
+
+MESSAGEWRITER::~MESSAGEWRITER()
+{
+	fprintf(fou,"%s",contents.c_str()+pos);
+}
