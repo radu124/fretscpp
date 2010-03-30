@@ -1,0 +1,14 @@
+interface
+
+const int INFOREADMID=1;
+const int DUMPREADMID=0;
+const int INFOAUDIO=1;
+const int DUMPAUDIO=0;
+
+#define INFO_READMID(msg) __COND_DBG_OUT(INFOREADMID,msg)
+#define INFO_AUDIO(msg) __COND_DBG_OUT(INFOAUDIO,msg)
+
+#define DUMP_READMID(msg) __COND_DBG_OUT(DUMPREADMID,msg)
+#define DUMP_AUDIO(msg) __COND_DBG_OUT(DUMPAUDIO,msg)
+
+implementation

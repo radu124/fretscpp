@@ -27,6 +27,8 @@ void init_fonts();
 
 implementation
 
+uses message, verbosity;
+
 FT_Library font_library;
 
 void TFont::displayString(const char *str,GLfloat x, GLfloat y, GLfloat scale, int pos)

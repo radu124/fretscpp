@@ -23,6 +23,7 @@ double gettimenow()
 	return v-origtime;
 }
 
+/*
 void assume(int b, const char *err)
 {
 	if (b) return;
@@ -32,6 +33,13 @@ void assume(int b, const char *err)
 	printf("SDL err: %s\n", SDL_GetError());
 	exit(1);
 }
+
+void warnif(int b, const char *err)
+{
+	if (b) return;
+	fprintf(stderr,"Warning: %s\n",err);
+}
+*/
 
 template <typename T>
 T* dorealloc(T* &adr,int len)

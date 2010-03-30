@@ -1,4 +1,4 @@
-uses includes, utils, font, sprites, globals, MainMenu, scene, audio;
+uses includes, utils, font, sprites, globals, MainMenu, scene, audio, midiparser, verbosity;
 
 void drawglstuff()
 {
