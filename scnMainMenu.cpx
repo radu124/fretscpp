@@ -1,0 +1,68 @@
+interface
+
+uses includes, globals, sprites, scene, scnMenu;
+
+class tScnMenuMain:public tScnMenuBase
+{
+public:
+	tScnMenuMain() { scenes.add(this,SCN_MAINMENU); }
+	GLfloat fadespeed() { return 100; }
+	void init();
+	void render();
+	void itemClicked(int i);
+} MainMenu;
+
+implementation
+
+void tScnMenuMain::init()
+{
+	additem("Start game");
+	additem("Multiplayer");
+	additem("Settings");
+	additem("Quit");
+	posx=globals::scr_width*0.2;
+	posy=globals::scr_height*0.4;
+	scale=globals::scr_height*0.08;
+	tScnMenuBase::init();
+}
+
+void tScnMenuMain::itemClicked(int i)
+{
+	switch (i)
+	{
+	case -1:
+	case 3:
+		gameover = 1;
+		break;
+	case 0:
+		fadetoscene(2);
+		break;
+	}
+}
+
+void tScnMenuMain::render()
+{
+	paintrotback();
+	GLfloat t=scn.timesc*0.33;
+	GLfloat fade2=scn.fade*2;
+	if (fade2>1) fade2=1;
+	GLfloat v=fade2*fade2; // 1-v in original
+	GLfloat logoscale=1+0.025*sin(t*17)*(1-v)-v*v*v;
+	
+	if (logoscale>0.01)
+	{
+		glLoadIdentity();
+		glTranslatef(0.5*w,0.2*h,0);
+		glScalef(1+0.025*sin(t*16), logoscale,1.0);
+		glScalef(ms,ms,1.0);
+		spc.logo.draw();
+	}
+	glLoadIdentity();
+	glTranslatef(0.75*w+v*v*w, 0.65*h, 0);
+	glScalef(0.9,0.9,1.0);
+	glScalef(ms,ms,1.0);
+	spc.guyk.draw();
+	
+	rendertext();
+}
+

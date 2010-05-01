@@ -1,0 +1,57 @@
+interface
+
+uses includes, scene, scnTable, midiparser;
+
+MidiParser crtSong;
+
+class tScnSetSongOpt:public tScnTable
+{
+public:
+	tScnSetSongOpt() { scenes.add(this,SCN_SETSONGOPT); }
+	void enter();
+	void itemClicked(int i, int j);
+} SongOpt;
+
+implementation
+
+uses sprites, scnTable, globals;
+
+void tScnSetSongOpt::enter()
+{
+	int res,i;
+	res=crtSong.openfile((globals::selectedsong+"/notes.mid").c_str());
+	if (!res) jumptoscene(1);
+	makeempty();
+	additem("OStart");
+	additem("");
+	for (i=0; i<crtSong.trk_instrument.size(); i++)
+		additem(string("O")+crtSong.trk_instrument[i]);
+	additem("");
+	additem("ASuperEasy");
+	additem("AEasy");
+	additem("AMedium");
+	additem("AHard");
+	additem("");
+	additem("|Controller:");
+	additem("CKeyboard1");
+	additem("CGuitar1");
+	optinit();
+	opt[0][5]=2;
+	opt[0][6]=1;
+}
+
+void tScnSetSongOpt::itemClicked(int i, int j)
+{
+	if (j==-1)
+	{
+		fadetoscene(SCN_SONGS);
+		return;
+	}
+	if (j==0)
+	{
+		fadetoscene(SCN_PLAYING);
+		return;
+	}
+	
+}
+

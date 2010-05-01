@@ -1,0 +1,102 @@
+interface
+
+uses includes, scene;
+
+class tScnMenuBase: public sceneBase
+{
+public:
+	vector<string> item;
+	int selected;
+	int viewOffset;
+	int viewSize;
+	GLfloat scale,posx,posy,faderot;
+	void init();
+	virtual void itemClicked(int i) {;}
+	void additem(const char *v);
+	void render();
+	void rendertext();
+	void renderback();
+	void handleevent(SDL_Event &event);
+};
+
+implementation
+
+uses utils;
+
+void tScnMenuBase::init()
+{
+	selected=0;
+	viewOffset=0;
+	viewSize=6;
+}
+
+void tScnMenuBase::additem(const char *v)
+{
+	item.push_back(string(v));
+}
+
+void tScnMenuBase::renderback()
+{
+	
+}
+
+void tScnMenuBase::handleevent(SDL_Event &event)
+{
+	switch (event.type)
+	{
+	case SDL_KEYDOWN:
+		switch (event.key.keysym.sym) 
+		{
+			case SDLK_ESCAPE:
+			case SDLK_q:
+					itemClicked(-1);
+					break;
+			case SDLK_RETURN:
+					itemClicked(selected);
+					break;
+		}
+		break;
+	}		
+}
+
+void tScnMenuBase::render()
+{
+	renderback();
+	rendertext();
+}
+
+void tScnMenuBase::rendertext()
+{
+	faderot=scn.fade*2-1;
+	if (faderot<0) faderot=0;
+	
+	if (scn.menufade==1) return;
+	GLfloat v,x,y,h,w;
+	h=globals::scr_height;
+	w=globals::scr_width;
+	x=posx; y=posy;
+	v=faderot*faderot;
+	int i;
+	for (i=viewOffset; (i<viewOffset+viewSize) && i<item.size(); i++)
+	{
+		glLoadIdentity();
+		glRotatef(v*45,0.0,0.0,1.0);
+		glColor3f(0.0f,0.0f,0.0f);
+		GLfloat dy=0;
+		if (selected==i && scn.menufade==0)
+			dy=sin(scn.time*8)*scale*0.1;
+		deffont.displayString(item[i].c_str(),x-(v/4)*scale+scale*0.05,y+scale*0.05+dy,scale);
+		
+		if (selected==i && scn.menufade==0)
+			glColor3f(1.0f,0.7f,0.0f);
+		else {
+			glColor3f(0.8f,0.3f,0.0f);	
+		}
+		
+		deffont.displayString(item[i].c_str(),x-(v/4)*scale           ,y+dy           ,scale);
+		v=v*2;
+		y=y+scale;
+		if (v>4) break;
+	}
+}
+
