@@ -3,45 +3,12 @@ uses includes, utils, font, sprites, globals, MainMenu, scene, audio, midiparser
 void drawglstuff()
 {
 	//printf("%d\n",(int) scn.time);
-	glBindTexture(GL_TEXTURE_2D,NULL);
 	//glBegin( GL_TRIANGLES );
 	//...glVertex3f( 600, 400, 0 );
 	//glEnd();
 	//a.displayString("Elena",300,200,60+50*sin(time),TFont::ALIGN_CENTER | TFont::ALIGN_VONETHIRD);
-	glTranslatef(0,0,0);
-	MainMenu.render();
-	scn.time=gettimenow();
-	if (((int) scn.time)%10==8) 
-	{
-		scn.fade=scn.time-floor(scn.time);
-		scn.timestartsc=gettimenow();
-		scn.menufade=0;
-	}
-	else if (((int) scn.time)%10==9) 
-	{
-		scn.fade=1;
-		scn.menufade=scn.time-floor(scn.time);
-		scn.timestartsc=gettimenow();
-	}
-	else if (((int) scn.time)%10==0) 
-	{
-		scn.fade=1;
-		scn.menufade=1-(scn.time-floor(scn.time));
-		scn.timestartsc=gettimenow();
-		scn.timesc=0;
-	}
-	else if (((int) scn.time)%10==1) 
-	{
-		scn.menufade=0;
-		scn.fade=1-(scn.time-floor(scn.time));
-		scn.timestartsc=gettimenow();
-		scn.timesc=0;
-	}
-	else {
-		scn.fade=0;
-		scn.menufade=0;
-		scn.timesc=gettimenow()-scn.timestartsc;
-	}
+	//glTranslatef(0,0,0);
+	renderscene();
 	audio_yield();
 }
 
@@ -96,28 +63,23 @@ int main( int argc, char* argv[] )
 	//SDL_FreeSurface(temp);
 
 	SDL_Event event;
-	int gameover = 0;
+	gameover = 0;
 
 	/* message pump */
 	while (!gameover)
 	{
 		/* look for an event */
-		if (SDL_PollEvent(&event)) {
+		while (SDL_PollEvent(&event)) {
 			/* an event was found */
+			if (event.type==SDL_QUIT)
+				gameover=1;
+			else 
+				scenehandleevent(event);
+				
 			switch (event.type) {
 				/* close button clicked */
 				case SDL_QUIT:
 					gameover = 1;
-					break;
-
-				/* handle the keyboard */
-				case SDL_KEYDOWN:
-					switch (event.key.keysym.sym) {
-						case SDLK_ESCAPE:
-						case SDLK_q:
-							gameover = 1;
-							break;
-					}
 					break;
 			}
 		}

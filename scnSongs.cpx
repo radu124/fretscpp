@@ -1,0 +1,118 @@
+interface
+
+uses includes, verbosity, scene;
+
+class tScnSongs:public sceneBase
+{
+public:
+	tScnSongs();
+	void init();
+	void render();
+	void handleevent(SDL_Event &a);
+	GLfloat fadespeed() { return 100; }
+	GLfloat scale;
+	int selected;
+	int viewOffset;
+} scnSongs;
+
+implementation
+
+uses songsdb,sprites,audio;
+
+tScnSongs::tScnSongs()
+{
+	scenes.add(this,SCN_SONGS); 
+}
+
+void tScnSongs::render()
+{
+	GLfloat w=globals.scr_width;
+	GLfloat h=globals.scr_height;
+	GLfloat t=scn.time*0.33;
+	GLfloat ms=1000.0/w;
+	GLfloat x,y;
+	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
+	glClear( GL_COLOR_BUFFER_BIT );	
+	scale=h*0.05;
+	y=scale*2;
+	x=scale;
+	if (songsdb.size()==0) updatesongdb();
+	
+	glLoadIdentity();
+	// v*2*w+
+	glTranslatef(0.5*w+cos(t/2)*w*0.2, 0.5*h+sin(t)*w*0.2, 0);
+	glRotatef(t*53.3f+30,0.0,0.0,1.0);
+	glScalef(2+sin(t/8), 2+sin(t/8),1.0);
+	glScalef(ms,ms,1.0);
+	spc.back.draw();
+	
+	int i;
+	
+	for (i=viewOffset; i<viewOffset+16 && i<songsdb.size(); i++)
+	{
+		glLoadIdentity();
+		glColor3f(0.0f,0.0f,0.0f);
+		GLfloat dy=0;
+		string item=songsdb[i].name;
+		if (selected==i && scn.fade==0)
+			dy=sin(scn.time*8)*scale*0.1;
+		//deffont.displayString(item.c_str(),x-scale*0.05,y+scale*0.05+dy,scale);
+		
+		if (selected==i && scn.fade==0)
+			glColor3f(1.0f,0.7f,0.0f);
+		else {
+			glColor3f(0.8f,0.3f,0.0f);	
+		}
+		
+		deffont.displayString(item.c_str(),x           ,y+dy           ,scale);
+		//deffont.displayString("====",0           ,i*32           ,32);
+		y=y+scale;
+	}
+}
+
+void tScnSongs::handleevent(SDL_Event &event)
+{
+	int oldsel=selected;
+	switch (event.type)
+	{
+	case SDL_KEYDOWN:
+		switch (event.key.keysym.sym) 
+		{
+		case SDLK_ESCAPE:
+			scn.nextscene = 1;
+			break;
+		case SDLK_DOWN:
+			if (selected<songsdb.size()-1) selected++;
+			if (selected>viewOffset+15) viewOffset++;
+			break;
+		case SDLK_UP:
+			if (selected>0) selected--;
+			if (selected<viewOffset) viewOffset--;
+			break;
+		case SDLK_PAGEDOWN:
+			selected=selected+16;
+			if (selected>=songsdb.size()) selected=songsdb.size()-1;
+			if (selected>viewOffset+15) viewOffset=selected-15;
+			break;
+		case SDLK_PAGEUP:
+			selected=selected-16;
+			if (selected<0) selected=0;
+			if (selected<viewOffset) viewOffset=selected;
+			break;
+		case SDLK_HOME:
+			selected=0;
+			viewOffset=0;
+			break;
+		case SDLK_END:
+			selected=songsdb.size()-1;
+			if (selected>viewOffset+15) viewOffset=selected-15;
+			break;
+		}
+		break;
+	}
+	if (selected!=oldsel)
+	{
+		string sp=songsdb[selected].dir+"/";
+		song_start(sp.c_str());
+	}
+}

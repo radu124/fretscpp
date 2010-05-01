@@ -2,11 +2,13 @@ interface
 
 uses includes, globals, sprites, scene, Menu;
 
-class tMainMenu
+class tMainMenu:public sceneBase
 {
 public:
+	tMainMenu() { scenes.add(this,SCN_MAINMENU); }
 	void init();
 	void render();
+	void handleevent(SDL_Event &a);
 	tMenu mm;
 } MainMenu;
 
@@ -29,7 +31,9 @@ void tMainMenu::render()
 	GLfloat w=globals.scr_width;
 	GLfloat h=globals.scr_height;
 	GLfloat t=scn.timesc*0.33;
-	GLfloat v=scn.fade*scn.fade; // 1-v in original
+	GLfloat fade2=scn.fade*2;
+	if (fade2>1) fade2=1;
+	GLfloat v=fade2*fade2; // 1-v in original
 	GLfloat logoscale=1+0.025*sin(t*17)*(1-v)-v*v*v;
 	GLfloat ms=1000.0/w;
 	
@@ -57,5 +61,26 @@ void tMainMenu::render()
 	glScalef(ms,ms,1.0);
 	spc.guyk.draw();
 	
+	mm.faderot=scn.fade*2-1;
+	if (mm.faderot<0) mm.faderot=0;
 	mm.render();
+}
+
+void tMainMenu::handleevent(SDL_Event &event)
+{
+	switch (event.type)
+	{
+	case SDL_KEYDOWN:
+		switch (event.key.keysym.sym) 
+		{
+			case SDLK_ESCAPE:
+			case SDLK_q:
+					gameover = 1;
+					break;
+			case SDLK_RETURN:
+					scn.nextscene=2;
+					break;
+		}
+		break;
+	}		
 }

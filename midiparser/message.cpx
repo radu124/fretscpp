@@ -13,7 +13,7 @@ public:
 	MESSAGEWRITER & operator &(float b);
 	MESSAGEWRITER & operator &(double b);
 	~MESSAGEWRITER();
-	int skiptochar(char c);
+	int skiptochar(string);
 	FILE *fou;
 	string contents;
 	int pos;
@@ -45,20 +45,20 @@ public:
 
 implementation
 
-int MESSAGEWRITER::skiptochar(char c)
+int MESSAGEWRITER::skiptochar(string c)
 {
 	ipos=pos;
 	modifier="%";
-	modifier+=c;
+	modifier+=c[0];
 	while (pos<contents.length())
 	{
 		if (contents[pos++]!='%') continue;
 		lpos=pos-1;
 		if (contents[pos]=='%') { pos++; continue; }
 		while (isdigit(contents[pos]) || contents[pos]=='.') pos++;
-		if (contents[pos]!=c)
+		if (c.find(contents[pos])==string::npos)
 		{
-			fprintf(fou,"!!! bad output qualifier %c-%c!!!",c,contents[pos]);
+			fprintf(fou,"!!! bad output qualifier %c, expecting \"%s\"!!!",contents[pos],c.c_str());
 			return 0;
 		}
 		modifier=contents.substr(lpos,pos-lpos+1);
@@ -74,42 +74,42 @@ int MESSAGEWRITER::skiptochar(char c)
 
 MESSAGEWRITER & MESSAGEWRITER::operator &(const string b)
 {
-	if (skiptochar('s')) fprintf(fou,modifier.c_str(),b.c_str());
+	if (skiptochar("s")) fprintf(fou,modifier.c_str(),b.c_str());
 	else contents+=b;
 	return *this;
 }
 
 MESSAGEWRITER & MESSAGEWRITER::operator &(const char * b)
 {
-	if (skiptochar('s')) fprintf(fou,modifier.c_str(),b);
+	if (skiptochar("s")) fprintf(fou,modifier.c_str(),b);
 	else contents+=b;
 	return *this;
 }
 
 MESSAGEWRITER & MESSAGEWRITER::operator &(unsigned int b)
 {
-	skiptochar('d');
+	skiptochar("xd");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }
 
 MESSAGEWRITER & MESSAGEWRITER::operator &(int b)
 {
-	skiptochar('d');
+	skiptochar("xd");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }
 
 MESSAGEWRITER & MESSAGEWRITER::operator &(float b)
 {
-	skiptochar('f');
+	skiptochar("f");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }
 
 MESSAGEWRITER & MESSAGEWRITER::operator &(double b)
 {
-	skiptochar('f');
+	skiptochar("f");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }

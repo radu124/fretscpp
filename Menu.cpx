@@ -8,7 +8,7 @@ struct tMenu
 	int selected;
 	int viewOffset;
 	int viewSize;
-	GLfloat scale,posx,posy;
+	GLfloat scale,posx,posy,faderot;
 	void init();
 	void add(const char *v);
 	void render();
@@ -37,7 +37,7 @@ void tMenu::render()
 	h=globals.scr_height;
 	w=globals.scr_width;
 	x=posx; y=posy;
-	v=scn.menufade*scn.menufade;
+	v=faderot*faderot;
 	int i;
 	for (i=viewOffset; (i<viewOffset+viewSize) && i<item.size(); i++)
 	{

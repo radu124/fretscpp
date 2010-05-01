@@ -11,6 +11,7 @@ interface
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <dirent.h>
 
 #include <ft2build.h>
 #include <freetype/freetype.h>
@@ -30,8 +31,11 @@ interface
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
+
+int gameover;
 
 implementation
 

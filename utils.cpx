@@ -48,4 +48,3 @@ T* dorealloc(T* &adr,int len)
 	if (!res) exit(1);
 	adr=res;
 }
-

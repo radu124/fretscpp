@@ -1,0 +1,21 @@
+interface
+
+class tSceneGuitar:public sceneBase
+{
+	tSceneGuitar() { scenes.add(this,SCN_PLAYING); };
+	GLfloat fadespeed() { return 1000; }
+	void init();
+	void render();
+} guitarScene;
+
+implementation
+
+void tSceneGuitar::init()
+{
+	
+}
+
+void tSceneGuitar::render()
+{
+	
+}

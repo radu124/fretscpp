@@ -2,6 +2,16 @@ interface
 
 uses includes, Menu;
 
+enum ENUM_SCENES { SCN_NULL=0, SCN_MAINMENU=1, SCN_SONGS=2};
+
+class sceneBase
+{
+public:
+	virtual void render()=0;
+	virtual void handleevent(SDL_Event &a)=0;
+	virtual GLfloat fadespeed() { return 0.6; }
+};
+
 struct tscene
 {
 	GLfloat fade;
@@ -9,7 +19,97 @@ struct tscene
 	GLfloat time;
 	double timestartsc;
 	GLfloat timesc;
+	GLfloat timestartfade;
+	int current;
+	int prevscene;
+	int nextscene;
 } scn;
+
+void renderscene();
+void scenehandleevent(SDL_Event &ev);
+
+class tscenelist
+{
+public:
+	static vector<sceneBase*> & get()
+	{
+		static vector<sceneBase*> res;
+		return res;
+	}
+	void add(sceneBase *s, int idx)
+	{
+		if (idx>=get().size()) get().resize(idx+1);
+		get()[idx]=s;
+	}
+	int add(sceneBase *s)
+	{
+		get().push_back(s);
+		return get().size()-1;
+	}
+	sceneBase * operator [] (int i);
+};
+
+tscenelist scenes;
 
 implementation
 
+uses MainMenu,message,scnSongs;
+
+sceneBase * tscenelist::operator [] (int i)
+{
+	assume(i>=0 && i<get().size(),"bad scene %d" &i);
+	return get()[i];
+}
+
+GLfloat fadespeed(int scene)
+{
+	if (!scenes[scene])
+		return 0.6;
+	return scenes[scene]->fadespeed();
+}
+
+void scenehandleevent(SDL_Event &event)
+{
+	if (!scenes[scn.current]) return;
+	scenes[scn.current]->handleevent(event);
+}
+
+void renderscene()
+{
+	// ensure no leftovers
+	glBindTexture(GL_TEXTURE_2D,NULL);
+	glLoadIdentity();
+	
+	scn.time=gettimenow();
+	int crtdispscene=scn.current;
+	if (scn.nextscene)
+	{
+		scn.prevscene=scn.current;
+		scn.current=scn.nextscene;
+		scn.nextscene=0;
+		scn.timestartfade=scn.time;
+	}
+	if (scn.prevscene)
+	{
+		scn.fade=(scn.time-scn.timestartfade)*fadespeed(scn.prevscene);
+		if (scn.fade>1)
+		{
+			scn.prevscene=0;
+			scn.timestartfade=scn.time;
+		}
+		else crtdispscene=scn.prevscene;
+	} else {		
+		scn.fade=1-(scn.time-scn.timestartfade)*fadespeed(scn.current);
+		if (scn.fade<0) scn.fade=0;
+		else scn.timestartsc=scn.time;
+	}
+	scn.timesc=scn.time-scn.timestartsc;
+	
+	if (!scenes[crtdispscene])
+	{
+		// bootstrap
+		scn.current=SCN_MAINMENU;
+		scn.timestartfade=scn.time;
+	}
+	else scenes[crtdispscene]->render();
+}

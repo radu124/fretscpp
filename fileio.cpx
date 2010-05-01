@@ -1,0 +1,38 @@
+interface
+
+uses includes;
+
+vector<string> listDirContents(string dir, int flags=0);
+int fileExists(std::string name);
+
+implementation
+
+vector<string> listDirContents(string dir, int flags)
+{
+	vector<string> res;
+	DIR *dp;
+	struct dirent *dirp;
+	//aedbg<<" scanning "<<dir<<" -pattern:"<<pattern<<endl;
+	if((dp  = opendir(dir.c_str())) == NULL) return res;
+	while ((dirp = readdir(dp)) != NULL) 
+	{
+		if ((flags & 2) && !(flags & 1) && dirp->d_type==DT_DIR) continue;
+		if ((flags & 2) &&  (flags & 1) && dirp->d_type!=DT_DIR) continue;		
+		// hide hidden files by default
+		if (!(flags & 4) && dirp->d_name[0]=='.') continue;
+		//if (boost::regex_match(dirp->d_name,re))
+		res.push_back(string(dirp->d_name));
+	}
+	closedir(dp);
+	return res;
+}
+
+int fileExists(std::string name)
+{
+	struct stat q;
+	//aedbg<<"DIRCHECK";
+        int err=stat(name.c_str(),&q);
+	if (err) return 0;
+	if (S_ISREG(q.st_mode)) return 1;
+	return 0;
+}
