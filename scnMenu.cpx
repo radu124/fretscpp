@@ -49,14 +49,37 @@ void tScnMenuBase::handleevent(SDL_Event &event)
 		{
 			case SDLK_ESCAPE:
 			case SDLK_q:
-					itemClicked(-1);
-					break;
+				itemClicked(-1);
+				break;
 			case SDLK_RETURN:
-					itemClicked(selected);
-					break;
+				itemClicked(selected);
+				break;
+			case SDLK_UP:
+				if (selected>0) selected--;
+				break;
+			case SDLK_DOWN:
+				if (selected<item.size()-1) selected++;
+				break;
+			case SDLK_HOME:
+				selected=0;
+				break;
+			case SDLK_END:
+				selected=item.size()-1;
+				break;
+			case SDLK_PAGEUP:
+				selected-=viewSize;
+				if (selected<0) selected=0;
+				break;
+			case SDLK_PAGEDOWN:
+				selected+=viewSize;
+				if (selected>=item.size()) selected=item.size()-1;
+				break;
 		}
 		break;
-	}		
+	}
+	// fix view offset
+	if (selected<viewOffset) viewOffset=selected;
+	if (viewOffset+viewSize-1<selected) viewOffset=selected+1-viewSize;
 }
 
 void tScnMenuBase::render()

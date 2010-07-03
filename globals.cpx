@@ -1,14 +1,13 @@
 interface
 
-struct Sglobals
+uses includes;
+
+namespace globals
 {
-	Sglobals()
-	{
-		scr_width=800;
-		scr_height=600;
-	}
-	int scr_width;
-	int scr_height;
-} globals;
+	int scr_width=800;
+	int scr_height=600;
+	string selectedsong="";
+	int numplayers=1;
+};
 
 implementation

@@ -23,7 +23,7 @@ struct tEffects
 	tEffects():count(0) { int i; for (i=0; i<256; i++) {data[i]=NULL; len[i]=0; } }
 };
 
-const int SONG_BUFFER_SIZE=131072;
+const int SONG_BUFFER_SIZE=262144;
 const int SONG_MARGIN=16384;
 const int SONG_STARTAFTER=44100;
 
@@ -75,8 +75,8 @@ int min3(int a, int b, int c)
 
 int rangelimit(int a)
 {
-	if (a<-32768) return -32768;
-	if (a>32767) return 32767;
+	if (a<-32760) return -32760;
+	if (a>32760) return 32760;
 	return a;
 }
 
@@ -95,27 +95,43 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 	if (!playing.playing && decodebtm>playing.playpos+SONG_STARTAFTER) playing.playing=1;
 	if (!playing.ov_openflags) playing.playing=0;
 	int en_play=(playing.playing && decodebtm>playing.playpos+len/4);
-	if (!en_play) playing.playing=0;
+	if (!en_play) 
+	{
+		playing.playing=0;
+		fprintf(stderr,".\n");
+	}
+	int vol1, vol2, vol3;
+	vol1=vol2=vol3=85;
+	if (!(ov_of &1)) vol1=0;
+	if (!(ov_of &2)) vol2=0;
+	if (!(ov_of &4)) vol3=0;
+	/*
+	fprintf(stderr,"%8x %8x %8x %8x\n",playing.playpos,
+		-playing.playpos+playing.decodepos[0],
+		-playing.playpos+playing.decodepos[1],
+		-playing.playpos+playing.decodepos[2]
+		);
+	*/
 	for (i=0; i<len/4; i++)
 	{
 		int s=0;
 		if (en_play)
 		{
-			if (ov_of & 1) s+=playing.buffer[0][pos];
-			if (ov_of & 2) s+=playing.buffer[2][pos];
-			if (ov_of & 4) s+=playing.buffer[4][pos];
+			s+=vol1*playing.buffer[0][pos];
+			s+=vol2*playing.buffer[2][pos];
+			s+=vol3*playing.buffer[4][pos];
 		}
-		streamS[i*2]=rangelimit(s);
+		streamS[i*2]=rangelimit(s/256);
 		
 		s=0;
 	
 		if (en_play)
 		{
-			if (ov_of & 1) s+=playing.buffer[1][pos];
-			if (ov_of & 2) s+=playing.buffer[3][pos];
-			if (ov_of & 4) s+=playing.buffer[5][pos];
+			s+=vol1*playing.buffer[1][pos];
+			s+=vol2*playing.buffer[3][pos];
+			s+=vol3*playing.buffer[5][pos];
 		}
-		streamS[i*2+1]=rangelimit(s);
+		streamS[i*2+1]=rangelimit(s/256);
 		
 		pos=(pos+1)%SONG_BUFFER_SIZE;
 		//effects.data[0][pbpos];

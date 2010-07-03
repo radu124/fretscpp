@@ -20,7 +20,7 @@ uses fileio;
 
 void updatesongdb()
 {
-	string songsroot="data-c/songs";
+	string songsroot="data/songs";
 	vector<string> dirs=listDirContents(songsroot);
 	int i;
 	INFO_SONGDB("Updating songs database, songs root is %s\n" &songsroot);

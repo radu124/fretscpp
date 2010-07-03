@@ -35,6 +35,11 @@ void tScnSetSongOpt::enter()
 	additem("|Controller:");
 	additem("CKeyboard1");
 	additem("CGuitar1");
+	if (globals::numplayers>1)
+	{
+		dupcol();
+		entries[1][0]="<";
+	}
 	optinit();
 	opt[0][5]=2;
 	opt[0][6]=1;

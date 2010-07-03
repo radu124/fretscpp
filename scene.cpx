@@ -1,15 +1,20 @@
 interface
 
-uses includes, Menu;
+uses includes;
 
-enum ENUM_SCENES { SCN_NULL=0, SCN_MAINMENU=1, SCN_SONGS=2};
+enum ENUM_SCENES { SCN_NULL=0, SCN_MAINMENU=1, SCN_SONGS=2, SCN_SETSONGOPT=3, SCN_PLAYING=4, SCN_KEYDEF};
 
 class sceneBase
 {
 public:
 	virtual void render()=0;
+	void setdim();
 	virtual void handleevent(SDL_Event &a)=0;
 	virtual GLfloat fadespeed() { return 0.6; }
+	virtual void enter() {;}
+	virtual void leave() {;}
+	GLfloat w,h,ms,t;
+	void paintrotback();
 };
 
 struct tscene
@@ -27,6 +32,8 @@ struct tscene
 
 void renderscene();
 void scenehandleevent(SDL_Event &ev);
+void jumptoscene(int i);
+void fadetoscene(int i);
 
 class tscenelist
 {
@@ -53,7 +60,40 @@ tscenelist scenes;
 
 implementation
 
-uses MainMenu,message,scnSongs;
+uses scnMainMenu,message,scnSongs,scnMenu,globals,scnSetSongOpt;
+
+void sceneBase::setdim()
+{
+	w=globals::scr_width;
+	h=globals::scr_height;
+	ms=1000.0/w;
+	t=scn.timesc*0.33;
+}
+
+void sceneBase::paintrotback()
+{
+	setdim();
+	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
+	glClear( GL_COLOR_BUFFER_BIT );	
+	glLoadIdentity();
+	// v*2*w+
+	glTranslatef(0.5*w+cos(t/2)*w*0.2, 0.5*h+sin(t)*w*0.2, 0);
+	glRotatef(t*53.3f+30,0.0,0.0,1.0);
+	glScalef(2+sin(t/8), 2+sin(t/8),1.0);
+	glScalef(ms,ms,1.0);
+	spc.back.draw();
+}
+
+void fadetoscene(int i)
+{
+	scn.nextscene=i;
+}
+
+void jumptoscene(int i)
+{
+	scn.nextscene=i;
+	scn.prevscene=0;
+}
 
 sceneBase * tscenelist::operator [] (int i)
 {
@@ -84,10 +124,12 @@ void renderscene()
 	int crtdispscene=scn.current;
 	if (scn.nextscene)
 	{
+		scenes[scn.current]->leave();
 		scn.prevscene=scn.current;
 		scn.current=scn.nextscene;
 		scn.nextscene=0;
 		scn.timestartfade=scn.time;
+		scenes[scn.current]->enter();
 	}
 	if (scn.prevscene)
 	{

@@ -1,0 +1,78 @@
+interface
+
+uses includes, scene, scnTable, midiparser;
+
+class tScnKeydef:public tScnTable
+{
+public:
+	tScnKeydef() { scenes.add(this,SCN_KEYDEF); }
+	void enter();
+	void itemClicked(int i, int j);
+} SCNKeyDef;
+
+implementation
+
+uses sprites, scnTable, globals;
+
+void tScnKeydef::enter()
+{
+	int res,i;
+	makeempty();
+	additem("ODone");
+	additem("");
+	additem("^");
+	additem("^Fret #1");
+	additem("^Fret #2");
+	additem("^Fret #3");
+	additem("^Fret #4");
+	additem("^Fret #5");
+	additem("^Pick");
+	additem("^Alt Pick");
+	additem("^Whammy");
+	newcol();
+	additem("OKeyboard");
+	additem("");
+	additem("ODefine all");
+	additem("OF1");
+	additem("OF2");
+	additem("OF3");
+	additem("OF4");
+	additem("OF5");
+	additem("OEnter");
+	additem("ORShift");
+	additem("OTab");
+	newcol();
+	additem("OJoystick1");
+	additem("");
+	additem("ODefine all");
+	additem("Ojoy#1");
+	additem("Ojoy#2");
+	additem("Ojoy#3");
+	additem("Ojoy#4");
+	additem("Ojoy#5");
+	additem("Ojoy#6");
+	additem("Ojoy#7");
+	additem("Ojoy#8");
+	newcol();
+	additem("OAdd New");
+	fixedcols=1;
+	colsvisible=2;
+	baseh=fixedcols;
+	optinit();
+}
+
+void tScnKeydef::itemClicked(int i, int j)
+{
+	if (j==-1)
+	{
+		fadetoscene(SCN_MAINMENU);
+		return;
+	}
+	if (j==0)
+	{
+		fadetoscene(SCN_MAINMENU);
+		return;
+	}
+	
+}
+

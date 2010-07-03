@@ -2,10 +2,12 @@ interface
 
 class tSceneGuitar:public sceneBase
 {
+public:
 	tSceneGuitar() { scenes.add(this,SCN_PLAYING); };
 	GLfloat fadespeed() { return 1000; }
 	void init();
 	void render();
+	void handleevent(SDL_Event &a);
 } guitarScene;
 
 implementation
@@ -18,4 +20,8 @@ void tSceneGuitar::init()
 void tSceneGuitar::render()
 {
 	
+}
+
+void tSceneGuitar::handleevent(SDL_Event &a)
+{
 }

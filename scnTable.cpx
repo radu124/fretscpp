@@ -171,7 +171,7 @@ void tScnTable::rendertext()
 
 	int i,j,cc;
 	GLfloat x,y,scale;
-	colsize=(w-xpos*2)/colsvisible;
+	colsize=(w-xpos*2)/(fixedcols+colsvisible);
 	scale=h*0.05;
 	glLoadIdentity();
 			
@@ -184,27 +184,27 @@ void tScnTable::rendertext()
 		if (cc>=entries.size()) continue;
 		for (i=0; i<entries[cc].size(); i++)
 		{
-			string item=entries[j][i];
+			string item=entries[cc][i];
 			
 			if (item=="") 
 			{
 				y+=scale/2;
 				continue;
 			}
-			if (opt[j][i] & 2) continue;
+			if (opt[cc][i] & 2) continue;
 				
 			glColor3f(0.0f,0.0f,0.0f);
 			GLfloat dy=0;
 			
-			if (selx==j && sely==i && scn.fade==0)
+			if (selx==cc && sely==i && scn.fade==0)
 			{
 				dy=sin(scn.time*8)*scale*0.1;
-				if (opt[j][i] & 1) glColor3f(1.0f,0.1f,0.0f);
+				if (opt[cc][i] & 1) glColor3f(1.0f,0.1f,0.0f);
 				else glColor3f(1.0f,0.7f,0.0f);
 			}
 			else  
 			{
-				if (opt[j][i] & 1) glColor3f(0.9f,0.0f,0.0f);	
+				if (opt[cc][i] & 1) glColor3f(0.9f,0.0f,0.0f);	
 				else glColor3f(0.8f,0.3f,0.0f);	
 			}
 			
@@ -290,6 +290,11 @@ void tScnTable::handleevent(SDL_Event &event)
 		break;
 	}
 	selfix();
+	if (selx>=fixedcols)
+	{
+		if (selx<baseh) baseh=selx;
+		if (selx>=baseh+colsvisible) baseh=selx-colsvisible+1;
+	}
 }
 
 void tScnTable::render()

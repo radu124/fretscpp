@@ -11,8 +11,12 @@ public:
 	void handleevent(SDL_Event &a);
 	GLfloat fadespeed() { return 100; }
 	GLfloat scale;
+	int previewsong;
 	int selected;
+	int previewlock;
+	GLfloat selecttime;
 	int viewOffset;
+	void enter();
 } scnSongs;
 
 implementation
@@ -22,29 +26,23 @@ uses songsdb,sprites,audio;
 tScnSongs::tScnSongs()
 {
 	scenes.add(this,SCN_SONGS); 
+	previewsong=-1;
+	previewlock=-1;
+}
+
+void tScnSongs::enter()
+{
+	SDL_EnableKeyRepeat(133,33);
 }
 
 void tScnSongs::render()
 {
-	GLfloat w=globals.scr_width;
-	GLfloat h=globals.scr_height;
-	GLfloat t=scn.time*0.33;
-	GLfloat ms=1000.0/w;
 	GLfloat x,y;
-	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
-	glClear( GL_COLOR_BUFFER_BIT );	
+	paintrotback();
 	scale=h*0.05;
 	y=scale*2;
 	x=scale;
 	if (songsdb.size()==0) updatesongdb();
-	
-	glLoadIdentity();
-	// v*2*w+
-	glTranslatef(0.5*w+cos(t/2)*w*0.2, 0.5*h+sin(t)*w*0.2, 0);
-	glRotatef(t*53.3f+30,0.0,0.0,1.0);
-	glScalef(2+sin(t/8), 2+sin(t/8),1.0);
-	glScalef(ms,ms,1.0);
-	spc.back.draw();
 	
 	int i;
 	
@@ -60,23 +58,46 @@ void tScnSongs::render()
 		
 		if (selected==i && scn.fade==0)
 			glColor3f(1.0f,0.7f,0.0f);
+		else if (previewlock==i) 
+		{
+			glColor3f(0.9f,0.1f,0.0f);	
+		}
 		else {
 			glColor3f(0.8f,0.3f,0.0f);	
 		}
-		
+		if (previewlock==i) 
+			item+=" (preview)";
 		deffont.displayString(item.c_str(),x           ,y+dy           ,scale);
 		//deffont.displayString("====",0           ,i*32           ,32);
 		y=y+scale;
+	}
+	if (previewlock>=0)
+	{
+		if (previewlock!=previewsong)
+		{
+			previewsong=previewlock;
+			string sp=songsdb[previewlock].dir+"/";
+			song_start(sp.c_str());
+		}
+	}
+	else if (previewsong!=selected && scn.time>selecttime+0.5)
+	{
+		previewsong=selected;
+		string sp=songsdb[selected].dir+"/";
+		song_start(sp.c_str());
 	}
 }
 
 void tScnSongs::handleevent(SDL_Event &event)
 {
 	int oldsel=selected;
+	int actkey;
 	switch (event.type)
 	{
 	case SDL_KEYDOWN:
-		switch (event.key.keysym.sym) 
+		actkey=event.key.keysym.sym;
+		// may need to process this one to intercept other keys
+		switch (actkey) 
 		{
 		case SDLK_ESCAPE:
 			scn.nextscene = 1;
@@ -107,12 +128,19 @@ void tScnSongs::handleevent(SDL_Event &event)
 			selected=songsdb.size()-1;
 			if (selected>viewOffset+15) viewOffset=selected-15;
 			break;
+		case SDLK_SPACE:
+			if (previewlock!=selected) previewlock=selected;
+			else previewlock=-1;
+			break;
+		case SDLK_RETURN:
+			globals::selectedsong=songsdb[selected].dir;
+			fadetoscene(SCN_SETSONGOPT);
+			break;
 		}
 		break;
 	}
 	if (selected!=oldsel)
 	{
-		string sp=songsdb[selected].dir+"/";
-		song_start(sp.c_str());
+		selecttime=scn.time;
 	}
 }

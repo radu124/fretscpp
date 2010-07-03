@@ -1,4 +1,4 @@
-uses includes, utils, font, sprites, globals, MainMenu, scene, audio, midiparser, verbosity;
+uses includes, utils, font, sprites, globals, scnMainMenu, scnGuitar, scnKeydef, scene, audio, midiparser, verbosity;
 
 void drawglstuff()
 {
@@ -21,7 +21,7 @@ int main( int argc, char* argv[] )
 	
 	SDL_WM_SetCaption("Frets-on-fire-CPP", "SDL");
 	/* create window */
-	SDL_Surface* screen = SDL_SetVideoMode(globals.scr_width, globals.scr_height, 0, SDL_OPENGL);
+	SDL_Surface* screen = SDL_SetVideoMode(globals::scr_width, globals::scr_height, 0, SDL_OPENGL);
 
 	glEnable( GL_TEXTURE_2D );
 	glEnable (GL_BLEND); 
