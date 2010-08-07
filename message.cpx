@@ -41,7 +41,54 @@ public:
 	{ MESSAGEWRITER __MW(stderr); __MW & "\n!!! WARNING !!! in " &__func__ &"() at " & __FILE__ &":"&__LINE__ & "\n" & msg & "\n\n"; \
 	} } while(0)
 
-#define assume_paranoid(cond,msg) assume(cond,msg
+#define assume_paranoid(cond,msg) assume(cond,msg)
+
+#ifdef DISABLEMESSAGES
+int MSG_DISABLE_ALL=1;
+#else
+int MSG_DISABLE_ALL=0;
+#endif
+
+/// required-produced matrix
+const int ML_QUIET_REQWARN=0;
+const int ML_QUIET_REQINFO=0;
+const int ML_QUIET_REQDBG=0;
+
+const int ML_WARN_REQWARN=1 && !MSG_DISABLE_ALL;
+const int ML_WARN_REQINFO=0;
+const int ML_WARN_REQDBG=0;
+
+const int ML_INFO_REQWARN=1 && !MSG_DISABLE_ALL;
+const int ML_INFO_REQINFO=1 && !MSG_DISABLE_ALL;
+const int ML_INFO_REQDBG=0;
+
+const int ML_DBG_REQWARN=1 && !MSG_DISABLE_ALL;
+const int ML_DBG_REQINFO=1 && !MSG_DISABLE_ALL;
+const int ML_DBG_REQDBG=1 && !MSG_DISABLE_ALL;
+
+
+#define LEV_QUIET(a) ML_QUIET_##a
+
+#ifndef ALLQUIET
+
+#define LEV_INFO(a) ML_INFO_##a
+#define LEV_WARN(a) ML_WARN_##a
+#define LEV_DBG(a) ML_DBG_##a
+
+#else
+
+#define LEV_INFO(a) ML_QUIET_##a
+#define LEV_WARN(a) ML_QUIET_##a
+#define LEV_DBG(a) ML_QUIET_##a
+
+#endif
+
+
+#define INFO(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQINFO),msg)
+#define WARN(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQWARN),msg)
+#define DBG(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQDBG),msg)
+#define MESSAGE(msg) __FILE_OUT(stdout,msg)
+
 
 implementation
 
@@ -88,14 +135,14 @@ MESSAGEWRITER & MESSAGEWRITER::operator &(const char * b)
 
 MESSAGEWRITER & MESSAGEWRITER::operator &(unsigned int b)
 {
-	skiptochar("xd");
+	skiptochar("cxd");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }
 
 MESSAGEWRITER & MESSAGEWRITER::operator &(int b)
 {
-	skiptochar("xd");
+	skiptochar("cxd");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }

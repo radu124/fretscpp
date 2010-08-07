@@ -23,7 +23,7 @@ implementation
 
 void tSceneGuitar::init()
 {
-	printf("Init guitar scene\n");
+	INFO(SCNGUITAR,"Init guitar scene\n");
 	additem("Return to Song");
 	additem("Restart Song");
 	additem("Change Song");

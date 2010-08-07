@@ -54,7 +54,7 @@ void tScnSetSongOpt::selInstrument(int i, int j)
 	} else 
 		lastInstr[i]=crtSong.trk_instrument[j];
 	base=groupStart(i,1);
-	printf("col: %d base:%d\n",i,base);
+	DBG(SCNSONGOPT,"col: %d base:%d\n" &i &base);
 	for (q=0; q<crtSong.trk_instrument.size(); q++)
 		opt[i][base+q]=(j==q);
 	selDifficulty(i);
@@ -89,7 +89,7 @@ void tScnSetSongOpt::selDifficulty(int i, int j)
 	int q,base, instr, dff;
 	instr=getInstrument(i);
 	base=groupStart(i,2);
-	printf("col: %d instr:%d base:%d\n",i,instr,base);
+	DBG(SCNSONGOPT,"col: %d instr:%d base:%d\n" &i &instr &base);
 	dff=1;
 	for (q=0; q<4; q++) 
 	{
@@ -138,7 +138,7 @@ void tScnSetSongOpt::enter()
 
 void tScnSetSongOpt::itemClickedSep(int i, int k, int j)
 {
-	printf("SEPclick %d %d %d\n",i,k,j);
+	DBG(SCNSONGOPT,"SEPclick %d %d %d\n" &i &k &j);
 	
 	if (i==-1)
 	{

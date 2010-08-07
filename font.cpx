@@ -105,8 +105,8 @@ int TFont::open(const char *fname)
 	scale2=FONT_SCALE_H*31/(max_h+1);
 	if (scale2<scale) scale=scale2;
 	FT_Set_Char_Size( face, scale*64, scale*64, 96, 96);
-	//printf("%d %d %d %d %d %d\n",min_v,max_v,min_h,max_h,max_v-min_v,max_h-min_h);
-	printf("%d\n",scale);
+	//DBG(FONT,"%d %d %d %d %d %d\n",min_v,max_v,min_h,max_h,max_v-min_v,max_h-min_h);
+	DBG(FONT,"%d\n" &scale);
 	for (ch=0; ch<256; ch++)
 	{
 		if (!texvalid[ch]) continue;
@@ -145,11 +145,11 @@ int TFont::open(const char *fname)
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA8, FONT_SCALE_H, FONT_SCALE_H, 0, GL_ALPHA, GL_UNSIGNED_BYTE, a );
 		//glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE8, 64, 64, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, a );
 		texvalid[ch]=1;
-		fprintf(stderr,"Bitmap size char %c, W:%3d, h:%3d, v%3d, ->%d, adv:%f\n", 
-			(ch<32)?'?':ch, 
-			bmp.width, 
-    			bmp.rows, disp_v , disp_h,
-			face->glyph->advance.x/64.0f);
+		DBG(FONT,"Bitmap size char %c, W:%3d, h:%3d, v%3d, ->%d, adv:%f\n"
+			&((ch<32)?'?':ch) 
+			&bmp.width 
+    		&bmp.rows &disp_v &disp_h
+			&(face->glyph->advance.x/64.0f));
 	}
 	FT_Done_Face(face);
 }

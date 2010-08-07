@@ -37,7 +37,7 @@ void sprite::load(const char *fname, int flags)
 	width  =ilGetInteger(IL_IMAGE_WIDTH);
 	//tex= ilutGLLoadImage((char *) fname);
 	tex=ilutGLBindTexImage();
-	printf("iname: %d tex:%d\n",iname,tex);
+	INFO(SPRITES,"iname: %d tex:%d\n" &iname &tex);
 	ilDeleteImages(1,&iname);
 	/*
 	ilutEnable(ILUT_OPENGL_CONV);

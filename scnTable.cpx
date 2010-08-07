@@ -296,7 +296,7 @@ void tScnTable::rendertext()
 void tScnTable::touch(int i, int j)
 {
 	char c=getMarker(i,j);
-	//printf("%d %d %c\n",i,j,c);
+	//DBG(TABLE,"%d %d %c\n" &i &j &c);
 	int q;
 	switch (c)
 	{

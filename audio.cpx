@@ -98,7 +98,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 	if (!en_play) 
 	{
 		playing.playing=0;
-		fprintf(stderr,".\n");
+		DBG(AUDIO,".\n");
 	}
 	int vol1, vol2, vol3;
 	vol1=vol2=vol3=85;
@@ -106,10 +106,10 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 	if (!(ov_of &2)) vol2=0;
 	if (!(ov_of &4)) vol3=0;
 	/*
-	fprintf(stderr,"%8x %8x %8x %8x\n",playing.playpos,
-		-playing.playpos+playing.decodepos[0],
-		-playing.playpos+playing.decodepos[1],
-		-playing.playpos+playing.decodepos[2]
+	DBG(AUDIO,"%8x %8x %8x %8x\n" &playing.playpos
+		&(-playing.playpos+playing.decodepos[0])
+		&(-playing.playpos+playing.decodepos[1])
+		&(-playing.playpos+playing.decodepos[2])
 		);
 	*/
 	for (i=0; i<len/4; i++)
@@ -177,7 +177,7 @@ int load_effects(const char *fn)
 	int channels = ov_info(&vf,0)->channels;
 	int samplerate = ov_info(&vf,0)->rate;
 	int cnt=effects.count;
-	INFO_AUDIO("OGG load effect %d: chn:%d, rate=%d\n" &cnt &channels &samplerate);
+	INFO(AUDIO,"OGG load effect %d: chn:%d, rate=%d\n" &cnt &channels &samplerate);
 	buf[0]=buf[1]=0;
 	dorealloc(effects.data[cnt],allocd);
 	readpos=256;
@@ -189,7 +189,7 @@ int load_effects(const char *fn)
 		int locrate=ov_info(&vf,-1)->rate;
 		int samples=ret/2/locchn;
 		int step=locrate*256/obtained.freq;
-		DUMP_AUDIO("Read %d chn:%d sr:%d\n" &samples &locchn &locrate);
+		DBG(AUDIO,"Read %d chn:%d sr:%d\n" &samples &locchn &locrate);
 		for (i=0; i<samples; i++)
 		{
 			v=0;
@@ -212,7 +212,7 @@ int load_effects(const char *fn)
 		buf[1]=buf[samples+1];
 	}
 	dorealloc(effects.data[cnt],pos);
-	INFO_AUDIO("Loaded effect, len=%d\n" &pos);
+	INFO(AUDIO,"Loaded effect, len=%d\n" &pos);
 	effects.len[cnt]=pos;
 	ov_clear(&vf);
 	return ++effects.count;
@@ -278,7 +278,7 @@ int tPlaying::decode(int idx, OggVorbis_File *ovf)
 	// decode at least 4 times as much as it took to render one frame
 	int target3=SONG_BUFFER_SIZE-SONG_MARGIN-(decodepos[idx]-playpos);
 	if (target3<target) target=target3; 
-	DUMP_AUDIO("Filling buffer %d, targets are: %d %d %d\n" &idx &target &target2 &target3);
+	DBG(AUDIO,"Filling buffer %d, targets are: %d %d %d\n" &idx &target &target2 &target3);
 	int pos=decodepos[idx];
 	while (target>0)
 	{
@@ -290,7 +290,7 @@ int tPlaying::decode(int idx, OggVorbis_File *ovf)
 		int samples=ret/2/locchn;
 		int chn2=locchn>1?1:0;
 		
-		DUMP_AUDIO("Read (idx %d) %d chn:%d sr:%d\n" &idx &samples &locchn &locrate);
+		DBG(AUDIO,"Read (idx %d) %d chn:%d sr:%d\n" &idx &samples &locchn &locrate);
 		for (i=0; i<samples; i++)
 		{
 			buffer[idx*2  ][pos%SONG_BUFFER_SIZE]=buf[i*locchn];

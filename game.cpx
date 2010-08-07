@@ -2,7 +2,7 @@ uses includes, utils, font, sprites, globals, scnMainMenu, scnGuitar, scnKeydef,
 
 void drawglstuff()
 {
-	//printf("%d\n",(int) scn.time);
+	//DBG(GL,"%d\n",(int) scn.time);
 	//glBegin( GL_TRIANGLES );
 	//...glVertex3f( 600, 400, 0 );
 	//glEnd();
@@ -35,13 +35,13 @@ int main( int argc, char* argv[] )
 	audio_yield();
 	if (0) {
 		int q;
-		for (q=0; q<90000; q++) printf("%09d %d %d %d %d %d %d\n",q,
-			playing.buffer[0][q],
-			playing.buffer[1][q],
-			playing.buffer[2][q],
-			playing.buffer[3][q],
-			playing.buffer[4][q],
-			playing.buffer[5][q]
+		for (q=0; q<90000; q++) DBG(AUDIO,"%09d %d %d %d %d %d %d\n" &q
+			&playing.buffer[0][q]
+			&playing.buffer[1][q]
+			&playing.buffer[2][q]
+			&playing.buffer[3][q]
+			&playing.buffer[4][q]
+			&playing.buffer[5][q]
 					      );
 	}
 	MainMenu.init();
@@ -100,7 +100,7 @@ int main( int argc, char* argv[] )
 
 	/* cleanup SDL */
 	SDL_Quit();
-	//printf("CBK=%d F:%d Fo:%d chn:%d buf%d\n",
+	//DBG(GAME,"CBK=%d F:%d Fo:%d chn:%d buf%d\n",
 	//	callbacklen,desired.format, obtained.format, obtained.channels, obtained.samples);
 	return 0;
 }
