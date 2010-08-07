@@ -18,17 +18,24 @@ implementation
 
 uses fileio;
 
-void updatesongdb()
+void readsongsdir(string songsroot)
 {
-	string songsroot="data/songs";
 	vector<string> dirs=listDirContents(songsroot);
 	int i;
 	INFO(SONGDB,"Updating songs database, songs root is %s\n" &songsroot);
 	sort(dirs.begin(),dirs.end());
 	for (i=0; i<dirs.size(); i++)
 	{
+		int haslib=(fileExists(songsroot+"/"+dirs[i]+"/library.ini"));
 		int hasini=(fileExists(songsroot+"/"+dirs[i]+"/song.ini"));
 		int hasmid=(fileExists(songsroot+"/"+dirs[i]+"/notes.mid"));
+		
+		if (haslib)
+		{
+			readsongsdir(songsroot+"/"+dirs[i]);
+			continue;
+		}
+		
 		DBG(SONGDB,"Song %s hasini:%d hasmid:%d\n" &dirs[i] &hasini &hasmid);
 		songentry a;
 		a.name=dirs[i];
@@ -37,4 +44,9 @@ void updatesongdb()
 		if (hasini && hasmid) songsdb.push_back(a);
 	}
 	INFO(SONGDB,"Song database contains %d entries\n" &songsdb.size());
+}
+
+void updatesongdb()
+{
+	readsongsdir("data/songs");
 }

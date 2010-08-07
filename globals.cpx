@@ -8,6 +8,7 @@ namespace globals
 	int scr_height=600;
 	string selectedsong="";
 	int numplayers=1;
+	int glfontaa=GL_LINEAR;
 };
 
 implementation

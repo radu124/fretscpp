@@ -2,7 +2,7 @@ uses includes, utils, font, sprites, globals, scnMainMenu, scnGuitar, scnKeydef,
 
 void drawglstuff()
 {
-	//DBG(GL,"%d\n",(int) scn.time);
+	//DBG(GL,"%d\n" &((int) scn.time));
 	//glBegin( GL_TRIANGLES );
 	//...glVertex3f( 600, 400, 0 );
 	//glEnd();
@@ -26,6 +26,9 @@ int main( int argc, char* argv[] )
 	glEnable( GL_TEXTURE_2D );
 	glEnable (GL_BLEND); 
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glAlphaFunc(GL_GREATER,0.1);
+	//glEnable(GL_ALPHA_TEST);
+	
 	//glBlendFunc (GL_BLEND_DST_ALPHA ,GL_SRC_ALPHA);
 	deffont.open("data/default.ttf");
 	init_sprites();
@@ -47,11 +50,11 @@ int main( int argc, char* argv[] )
 	MainMenu.init();
 	guitarScene.init();
 	
-	glViewport( 0, 0, 800, 600 );
+	glViewport( 0, 0, globals::scr_width, globals::scr_height );
 	glClear( GL_COLOR_BUFFER_BIT );
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
-	glOrtho(0.0f, 800, 600, 0.0f, -1.0f, 1.0f);
+	glOrtho(0.0f, globals::scr_width, globals::scr_height, 0.0f, -1.0f, 1.0f);
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 	glEnable(GL_POLYGON_SMOOTH);

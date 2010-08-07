@@ -28,4 +28,8 @@ cpxprep: cpxprep.cpp
 	g++ $< -o $@
 
 linkfrets:
-	ln -s /usr/share/games/fretsonfire/data data
+	-ln -s /usr/share/games/fretsonfire/data data
+
+ubudeps: linkfrets
+	sudo apt-get install fretsonfire build-essential libsdl-dev libdevil-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev
+	
