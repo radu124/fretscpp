@@ -1,27 +1,123 @@
 interface
 
-class tSceneGuitar:public sceneBase
+class tSceneGuitar:public tScnMenuBase
 {
 public:
 	tSceneGuitar() { scenes.add(this,SCN_PLAYING); };
 	GLfloat fadespeed() { return 1000; }
+	GLfloat lmargin,rmargin,boardlen;
 	void init();
 	void render();
 	void handleevent(SDL_Event &a);
+	void renderNeck();
+	void renderTracks();
+	void renderBars();
+	void renderNote();
+	void renderNotes();
+	void renderFrets();
+	int menumode;
+	void itemClicked(int i);
 } guitarScene;
 
 implementation
 
 void tSceneGuitar::init()
 {
+	printf("Init guitar scene\n");
+	additem("Return to Song");
+	additem("Restart Song");
+	additem("Change Song");
+	additem("Settings");
+	additem("Quit to Main Menu");
+	menumode=1;
+	posx=globals::scr_width*0.2;
+	posy=globals::scr_height*0.4;
+	scale=globals::scr_height*0.04;
+	tScnMenuBase::init();
+	viewOffset=0;
+	viewSize=5;
+}
+
+void tSceneGuitar::renderNeck()
+{
+	GLfloat s0=0,s1=0.2,s3=0.4+0.2*boardlen;
+	glBindTexture(GL_TEXTURE_2D,spc.neck.tex);
+	glBegin(GL_TRIANGLE_STRIP);
 	
+	lmargin=-2.0f;
+	rmargin=2.0f;
+	
+	glColor4f(1.0f,1.0f,1.0f,0.0f);
+	glTexCoord2f(0.0f,s0);
+	glVertex3f(lmargin,0.0f,-2.0f);
+	glTexCoord2f(1.0f,s0);
+	glVertex3f(rmargin,0.0f,-2.0f);
+	
+	glColor4f(1.0f,1.0f,1.0f,1.0f-scn.fade);
+	glTexCoord2f(0.0f,s1);
+	glVertex3f(lmargin,0.0f,-1.0f);
+	glTexCoord2f(1.0f,s1);
+	glVertex3f(rmargin,0.0f,-1.0f);
+	
+	glTexCoord2f(0.0f,s3);
+	glVertex3f(lmargin,0.0f,boardlen);
+	glTexCoord2f(1.0f,s3);
+	glVertex3f(rmargin,0.0f,boardlen);
+	
+	glEnd();
 }
 
 void tSceneGuitar::render()
 {
+	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
+	glClear( GL_COLOR_BUFFER_BIT );	
 	
+	renderNeck();
+	
+	if (menumode)
+	{
+		glBegin(GL_TRIANGLE_FAN);
+		glColor4f(0.0f,0.0f,0.0f,0.30f);
+		glVertex3f(0,0,0);
+		glVertex3f(globals::scr_width,0,0);
+		glVertex3f(globals::scr_width,globals::scr_height,0);
+		glVertex3f(0,globals::scr_height,0);
+		glEnd();
+		glLoadIdentity();
+		rendertext();
+	}
 }
 
 void tSceneGuitar::handleevent(SDL_Event &a)
 {
+	if (a.type==SDL_KEYDOWN &&
+		a.key.keysym.sym==SDLK_ESCAPE &&
+		menumode==0)
+	{
+		menumode=1;
+		return;
+	} 
+	
+	if (menumode) tScnMenuBase::handleevent(a);
+}
+
+void tSceneGuitar::itemClicked(int i)
+{
+	switch (i)
+	{
+	case -1:
+	case 0: // return
+		menumode=0;
+		return;
+	case 1: // restart
+		return;
+	case 2: // change song
+		fadetoscene(SCN_SONGS);
+		return;
+	case 3: // settings
+		return;
+	case 4: // main menu
+		fadetoscene(SCN_MAINMENU);
+		return;
+	}
 }

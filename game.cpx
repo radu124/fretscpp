@@ -45,6 +45,8 @@ int main( int argc, char* argv[] )
 					      );
 	}
 	MainMenu.init();
+	guitarScene.init();
+	
 	glViewport( 0, 0, 800, 600 );
 	glClear( GL_COLOR_BUFFER_BIT );
 	glMatrixMode( GL_PROJECTION );

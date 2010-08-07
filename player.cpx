@@ -1,0 +1,17 @@
+interface
+
+class tPlayer
+{
+public:
+	int lefty;
+	int score;
+	int streak;
+	int lastkeys[5];
+	int keys;
+	int hit;
+};
+
+tPlayer player[2];
+
+implementation
+

@@ -9,12 +9,104 @@ class tScnSetSongOpt:public tScnTable
 public:
 	tScnSetSongOpt() { scenes.add(this,SCN_SETSONGOPT); }
 	void enter();
-	void itemClicked(int i, int j);
+	void enableDisableMulti();
+	int getInstrument(int i);
+	int getDifficulty(int i);
+	void selInstrument(int i, int j=-1);
+	void selDifficulty(int i, int j=-1);
+	void itemClickedSep(int i, int k, int j);
+	string lastInstr[2];
+	int lastDiffi[2];
+	int lastP2controller;
 } SongOpt;
 
 implementation
 
 uses sprites, scnTable, globals;
+
+void tScnSetSongOpt::enableDisableMulti()
+{
+	int i;
+	if (globals::numplayers==1)
+	{
+		globals::numplayers=2;
+		for (i=1; i<opt[1].size(); i++)
+			opt[1][i]=0;
+		opt[1][0]=1;
+		selInstrument(1);
+	} else {
+		globals::numplayers=1;
+		for (i=1; i<opt[1].size(); i++)
+			opt[1][i]=2;
+		opt[1][0]=0;
+	}
+}
+
+void tScnSetSongOpt::selInstrument(int i, int j)
+{
+	int base,q;
+	if (j>=crtSong.trk_instrument.size()) j=-1;
+	if (j<0)
+	{
+		j=0;
+		for (q=0; q<crtSong.trk_instrument.size(); q++)
+			if (lastInstr[i]==crtSong.trk_instrument[q]) j=q;
+	} else 
+		lastInstr[i]=crtSong.trk_instrument[j];
+	base=groupStart(i,1);
+	printf("col: %d base:%d\n",i,base);
+	for (q=0; q<crtSong.trk_instrument.size(); q++)
+		opt[i][base+q]=(j==q);
+	selDifficulty(i);
+}
+
+/**
+ * return currently selected instrument for player i(+1)
+ */
+int tScnSetSongOpt::getInstrument(int i)
+{
+	int base,q;
+	base=groupStart(i,1);
+	for (q=0; q<crtSong.trk_instrument.size(); q++)
+		if (opt[i][base+q]==1) return q;
+	return 0;
+}
+
+/**
+ * return currently selected difficulty for player i(+1)
+ */
+int tScnSetSongOpt::getDifficulty(int i)
+{
+	int base,q;
+	base=groupStart(i,2);
+	for (q=0; q<4; q++)
+		if (opt[i][base+q]==1) return q;
+	return 0;
+}
+
+void tScnSetSongOpt::selDifficulty(int i, int j)
+{
+	int q,base, instr, dff;
+	instr=getInstrument(i);
+	base=groupStart(i,2);
+	printf("col: %d instr:%d base:%d\n",i,instr,base);
+	dff=1;
+	for (q=0; q<4; q++) 
+	{
+		opt[i][base+q]=(crtSong.trk_difficulties[instr]&dff)?0:2;
+		dff<<=1;
+	}
+	if (j==-1) j=lastDiffi[i];
+	else lastDiffi[i]=j;
+	// this difficulty level does not exist for this song/instrument
+	if (opt[i][base+j])
+	{
+		j=0;
+		for (q=0; q<4; q++)
+			if (!opt[i][base+q]) { j=q; break; }
+	}
+	opt[i][base+j]=1;
+}
 
 void tScnSetSongOpt::enter()
 {
@@ -35,28 +127,43 @@ void tScnSetSongOpt::enter()
 	additem("|Controller:");
 	additem("CKeyboard1");
 	additem("CGuitar1");
-	if (globals::numplayers>1)
-	{
-		dupcol();
-		entries[1][0]="<";
-	}
+	
+	dupcol();
+	entries[1][0]="OPlayer 2";
 	optinit();
-	opt[0][5]=2;
-	opt[0][6]=1;
+	globals::numplayers=3-globals::numplayers;
+	enableDisableMulti();
+	selInstrument(0);
 }
 
-void tScnSetSongOpt::itemClicked(int i, int j)
+void tScnSetSongOpt::itemClickedSep(int i, int k, int j)
 {
-	if (j==-1)
+	printf("SEPclick %d %d %d\n",i,k,j);
+	
+	if (i==-1)
 	{
 		fadetoscene(SCN_SONGS);
 		return;
 	}
-	if (j==0)
+	if (i==0 && k==0)
 	{
 		fadetoscene(SCN_PLAYING);
 		return;
 	}
-	
+	if (i==1 && k==0)
+	{
+		enableDisableMulti();
+		return;
+	}
+	if (k==1) 
+	{
+		selInstrument(i,j);
+		return;
+	}
+	if (k==2)
+	{
+		selDifficulty(i,j);
+		return;
+	}
 }
 

@@ -60,7 +60,7 @@ tscenelist scenes;
 
 implementation
 
-uses scnMainMenu,message,scnSongs,scnMenu,globals,scnSetSongOpt;
+uses scnMainMenu,message,scnSongs,scnMenu,globals,scnSetSongOpt,scnGuitar;
 
 void sceneBase::setdim()
 {

@@ -7,7 +7,7 @@ void init_sprites();
 class sprite
 {
 public:
-	void load(const char *, GLfloat cx=0.5f, GLfloat cy=0.5f);
+	void load(const char *, int flags=0);
 	void setCenter(GLfloat, GLfloat);
 	void draw(GLfloat x=0, GLfloat y=0);
 	int width, height;
@@ -21,12 +21,14 @@ struct tsprites
 	sprite logo;
 	sprite back;
 	sprite guyk;
+	sprite neck;
 } spc;
 
 implementation
 		
-void sprite::load(const char *fname, GLfloat cx, GLfloat cy)
+void sprite::load(const char *fname, int flags)
 {
+	GLfloat cx=0.5f, cy=0.5f;
 	ILuint iname;
 	ilGenImages(1,&iname);
 	ilBindImage(iname);
@@ -73,7 +75,8 @@ void init_sprites()
 	iluInit();
 	ilutRenderer(ILUT_OPENGL);
 //	ilGenImages(1,&baseiname);
-	spc.logo.load("data/logo.png",0.5f,0.5f);
-	spc.back.load("data/keyboard.png",0.5f,0.5f);
+	spc.logo.load("data/logo.png");
+	spc.back.load("data/keyboard.png");
 	spc.guyk.load("data/pose.png");
+	spc.neck.load("data/neck.png");
 }
