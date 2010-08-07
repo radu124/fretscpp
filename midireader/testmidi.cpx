@@ -1,0 +1,7 @@
+uses midiparser;
+
+int main(int argc, char *argv[])
+{
+	Midiparser a;
+	a.openfile(argv[1]);
+}

@@ -1,0 +1,20 @@
+interface
+
+class Midiparser
+{
+	int openfile(const char *name);
+	unsigned char *buffer;
+	int size;
+	int fd;
+};
+
+implementation
+
+int Midiparser::openfile(const char *name)
+{
+	fd=open(name,O_RDONLY);
+	if (fd<0) return 0;
+	size=lseek(
+	close(fd);
+	return 1;
+}
