@@ -121,6 +121,15 @@ int MidiParser::openfile(const char *name)
 	pos=0;
 	FAIL=0;
 	int res=doparse();
+	if (trk_difficulties.size()==0)
+	{
+		vector<notestatus> score;
+		score.push_back(notestatus());
+		score.push_back(notestatus());
+		trk_notes.push_back(score);
+		trk_difficulties.push_back(0);
+		trk_instrument.push_back("NONE");
+	}
 	delete [] buffer;
 	close(fd);
 	return res;
@@ -346,6 +355,7 @@ int MidiParser::doparse()
 				DBG(READMID,"MIDI note-on:  %4d %4d %s\n" & notenum & velo & a.stat);
 				anynotes=1;
 				if (a.timestamp>40000) difficulties |= 1<<(ournote/5);
+				// skip single note in the beginning
 				continue;
 			}
 			if ((event & 0xf0)==0x80)

@@ -5,21 +5,63 @@ class tSceneGuitar:public tScnMenuBase
 public:
 	tSceneGuitar() { scenes.add(this,SCN_PLAYING); };
 	GLfloat fadespeed() { return 1000; }
-	GLfloat lmargin,rmargin,boardlen;
+	GLfloat lmargin,rmargin,boardlen,boardline;
+	int crtnote;
+	void enter();
 	void init();
 	void render();
 	void handleevent(SDL_Event &a);
 	void renderNeck();
 	void renderTracks();
 	void renderBars();
-	void renderNote();
+	void renderKey(int num, int position);
+	void renderKeys();
+	int renderNote(int col, GLfloat pos, int flags=0);
 	void renderNotes();
 	void renderFrets();
+	void renderStats();
 	int menumode;
 	void itemClicked(int i);
 } guitarScene;
 
 implementation
+
+uses audio,player;
+
+void tSceneGuitar::render()
+{
+	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
+	glClear( GL_COLOR_BUFFER_BIT );	
+	scene_setNeck();
+	renderNeck();
+	renderNotes();
+	renderKeys();
+	scene_setOrtho();
+
+	renderStats();
+	if (menumode)
+	{
+		glLoadIdentity();
+		glBindTexture(GL_TEXTURE_2D,NULL);
+		glBegin(GL_TRIANGLE_FAN);
+		glColor4f(0.0f,0.0f,0.0f,0.30f);
+		glVertex3f(0,0,0);
+		glVertex3f(globals::scr_width,0,0);
+		glVertex3f(globals::scr_width,globals::scr_height,0);
+		glVertex3f(0,globals::scr_height,0);
+		glEnd();
+		glLoadIdentity();
+		rendertext();
+	}
+}
+
+void tSceneGuitar::enter()
+{
+	tScnMenuBase::enter();
+	player[0].crtnote=0;
+	menumode=0;
+	song_start((globals::selectedsong+"/").c_str());
+}
 
 void tSceneGuitar::init()
 {
@@ -36,16 +78,26 @@ void tSceneGuitar::init()
 	tScnMenuBase::init();
 	viewOffset=0;
 	viewSize=5;
+	
+	lmargin=-2.0f;
+	rmargin=2.0f;
+	boardlen=4;
+	boardline=3;
 }
 
 void tSceneGuitar::renderNeck()
 {
-	GLfloat s0=0,s1=0.2,s3=0.4+0.2*boardlen;
+	GLfloat s0,s1,s3;
+	s0=playing.playpos*0.00001;
+	s0=s0-(int) s0;
+	s0=1-s0;
+	s1=s0+0.2;
+	s3=s0+0.4+0.2*boardlen;
+	//glScalef(5.0f,5.0f,5.0f);
 	glBindTexture(GL_TEXTURE_2D,spc.neck.tex);
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	glBegin(GL_TRIANGLE_STRIP);
-	
-	lmargin=-2.0f;
-	rmargin=2.0f;
 	
 	glColor4f(1.0f,1.0f,1.0f,0.0f);
 	glTexCoord2f(0.0f,s0);
@@ -67,24 +119,96 @@ void tSceneGuitar::renderNeck()
 	glEnd();
 }
 
-void tSceneGuitar::render()
+GLfloat keycolors[5][3]={
+	0.0f, 1.0f, 0.0f, 
+	1.0f, 0.0f, 0.0f, 
+	1.0f, 1.0f, 0.0f, 
+	0.0f, 0.0f, 1.0f, 
+	1.0f, 0.0f, 1.0f 
+	};
+
+int tSceneGuitar::renderNote(int col, GLfloat pos, int flags)
 {
-	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
-	glClear( GL_COLOR_BUFFER_BIT );	
-	
-	renderNeck();
-	
-	if (menumode)
+	GLfloat x,y,yy,sz,nfade;
+	GLfloat c1,c2,c0;
+	x=lmargin+(rmargin-lmargin)*(col/5.0+0.1);
+	y=boardline-pos*2.2;
+	nfade=1.0f;
+	yy=0;
+	if (y<-1) nfade=2+y;
+	if (pos<0) nfade=1+pos;
+	if (nfade<0) nfade=0;
+	if (y<-2) return 1;
+	sz=0.3;
+	c0=keycolors[col][0];
+	c1=keycolors[col][1];
+	c2=keycolors[col][2];
+	if (flags & 8) 
 	{
-		glBegin(GL_TRIANGLE_FAN);
-		glColor4f(0.0f,0.0f,0.0f,0.30f);
-		glVertex3f(0,0,0);
-		glVertex3f(globals::scr_width,0,0);
-		glVertex3f(globals::scr_width,globals::scr_height,0);
-		glVertex3f(0,globals::scr_height,0);
-		glEnd();
-		glLoadIdentity();
-		rendertext();
+		glBindTexture(GL_TEXTURE_2D,spc.key.tex);
+		sz=0.33;
+		if (flags & 1) 
+		{
+			yy=0.2;
+			c0=0.5+0.5*c0;
+			c1=0.5+0.5*c1;
+			c2=0.5+0.5*c2;
+			if (flags & 2) yy+=0.1;
+		}
+	} else glBindTexture(GL_TEXTURE_2D,spc.ball.tex);
+	glColor4f(c0,c1,c2,nfade);
+	glBegin(GL_TRIANGLE_STRIP);
+	glTexCoord2d(0,1);  glVertex3f(x-sz  , yy, y-sz);
+	glTexCoord2d(0,0);  glVertex3f(x-sz  , yy, y+sz);
+	glTexCoord2d(1,1);  glVertex3f(x+sz  , yy, y-sz);
+	glTexCoord2d(1,0);  glVertex3f(x+sz  , yy, y+sz);
+	glEnd();
+	return 0;
+}
+
+void tSceneGuitar::renderKey(int num, int position)
+{
+	renderNote(num,0,position+8);
+}
+
+void tSceneGuitar::renderKeys()
+{
+	int i;
+	for (i=0; i<5; i++) renderKey(i,player[0].lastkeys[i]+player[0].lastkeys[5]*2);
+}
+
+void tSceneGuitar::renderStats()
+{
+	char a[32];
+	player[0].passtime();
+	sprintf(a,"%d %s",player[0].streak,player[0].dbg.c_str());
+	glLoadIdentity();
+	glColor4f(1.0,1.0,1.0,1.0);
+	deffont.displayString(a,20,20,20,0);
+}
+
+void tSceneGuitar::renderNotes()
+{
+	int timenow=playing.playpos;
+	int i,j;
+	crtnote=0;
+	while (crtnote<crtSong.trk_notes[0].size())
+	{
+		if (crtSong.trk_notes[0][crtnote].timestamp>timenow) break;
+		crtnote++;
+	}
+	//INFO(SCNGUITAR,"note %d\n" &crtnote);
+	for (i=crtnote; i<crtSong.trk_notes[0].size(); i++)
+	{
+		int finishhere=0;
+		notestatus v=crtSong.trk_notes[0][i];
+		for (j=0; j<4; j++)
+		{
+			if (v.stat[j+5]=='O' || v.stat[j+5]=='B')
+				finishhere|=renderNote(j,(v.timestamp-timenow)/44100.0);
+		}
+		if (finishhere) break;
+		
 	}
 }
 
@@ -95,10 +219,33 @@ void tSceneGuitar::handleevent(SDL_Event &a)
 		menumode==0)
 	{
 		menumode=1;
+		playing.pause=1;
 		return;
 	} 
 	
 	if (menumode) tScnMenuBase::handleevent(a);
+	else {
+		if (a.type==SDL_KEYDOWN) switch (a.key.keysym.sym)
+		{
+			case SDLK_F1: player[0].lastkeys[0]=1; break;
+			case SDLK_F2: player[0].lastkeys[1]=1; break;
+			case SDLK_F3: player[0].lastkeys[2]=1; break;
+			case SDLK_F4: player[0].lastkeys[3]=1; break;
+			case SDLK_F5: player[0].lastkeys[4]=1; break;
+			case SDLK_RETURN: player[0].lastkeys[5]=1; player[0].handlehit(); break;
+			case SDLK_RSHIFT: player[0].lastkeys[5]=1; player[0].handlehit(); break;
+		}
+		if (a.type==SDL_KEYUP) switch (a.key.keysym.sym)
+		{
+			case SDLK_F1: player[0].lastkeys[0]=0; break;
+			case SDLK_F2: player[0].lastkeys[1]=0; break;
+			case SDLK_F3: player[0].lastkeys[2]=0; break;
+			case SDLK_F4: player[0].lastkeys[3]=0; break;
+			case SDLK_F5: player[0].lastkeys[4]=0; break;
+			case SDLK_RETURN: player[0].lastkeys[5]=0; break;
+			case SDLK_RSHIFT: player[0].lastkeys[5]=0; break;
+		}
+	}
 }
 
 void tSceneGuitar::itemClicked(int i)
@@ -108,6 +255,7 @@ void tSceneGuitar::itemClicked(int i)
 	case -1:
 	case 0: // return
 		menumode=0;
+		playing.pause=0;
 		return;
 	case 1: // restart
 		return;

@@ -4,7 +4,7 @@ interface
 #define MSG_AUDIO        LEV_QUIET
 #define MSG_SONGDB       LEV_DBG
 #define MSG_FONT         LEV_DBG
-#define MSG_MIDI         LEV_INFO
+#define MSG_MIDI         LEV_DBG
 #define MSG_SPRITES      LEV_INFO
 #define MSG_SCNGUITAR    LEV_DBG
 #define MSG_SCNSONGOPT   LEV_INFO

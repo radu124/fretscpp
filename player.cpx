@@ -6,12 +6,80 @@ public:
 	int lefty;
 	int score;
 	int streak;
-	int lastkeys[5];
+	int lastkeys[6];
 	int keys;
 	int hit;
+	int crtnote;
+	int crtnotehit;
+	string dbg,dbg2;
+	void handlehit();
+	void passtime();
 };
 
 tPlayer player[2];
 
 implementation
 
+uses audio;
+
+void tPlayer::passtime()
+{
+	int timenow=playing.playpos;
+	int j;
+	while (crtnote<crtSong.trk_notes[0].size())
+	{
+		if (crtSong.trk_notes[0][crtnote].timestamp>timenow-4000) break;
+		crtnote++;
+	}
+	if (crtnote<crtSong.trk_notes[0].size())
+	{
+		dbg="";
+		for (j=0; j<5; j++) dbg+=crtSong.trk_notes[0][crtnote].stat[j+5];
+		dbg+=dbg2;
+	}
+}
+
+void tPlayer::handlehit()
+{
+	char a[16];
+	a[6]=0;
+	a[0]='|';
+	a[1]=0;
+	int timenow=playing.playpos;
+	int i,found=-1,good=0,j;
+	for (i=crtnote; i<crtSong.trk_notes[0].size(); i++)
+	{
+		if (crtSong.trk_notes[0][i].timestamp>timenow+10000) break;
+		for (j=0; j<5; j++)
+		{
+			char c=crtSong.trk_notes[0][i].stat[j+5];
+			if (c=='O' || c=='B') {
+				found=i;
+				//crtnote++;
+				break;
+			}
+		}
+		if (found>=0) break;
+	}
+	if (found>=0)
+	{
+		a[0]='!';
+		good=1;
+		for (j=0; j<5; j++)
+		{
+			char c=crtSong.trk_notes[0][found].stat[j+5];
+			if ((c=='O' || c=='B') ^ (lastkeys[j])) good=0;
+			if (lastkeys[j]) c++;
+			a[j+1]=c;
+		}
+	}
+	if (good) {
+		streak++;
+		playing.gp0=1;
+	}
+	else {
+		streak=0;
+		playing.gp0=0;
+	}
+	dbg2=a;
+}

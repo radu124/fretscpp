@@ -34,6 +34,7 @@ struct tPlaying
 	int effectchn[8];
 	int effectpos[8];
 	
+	volatile int gp0;
 	volatile int playpos;
 	volatile int decodepos[3];
 	volatile int refreshsong;
@@ -98,10 +99,11 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 	if (!en_play) 
 	{
 		playing.playing=0;
-		DBG(AUDIO,".\n");
+		DBG(AUDIO,"P\n");
 	}
 	int vol1, vol2, vol3;
-	vol1=vol2=vol3=85;
+	vol1=vol2=85;
+	vol3=playing.gp0*65+20;
 	if (!(ov_of &1)) vol1=0;
 	if (!(ov_of &2)) vol2=0;
 	if (!(ov_of &4)) vol3=0;
@@ -112,6 +114,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 		&(-playing.playpos+playing.decodepos[2])
 		);
 	*/
+	if (playing.pause) en_play=0;
 	for (i=0; i<len/4; i++)
 	{
 		int s=0;
@@ -138,7 +141,8 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 		//pbpos=pbpos+1;
 		if (pbpos>=effects.len[0]) pbpos=0;
 	}
-	playing.playpos+=len/4;
+	if (en_play)
+		playing.playpos+=len/4;
 	// warning, thread sync problem
 }
 
@@ -220,6 +224,7 @@ int load_effects(const char *fn)
 
 int song_start(const char *path)
 {
+	playing.gp0=1;
 	strncpy(playing.songname,path,2047);
 	playing.songname[2048]=0;
 	playing.refreshsong=1;
@@ -252,6 +257,7 @@ void tPlaying::open_song()
 	ogg_bs[0]=ogg_bs[1]=ogg_bs[2]=0;
 	SDL_LockAudio();
 	playpos=0;
+	pause=0;
 	SDL_UnlockAudio();
 	songstarted=0;
 	int l=strlen(namelocal);

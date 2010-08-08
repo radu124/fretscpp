@@ -22,6 +22,8 @@ struct tsprites
 	sprite back;
 	sprite guyk;
 	sprite neck;
+	sprite ball;
+	sprite key;
 } spc;
 
 implementation
@@ -35,8 +37,10 @@ void sprite::load(const char *fname, int flags)
 	ilLoadImage((char *) fname);
 	height =ilGetInteger(IL_IMAGE_HEIGHT);
 	width  =ilGetInteger(IL_IMAGE_WIDTH);
+	if (flags & 1) { height=1; width=1; }
 	//tex= ilutGLLoadImage((char *) fname);
 	tex=ilutGLBindTexImage();
+	
 	INFO(SPRITES,"iname: %d tex:%d\n" &iname &tex);
 	ilDeleteImages(1,&iname);
 	/*
@@ -79,4 +83,6 @@ void init_sprites()
 	spc.back.load("data/keyboard.png");
 	spc.guyk.load("data/pose.png");
 	spc.neck.load("data/neck.png");
+	spc.ball.load("data/ball2.png",1);
+	spc.key.load("data/ball1.png",1);
 }

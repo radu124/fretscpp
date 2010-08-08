@@ -56,11 +56,39 @@ public:
 	sceneBase * operator [] (int i);
 };
 
+void scene_setOrtho();
+void scene_setNeck(int i=0);
+
 tscenelist scenes;
 
 implementation
 
 uses scnMainMenu,message,scnSongs,scnMenu,globals,scnSetSongOpt,scnGuitar;
+
+void scene_setOrtho()
+{
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+	glOrtho(0.0f, globals::scr_width, globals::scr_height, 0.0f, -1.0f, 1.0f);
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
+}
+
+void scene_setNeck(int i)
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0f, 1.0f * globals::scr_width / globals::scr_height, 1.0f, 100.0f);
+	gluLookAt(
+		0.0f, 10.0f, 10.0f,
+		0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f);
+	//glLoadIdentity();
+	
+	//float fvViewMatrix[ 16 ]; 
+	//glGetFloatv( GL_MODELVIEW_MATRIX, fvViewMatrix );
+	glMatrixMode(GL_MODELVIEW);
+}
 
 void sceneBase::setdim()
 {
