@@ -94,7 +94,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 	dc=playing.decodepos[2]; if (!(ov_of &4)) dc=playing.playpos+SONG_STARTAFTER+1;
 	int decodebtm=min3(da,db,dc);
 	if (!playing.playing && decodebtm>playing.playpos+SONG_STARTAFTER) playing.playing=1;
-	if (!playing.ov_openflags) playing.playing=0;
+	if (!ov_of) playing.playing=0;
 	int en_play=(playing.playing && decodebtm>playing.playpos+len/4);
 	if (!en_play) 
 	{
@@ -102,11 +102,33 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 		DBG(AUDIO,"P\n");
 	}
 	int vol1, vol2, vol3;
+	int16_t *effs[8];
+	int16_t *eff0=NULL;
+	int16_t *eff1=NULL;
+	int vole0=85;
+	int vole1=85;
 	vol1=vol2=85;
-	vol3=playing.gp0*65+20;
+	vol3=playing.gp0*200+20;
 	if (!(ov_of &1)) vol1=0;
 	if (!(ov_of &2)) vol2=0;
 	if (!(ov_of &4)) vol3=0;
+	
+	for (i=0; i<8; i++)
+	{
+		effs[i]=NULL;
+		if (playing.effectid[i]>0)
+		{
+			int eid=playing.effectid[i];
+			int epos=playing.effectpos[i];
+			if (effects.len[eid]<epos+len/4) 
+			{	
+				playing.effectid[i]=0;
+			} else effs[i]=effects.data[eid]+epos;
+			playing.effectpos[i]+=len/4;
+		}
+	}
+	eff0=effs[0];
+	eff1=effs[1];
 	/*
 	DBG(AUDIO,"%8x %8x %8x %8x\n" &playing.playpos
 		&(-playing.playpos+playing.decodepos[0])
@@ -124,6 +146,8 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 			s+=vol2*playing.buffer[2][pos];
 			s+=vol3*playing.buffer[4][pos];
 		}
+		if (eff0) s+=vole0* *eff0;
+		if (eff1) s+=vole0* *eff1;
 		streamS[i*2]=rangelimit(s/256);
 		
 		s=0;
@@ -134,12 +158,14 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 			s+=vol2*playing.buffer[3][pos];
 			s+=vol3*playing.buffer[5][pos];
 		}
+		if (eff0) s+=vole0* *eff0++;
+		if (eff1) s+=vole0* *eff1++;
 		streamS[i*2+1]=rangelimit(s/256);
 		
 		pos=(pos+1)%SONG_BUFFER_SIZE;
 		//effects.data[0][pbpos];
 		//pbpos=pbpos+1;
-		if (pbpos>=effects.len[0]) pbpos=0;
+		//if (pbpos>=effects.len[0]) pbpos=0;
 	}
 	if (en_play)
 		playing.playpos+=len/4;
@@ -148,7 +174,11 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 
 void effect_start(int effnum, int channel, int volume)
 {
+	static int alternate=0;
 	if (!effnum) return;
+	playing.effectpos[alternate]=0;
+	playing.effectid[alternate]=effnum;
+	alternate^=1;
 }
 
 void init_audio()

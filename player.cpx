@@ -7,13 +7,25 @@ public:
 	int score;
 	int streak;
 	int lastkeys[6];
+	int lasthit[5];
 	int keys;
 	int hit;
 	int crtnote;
+	int nextnote;
+	int donenote;
+	int farrnote;
+	int hittnote;
+	int id;
 	int crtnotehit;
+	int multiplier;
+	int instrument;
+	int difficulty;
+	int hitactive;
 	string dbg,dbg2;
 	void handlehit();
 	void passtime();
+	void init(int iid);
+	vector<notestatus> *cnotes;
 };
 
 tPlayer player[2];
@@ -22,19 +34,39 @@ implementation
 
 uses audio;
 
+void tPlayer::init(int iid)
+{
+	int i;
+	for (i=0; i<5; i++) lasthit[i]=-1000000;
+	id=iid;
+	crtnote=0;
+	hittnote=-1;
+	nextnote=0;
+	cnotes=&crtSong.trk_notes[instrument];
+}
+
 void tPlayer::passtime()
 {
 	int timenow=playing.playpos;
 	int j;
-	while (crtnote<crtSong.trk_notes[0].size())
+	while (crtnote<crtSong.trk_notes[instrument].size())
 	{
-		if (crtSong.trk_notes[0][crtnote].timestamp>timenow-4000) break;
+		if (cnotes[0][crtnote].timestamp>timenow-4000) break;
+		if (cnotes[0][crtnote].hashit(difficulty)) 
+		{
+			hitactive=0;
+			streak=0;
+			playing.gp0=0;
+		}
 		crtnote++;
 	}
-	if (crtnote<crtSong.trk_notes[0].size())
+	if (crtnote<crtSong.trk_notes[instrument].size())
 	{
 		dbg="";
-		for (j=0; j<5; j++) dbg+=crtSong.trk_notes[0][crtnote].stat[j+5];
+		char a[20];
+		sprintf(a,"%d:%d:",playing.ov_openflags,playing.playing,playing.decodepos[0]);
+		dbg+=a;
+		for (j=0; j<6; j++) dbg+=crtSong.trk_notes[instrument][nextnote].stat[j+12*difficulty];
 		dbg+=dbg2;
 	}
 }
@@ -47,19 +79,10 @@ void tPlayer::handlehit()
 	a[1]=0;
 	int timenow=playing.playpos;
 	int i,found=-1,good=0,j;
-	for (i=crtnote; i<crtSong.trk_notes[0].size(); i++)
+	for (i=crtnote; i<crtSong.trk_notes[instrument].size(); i++)
 	{
-		if (crtSong.trk_notes[0][i].timestamp>timenow+10000) break;
-		for (j=0; j<5; j++)
-		{
-			char c=crtSong.trk_notes[0][i].stat[j+5];
-			if (c=='O' || c=='B') {
-				found=i;
-				//crtnote++;
-				break;
-			}
-		}
-		if (found>=0) break;
+		if (cnotes[0][i].timestamp>timenow+4000) break;
+		if (cnotes[0][i].hashit(difficulty)) { found=i; crtnote=i+1; break; }
 	}
 	if (found>=0)
 	{
@@ -67,19 +90,24 @@ void tPlayer::handlehit()
 		good=1;
 		for (j=0; j<5; j++)
 		{
-			char c=crtSong.trk_notes[0][found].stat[j+5];
+			char c=crtSong.trk_notes[instrument][found].stat[j+12*difficulty];
 			if ((c=='O' || c=='B') ^ (lastkeys[j])) good=0;
 			if (lastkeys[j]) c++;
 			a[j+1]=c;
 		}
 	}
 	if (good) {
+		for (i=0; i<5; i++)
+			if (lastkeys[i]) lasthit[i]=timenow;
 		streak++;
 		playing.gp0=1;
+		hitactive=1;
 	}
 	else {
+		effect_start(1+rand()%4,0);
 		streak=0;
 		playing.gp0=0;
+		hitactive=0;
 	}
 	dbg2=a;
 }

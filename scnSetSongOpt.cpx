@@ -22,7 +22,7 @@ public:
 
 implementation
 
-uses sprites, scnTable, globals;
+uses sprites, scnTable, globals, player;
 
 void tScnSetSongOpt::enableDisableMulti()
 {
@@ -57,6 +57,7 @@ void tScnSetSongOpt::selInstrument(int i, int j)
 	DBG(SCNSONGOPT,"col: %d base:%d\n" &i &base);
 	for (q=0; q<crtSong.trk_instrument.size(); q++)
 		opt[i][base+q]=(j==q);
+	player[i].instrument=j;
 	selDifficulty(i);
 }
 
@@ -106,6 +107,7 @@ void tScnSetSongOpt::selDifficulty(int i, int j)
 			if (!opt[i][base+q]) { j=q; break; }
 	}
 	opt[i][base+j]=1;
+	player[i].difficulty=j;
 }
 
 void tScnSetSongOpt::enter()

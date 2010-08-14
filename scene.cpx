@@ -35,6 +35,9 @@ void scenehandleevent(SDL_Event &ev);
 void jumptoscene(int i);
 void fadetoscene(int i);
 
+GLfloat camerapos[3]={0,-4,3};
+GLfloat cameraangle=30;
+
 class tscenelist
 {
 public:
@@ -78,11 +81,11 @@ void scene_setNeck(int i)
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0f, 1.0f * globals::scr_width / globals::scr_height, 1.0f, 100.0f);
+	gluPerspective(90.0f, 1.0f * globals::scr_width / globals::scr_height, 1.0f, 100.0f);
 	gluLookAt(
-		0.0f, 10.0f, 10.0f,
+		camerapos[0], camerapos[1], camerapos[2],
 		0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f);
+		0.0f, 0.0f, 1.0f);
 	//glLoadIdentity();
 	
 	//float fvViewMatrix[ 16 ]; 

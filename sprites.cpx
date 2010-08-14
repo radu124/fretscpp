@@ -10,6 +10,8 @@ public:
 	void load(const char *, int flags=0);
 	void setCenter(GLfloat, GLfloat);
 	void draw(GLfloat x=0, GLfloat y=0);
+	void draw3d();
+	void bind();
 	int width, height;
 	GLuint tex;
 	GLfloat scale;
@@ -23,11 +25,28 @@ struct tsprites
 	sprite guyk;
 	sprite neck;
 	sprite ball;
-	sprite key;
+	sprite key[5];
+	sprite flame;
+	sprite hitg1, hitg2;
+	sprite hitf1, hitf2;
+	sprite glow;
+	sprite note[4][5];
+	sprite noteline;
+	static void unbind();
 } spc;
 
 implementation
-		
+
+void sprite::bind()
+{
+	glBindTexture(GL_TEXTURE_2D,tex);
+}
+
+void tsprites::unbind()
+{
+	glBindTexture(GL_TEXTURE_2D,NULL);
+}
+
 void sprite::load(const char *fname, int flags)
 {
 	GLfloat cx=0.5f, cy=0.5f;
@@ -41,7 +60,7 @@ void sprite::load(const char *fname, int flags)
 	//tex= ilutGLLoadImage((char *) fname);
 	tex=ilutGLBindTexImage();
 	
-	INFO(SPRITES,"iname: %d tex:%d\n" &iname &tex);
+	INFO(SPRITES,"Loading: %s, iname: %d tex:%d size:%dx%d\n" &fname &iname &tex &width &height);
 	ilDeleteImages(1,&iname);
 	/*
 	ilutEnable(ILUT_OPENGL_CONV);
@@ -67,6 +86,18 @@ void sprite::draw(GLfloat x, GLfloat y)
 	glEnd();
 }
 
+void sprite::draw3d()
+{
+	glBindTexture(GL_TEXTURE_2D,tex);
+	glBegin(GL_TRIANGLE_STRIP);
+	glTexCoord2f(0.0, 0.0); glVertex3f(-1, -1, 0);
+	glTexCoord2f(1.0, 0.0); glVertex3f( 1, -1, 0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(-1, 1, 0);
+	glTexCoord2f(1.0, 1.0); glVertex3f( 1, 1, 0);
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D,NULL);
+}
+
 void sprite::setCenter(GLfloat x, GLfloat y)
 {
 	centerx=x*width;
@@ -75,6 +106,7 @@ void sprite::setCenter(GLfloat x, GLfloat y)
 
 void init_sprites()
 {
+	int i,j;
 	ilInit();
 	iluInit();
 	ilutRenderer(ILUT_OPENGL);
@@ -84,5 +116,21 @@ void init_sprites()
 	spc.guyk.load("data/pose.png");
 	spc.neck.load("data/neck.png");
 	spc.ball.load("data/ball2.png",1);
-	spc.key.load("data/ball1.png",1);
+	for (i=0; i<5; i++)
+	{
+		char a[32];
+		sprintf(a,"data/key%d.png",i+1);
+		spc.key[i].load(a,1);
+		for (j=0; j<4; j++)
+		{
+			sprintf(a,"data/note%d%d.png",j,i+1);
+			spc.note[j][i].load(a,1);			
+		}
+	}
+	spc.hitg1.load("data/hitglow1.png",1);
+	spc.hitg2.load("data/hitglow2.png",1);
+	spc.hitf1.load("data/hitflames1.png",1);
+	spc.hitf2.load("data/hitflames2.png",1);
+	spc.glow.load("data/glow.png",1);
+	spc.noteline.load("data/note.png",1);
 }

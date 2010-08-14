@@ -5,8 +5,9 @@ uses includes;
 struct notestatus
 {
 	int timestamp;
-	char stat[24]; // " O-XB"
+	char stat[64]; // " O-XB"
 	string otherstat;
+	int hashit(int difficulty);
 };
 
 typedef vector<vector<notestatus> > vvnotestatus;
@@ -48,6 +49,17 @@ public:
 implementation
 
 uses message,verbosity;
+
+int notestatus::hashit(int difficulty)
+{ 
+	int i;
+	for (i=0; i<4; i++) 
+	{
+		char ch=stat[i+12*difficulty];
+		if (ch=='O' || ch=='B') return 1;
+	}
+	return 0;
+}
 
 int MidiParser::expect(const char *str)
 {
@@ -181,8 +193,18 @@ void MidiParser::timeincrement(int delta)
 		&delta &(tickduration*1000) &(newtimestamp/44100.0));
 	score.push_back(a);
 	a.timestamp=newtimestamp;
-	int i;
-	for (i=0; i<20; i++) switch (a.stat[i])
+	int i,j;
+	for (j=0; j<4; j++) 
+	{
+		char ce=' ';
+		for (i=0; i<5; i++)
+		{
+			char cv=a.stat[j*12+i];
+			if (cv=='O' || cv=='B') ce='@';
+		}
+		a.stat[j*12+5]=ce;
+	}
+	for (i=0; i<48; i++) switch (a.stat[i])
 	{
 		case 'O':
 		case '-':
@@ -250,7 +272,7 @@ int MidiParser::doparse()
 		int difficulties=0;
 		memset(a.stat,' ',sizeof(a.stat));
 		a.timestamp=0;
-		a.stat[21]=0;
+		a.stat[63]=0;
 		score.resize(0);
 		string instrument="Guitar";
 		while (pos<chunkend) 
@@ -338,11 +360,8 @@ int MidiParser::doparse()
 			case 14:
 				notenum=readbyte();
 				velo=readbyte();
-				ournote=20;
-				if (notenum>=60 && notenum<=64)  ournote=notenum-60;
-				if (notenum>=72 && notenum<=76)  ournote=notenum-67;
-				if (notenum>=84 && notenum<=88)  ournote=notenum-74;
-				if (notenum>=96 && notenum<=100) ournote=notenum-81;
+				ournote=48;
+				if (notenum>=60 && notenum<=100) ournote=notenum-60;
 				break;
 			case 12:
 			case 13:
@@ -354,7 +373,11 @@ int MidiParser::doparse()
 				a.stat[ournote]='O';
 				DBG(READMID,"MIDI note-on:  %4d %4d %s\n" & notenum & velo & a.stat);
 				anynotes=1;
-				if (a.timestamp>40000) difficulties |= 1<<(ournote/5);
+				if (a.timestamp>40000 && 
+					ournote%12<5)
+					{
+						difficulties |= 1<<(ournote/12);
+					}
 				// skip single note in the beginning
 				continue;
 			}

@@ -33,8 +33,11 @@ int main( int argc, char* argv[] )
 	deffont.open("data/default.ttf");
 	init_sprites();
 	init_audio();
-	load_effects("data/menu.ogg");
-	song_start("data/songs/tutorial/");
+	load_effects("data/fiba1.ogg");
+	load_effects("data/fiba2.ogg");
+	load_effects("data/fiba5.ogg");
+	load_effects("data/fiba6.ogg");
+	song_start("data/menu.ogg");
 	audio_yield();
 	if (0) {
 		int q;
