@@ -1,8 +1,40 @@
+/*******************************************************************
+(C) 2010 by Radu Stefan
+radu124@gmail.com
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+*******************************************************************/  
+  
 interface
 
 implementation
 
-uses scnGuitar;
+uses scnGuitar,includes;
+
+void tSceneGuitar::renderMultiplier()
+{
+	if (timenow-player[0].timemultiplier<40000)
+	{
+		GLfloat sv=(timenow-player[0].timemultiplier)/8000.0;
+		glPushMatrix();
+		glTranslatef(0, 2, 0);
+		glRotatef(60, 1, 0, 0);
+		glTranslatef(0, 1, 0);
+		glScalef(sv,sv,1);
+		
+		if (player[0].streak>=30) spc.m4.draw3d();
+		else if (player[0].streak>=20) spc.m3.draw3d();
+		else if (player[0].streak>=10) spc.m2.draw3d();
+		glPopMatrix();
+	}
+}
 
 void tSceneGuitar::renderFlame(int col, GLfloat sz)
 {
@@ -12,14 +44,17 @@ void tSceneGuitar::renderFlames()
 {
 	int i;
 	tPlayer &pp=player[cplayer];
-	for (i=0; i<4; i++) 
+	
+	for (i=0; i<5; i++) 
 	{
 		if ((pp.hitactive && pp.lastkeys[i])
-			|| (pp.lasthit[i]+20000>timenow))
+			|| (pp.lasthit[i]+10000>timenow))
 		{
 			rfFlame(i,1);
 		}
 	}
+	
+	//rfFlames2();
 //	rfFlame(0,1);
 //	origGlow(4);
 }
@@ -116,5 +151,130 @@ void tSceneGuitar::origGlow(int n)
 		s += 0.2;
 	}
 	glPopMatrix();
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+// to fix...
+void tSceneGuitar::rfFlames2()
+{
+	int i,j;
+	const int flameLimit = 10.0;
+	const int flameLimitHalf = flameLimit/2;
+    tPlayer &pp=player[cplayer];
+	int evfc=0; //event.flameCount
+    GLfloat sang=60;
+    glBlendFunc(GL_ONE, GL_ONE);
+    MESSAGE("\n");
+    for (i=pp.crtnote-1; i>=0; i--)
+	{
+		MESSAGE(".");
+		int nts=cnotes[0][i].timestamp;
+		if (timenow-nts>100000) break;
+		if (pp.history[i]!=2) continue;
+		MESSAGE(">");
+		for (j=0; j<5; j++) 
+		{
+			char ch=cnotes[0][i].stat[cdifficulty*12+j];
+			if (ch!='O' && ch!='B') continue;
+			MESSAGE("%d" &j);
+			//int tev=player[cplayer].timelastgood[i];
+			int mult;
+			GLfloat mx,x,y,ff;
+			GLfloat flameColor[3];
+			GLfloat flameSize;
+			ms = sin(timenow/44) * .25 + 1;
+			
+			x  = j-2; // (self.strings / 2 - event.number) * w
+			ff = 1.25;
+			y = -boardline; //-ff / 6; //v + 
+			
+			flameSize = (10-9/(3+pp.streak))*((timenow-nts)/10000000.0);
+			
+			mult=pp.streak/10;
+			if (mult>3) mult=3;
+			flameColor[0] = keycolors[mult][0]; // ev.number
+			flameColor[1] = keycolors[mult][1]; 
+			flameColor[2] = keycolors[mult][2]; 
+			
+			ff += 1.5;
+			if (i < flameLimitHalf)
+			{
+				glColor3f(flameColor[0], flameColor[1], flameColor[2]);
+				glPushMatrix();
+				glTranslatef(x, y + .20, 0);
+				glRotatef(sang, 1, 0, 0);
+				glScalef(.25 + .6 * ms * ff, evfc/6.0 + .6 * ms * ff, evfc / 6.0 + .6 * ms * ff);
+				glScalef(flameSize *ff, flameSize *ff, 1);
+				spc.hitf2.draw3d();
+				glPopMatrix();
+
+				glPushMatrix();
+				glTranslatef(x - .005, y + .25 + .005, 0);
+				glRotatef(sang, 1, 0, 0);
+				glScalef(.30 + .6 * ms * ff, (evfc + 1) / 5.5 + .6 * ms * ff, (evfc + 1) / 5.5 + .6 * ms * ff);
+				glScalef(flameSize *ff, flameSize *ff, 1);
+				spc.hitf2.draw3d();
+				glPopMatrix();
+
+				glPushMatrix();
+				glTranslatef(x+.005, y +.25 +.005, 0);
+				glRotatef(sang, 1, 0, 0);
+				glScalef(.35 + .6 * ms * ff, (evfc + 1) / 5.0 + .6 * ms * ff, (evfc + 1) / 5.0 + .6 * ms * ff);
+				glScalef(flameSize *ff, flameSize *ff, 1);
+				spc.hitf2.draw3d();
+				glPopMatrix();	  
+
+				glPushMatrix();
+				glTranslatef(x, y +.25 +.005, 0);
+				glRotatef(sang, 1, 0, 0);
+				glScalef(.40 + .6 * ms * ff, (evfc + 1)/ 4.7 + .6 * ms * ff, (evfc + 1) / 4.7 + .6 * ms * ff);
+				glScalef(flameSize *ff, flameSize *ff, 1);
+				spc.hitf2.draw3d();
+				glPopMatrix();
+			}
+			else
+			{
+				GLfloat flameColorMod0 = 0.1 * (flameLimit - evfc);
+				GLfloat flameColorMod1 = 0.1 * (flameLimit - evfc);
+				GLfloat flameColorMod2 = 0.1 * (flameLimit - evfc);
+
+				glColor3f(flameColor[0] * flameColorMod0, flameColor[1] * flameColorMod1, flameColor[2] * flameColorMod2);
+				glPushMatrix();
+				glTranslatef(x, y + .35, 0);
+				glRotatef(sang, 1, 0, 0);
+				glScalef(.25 + .6 * ms * ff, evfc / 3.0 + .6 * ms * ff, evfc / 3.0 + .6 * ms * ff);
+				glScalef(flameSize *ff, flameSize *ff, 1);
+				spc.hitf1.draw3d();
+				glPopMatrix();
+
+			
+				glPushMatrix();
+				glTranslatef(x - .005, y + .40 + .005, 0);
+				glRotatef(sang, 1, 0, 0);
+				glScalef(.30 + .6 * ms * ff, (evfc + 1)/ 2.5 + .6 * ms * ff, (evfc + 1) / 2.5 + .6 * ms * ff);
+				glScalef(flameSize *ff, flameSize *ff, 1);
+				spc.hitf1.draw3d();
+				glPopMatrix(); 
+
+
+				glPushMatrix();
+				glTranslatef(x + .005, y + .35 + .005, 0);
+				glRotatef(sang, 1, 0, 0);
+				glScalef(.35 + .6 * ms * ff, (evfc + 1) / 2.0 + .6 * ms * ff, (evfc + 1) / 2.0 + .6 * ms * ff);
+				glScalef(flameSize *ff, flameSize *ff, 1);
+				spc.hitf1.draw3d();
+				glPopMatrix(); 
+
+
+				glPushMatrix();
+				glTranslatef(x+.005, y +.35 +.005, 0);
+				glRotatef(sang, 1, 0, 0);
+				glScalef(.40 + .6 * ms * ff, (evfc + 1) / 1.7 + .6 * ms * ff, (evfc + 1) / 1.7 + .6 * ms * ff);
+				glScalef(flameSize *ff, flameSize *ff, 1);
+				spc.hitf1.draw3d();
+				glPopMatrix(); 
+			}
+		}
+	}
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

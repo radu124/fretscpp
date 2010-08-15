@@ -1,0 +1,83 @@
+/*******************************************************************
+(C) 2010 by Radu Stefan
+radu124@gmail.com
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+*******************************************************************/  
+
+interface
+
+uses includes, scene, scnTable, midiparser;
+
+class tScnScore:public sceneBase
+{
+public:
+	tScnScore() { scenes.add(this,SCN_SCORE); }
+	GLfloat fadespeed() { return 1; }
+	void enter();
+	void render();
+	void handleevent(SDL_Event &a);
+} SCNScore;
+
+implementation
+
+uses sprites, scnTable, globals;
+
+void tScnScore::enter()
+{
+	
+}
+
+void tScnScore::render()
+{
+	char a[128];
+	paintrotback();
+	int percentage=100;
+	if (player[0].notetotal>0) percentage=player[0].notegood*100/player[0].notetotal;
+	glLoadIdentity();
+	glColor4f(1.0,1.0,1.0,1.0);
+	sprintf(a,"%d/%d (%d%%)",player[0].notegood,player[0].notetotal,percentage);
+	if (player[0].notegood+player[0].notexmiss!=player[0].notetotal)
+	{
+		sprintf(a+strlen(a)," and %d extra misses",player[0].notexmiss);
+	}
+	deffont.displayString(a,20,20,20,0);
+	sprintf(a,"%d points",player[0].score);
+	deffont.displayString(a,40,40,20,0);
+	sprintf(a,"name: %s",player[0].name.c_str());
+	deffont.displayString(a,20,60,20,0);
+}
+
+void tScnScore::handleevent(SDL_Event &a)
+{
+	if (a.type==SDL_KEYDOWN) 
+	{
+		int ch=a.key.keysym.sym;
+		if (ch==SDLK_ESCAPE || ch==SDLK_RETURN)
+		{
+			FILE *scf=fopen("scores.txt","a");
+			fprintf(scf,"%d %d %s %s\n",
+				player[0].notegood, player[0].score, 
+				player[0].name.c_str(), globals::selectedsong.c_str());
+			fclose(scf);
+			fadetoscene(SCN_SONGS);
+			return;
+		}
+		if (isalnum(ch) || ch=='.')
+		{
+			if (player[0].name.size()<16) player[0].name+=(char) ch;
+		}
+		if (ch==SDLK_BACKSPACE)
+		{
+			int q=player[0].name.size();
+			if (q>0) player[0].name=player[0].name.substr(0,q-1);
+		}
+	}
+}

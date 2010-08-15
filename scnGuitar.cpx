@@ -1,3 +1,17 @@
+/*******************************************************************
+(C) 2010 by Radu Stefan
+radu124@gmail.com
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+*******************************************************************/  
+
 interface
 
 class tSceneGuitar:public tScnMenuBase
@@ -28,9 +42,11 @@ public:
 	void renderStats();
 	void renderFlame(int col, GLfloat sz);
 	void renderFlames();
+	void renderMultiplier();
 	void noteRegion();
 	void origGlow(int n);
 	void rfFlame(int n, GLfloat sz);
+	void rfFlames2();
 	int menumode;
 	void itemClicked(int i);
 	GLfloat notePos(int timestamp);
@@ -50,8 +66,16 @@ uses audio,player,globals,sgFlames,sgNeck,sgNotes,sgKeys;
 
 void tSceneGuitar::render()
 {
+//	fprintf(stderr,"P%d:S%d:E%d:Pl%d %d/%d-%d-%d--%d-%d-%d\n",playing.pause,playing.stalled,playing.songended,playing.playing,playing.playpos,
+//		playing.stopsat[0],playing.stopsat[1],playing.stopsat[2],playing.decodepos[0],playing.decodepos[1],playing.decodepos[2]);
+		
+	if (playing.songended) 
+	{	
+		fadetoscene(SCN_SCORE);
+		MESSAGE("SONGENDED");
+	}
 	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
-	glClear( GL_COLOR_BUFFER_BIT );	
+	glClear( GL_COLOR_BUFFER_BIT );
 	timenow=playing.playpos;
 	for (cplayer=0; cplayer<1; cplayer++)
 	{
@@ -66,6 +90,7 @@ void tSceneGuitar::render()
 		renderKeys();
 		renderNotes();
 		renderFlames();
+		renderMultiplier();
 		scene_setOrtho();
 	}
 	
@@ -102,6 +127,7 @@ void tSceneGuitar::init()
 	additem("Return to Song");
 	additem("Restart Song");
 	additem("Change Song");
+	additem("End Song");
 	additem("Settings");
 	additem("Quit to Main Menu");
 	menumode=1;
@@ -110,7 +136,7 @@ void tSceneGuitar::init()
 	scale=globals::scr_height*0.04;
 	tScnMenuBase::init();
 	viewOffset=0;
-	viewSize=5;
+	viewSize=6;
 	
 	boardlen=4;
 	boardline=3;
@@ -119,12 +145,14 @@ void tSceneGuitar::init()
 
 void tSceneGuitar::renderStats()
 {
-	char a[32];
+	char a[256];
 	player[0].passtime();
-	sprintf(a,"%d %s",player[0].streak,player[0].dbg.c_str());
 	glLoadIdentity();
 	glColor4f(1.0,1.0,1.0,1.0);
+	sprintf(a,"streak: %d",player[0].streak);
 	deffont.displayString(a,20,20,20,0);
+	sprintf(a,"score: %d",player[0].score);
+	deffont.displayString(a,20,40,20,0);
 }
 
 void tSceneGuitar::handleevent(SDL_Event &a)
@@ -142,23 +170,23 @@ void tSceneGuitar::handleevent(SDL_Event &a)
 	else {
 		if (a.type==SDL_KEYDOWN) switch (a.key.keysym.sym)
 		{
-			case SDLK_F1: player[0].lastkeys[0]=1; player[0].hitactive=0; break;
-			case SDLK_F2: player[0].lastkeys[1]=1; player[0].hitactive=0; break;
-			case SDLK_F3: player[0].lastkeys[2]=1; player[0].hitactive=0; break;
-			case SDLK_F4: player[0].lastkeys[3]=1; player[0].hitactive=0; break;
-			case SDLK_F5: player[0].lastkeys[4]=1; player[0].hitactive=0; break;
-			case SDLK_RETURN: player[0].lastkeys[5]=1; player[0].handlehit(); break;
-			case SDLK_RSHIFT: player[0].lastkeys[5]=1; player[0].handlehit(); break;
+			case SDLK_F1: player[0].presskey(0); break;
+			case SDLK_F2: player[0].presskey(1); break;
+			case SDLK_F3: player[0].presskey(2); break;
+			case SDLK_F4: player[0].presskey(3); break;
+			case SDLK_F5: player[0].presskey(4); break;
+			case SDLK_RETURN: player[0].presskey(5); break;
+			case SDLK_RSHIFT: player[0].presskey(5); break;
 		}
 		if (a.type==SDL_KEYUP) switch (a.key.keysym.sym)
 		{
-			case SDLK_F1: player[0].lastkeys[0]=0; player[0].hitactive=0; break;
-			case SDLK_F2: player[0].lastkeys[1]=0; player[0].hitactive=0; break;
-			case SDLK_F3: player[0].lastkeys[2]=0; player[0].hitactive=0; break;
-			case SDLK_F4: player[0].lastkeys[3]=0; player[0].hitactive=0; break;
-			case SDLK_F5: player[0].lastkeys[4]=0; player[0].hitactive=0; break;
-			case SDLK_RETURN: player[0].lastkeys[5]=0; break;
-			case SDLK_RSHIFT: player[0].lastkeys[5]=0; break;
+			case SDLK_F1: player[0].releasekey(0); break;
+			case SDLK_F2: player[0].releasekey(1); break;
+			case SDLK_F3: player[0].releasekey(2); break;
+			case SDLK_F4: player[0].releasekey(3); break;
+			case SDLK_F5: player[0].releasekey(4); break;
+			case SDLK_RETURN: player[0].releasekey(5); break;
+			case SDLK_RSHIFT: player[0].releasekey(5); break;
 		}
 	}
 }
@@ -177,9 +205,12 @@ void tSceneGuitar::itemClicked(int i)
 	case 2: // change song
 		fadetoscene(SCN_SONGS);
 		return;
-	case 3: // settings
+	case 3: // change song
+		fadetoscene(SCN_SCORE);
 		return;
-	case 4: // main menu
+	case 4: // settings
+		return;
+	case 5: // main menu
 		fadetoscene(SCN_MAINMENU);
 		return;
 	}

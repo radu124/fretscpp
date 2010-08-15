@@ -1,3 +1,17 @@
+/*******************************************************************
+(C) 2010 by Radu Stefan
+radu124@gmail.com
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+*******************************************************************/  
+  
 interface
 
 void init_audio();
@@ -37,18 +51,22 @@ struct tPlaying
 	volatile int gp0;
 	volatile int playpos;
 	volatile int decodepos[3];
+	volatile int stopsat[3];
+	volatile int sisopen[3];
 	volatile int refreshsong;
 	volatile int loopsong;
 	volatile int playing;
 	volatile int pause;
 	volatile int songstarted;
+	volatile int stalled;
+	volatile int songended;
 	int ogg_bs[3];
 	int decode_lasttime;
 	int decode_ticks;
+	
 	OggVorbis_File ov_song;
 	OggVorbis_File ov_rhythm;
 	OggVorbis_File ov_guitar;
-	volatile int ov_openflags;
 	
 	int16_t buffer[6][SONG_BUFFER_SIZE];
 	char songname[2048];
@@ -85,23 +103,35 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 {
 	int i,da,db,dc;
 	int16_t *streamS=(int16_t *) stream;
-	int ov_of=playing.ov_openflags;
-	int pos=playing.playpos%SONG_BUFFER_SIZE;
+	int poslong=playing.playpos;
+	int pos=poslong%SONG_BUFFER_SIZE;
 	callbacklen=len;
 	//if (effects.len[0])
-	da=playing.decodepos[0]; if (!(ov_of &1)) da=playing.playpos+SONG_STARTAFTER+1;
-	db=playing.decodepos[1]; if (!(ov_of &2)) db=playing.playpos+SONG_STARTAFTER+1;
-	dc=playing.decodepos[2]; if (!(ov_of &4)) dc=playing.playpos+SONG_STARTAFTER+1;
+	da=playing.decodepos[0]; 
+	db=playing.decodepos[1]; 
+	dc=playing.decodepos[2]; 
 	int decodebtm=min3(da,db,dc);
-	if (!playing.playing && decodebtm>playing.playpos+SONG_STARTAFTER) playing.playing=1;
-	if (!ov_of) playing.playing=0;
-	int en_play=(playing.playing && decodebtm>playing.playpos+len/4);
-	if (!en_play) 
+	if (playing.stalled && decodebtm>playing.playpos+SONG_STARTAFTER) 
+	{
+		playing.playing=1;
+		playing.stalled=0;
+		DBG(AUDIO,"unstalled\n");
+	}
+	if (poslong>playing.stopsat[0] && poslong>playing.stopsat[1] && poslong>playing.stopsat[2])
 	{
 		playing.playing=0;
-		DBG(AUDIO,"P\n");
+		playing.songended=1;
 	}
+	//MESSAGE("A:%d %d %d\n" &pos &playing.stopsat[0] &playing.songended);
+	if (playing.playing && decodebtm<playing.playpos+len/4)
+	{
+		playing.stalled=1;
+		playing.playing=0;
+		DBG(AUDIO,"stalled\n");
+	}
+	int en_play=(playing.playing);
 	int vol1, vol2, vol3;
+	
 	int16_t *effs[8];
 	int16_t *eff0=NULL;
 	int16_t *eff1=NULL;
@@ -109,9 +139,6 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 	int vole1=85;
 	vol1=vol2=85;
 	vol3=playing.gp0*200+20;
-	if (!(ov_of &1)) vol1=0;
-	if (!(ov_of &2)) vol2=0;
-	if (!(ov_of &4)) vol3=0;
 	
 	for (i=0; i<8; i++)
 	{
@@ -136,6 +163,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 		&(-playing.playpos+playing.decodepos[2])
 		);
 	*/
+	//MESSAGE("%d\n" &en_play);
 	if (playing.pause) en_play=0;
 	for (i=0; i<len/4; i++)
 	{
@@ -200,6 +228,7 @@ int16_t interpolate(int16_t *buf, int pos, int chn=1)
 
 int load_effects(const char *fn)
 {
+	int padding=BUF_SIZE;
 	int16_t buf[4112];
 	int bs=0;
 	int i,j,v;
@@ -245,9 +274,10 @@ int load_effects(const char *fn)
 		buf[0]=buf[samples];
 		buf[1]=buf[samples+1];
 	}
-	dorealloc(effects.data[cnt],pos);
+	dorealloc(effects.data[cnt],pos+padding);
+	for (i=0; i<padding; i++) effects.data[i+pos]=0;
 	INFO(AUDIO,"Loaded effect, len=%d\n" &pos);
-	effects.len[cnt]=pos;
+	effects.len[cnt]=pos+padding;
 	ov_clear(&vf);
 	return ++effects.count;
 }
@@ -272,19 +302,26 @@ void tPlaying::close_song()
 {
 	decodepos[0]=decodepos[1]=decodepos[2]=0;
 	playing=0;
-	if (ov_openflags & 1) ov_clear(&ov_song);
-	if (ov_openflags & 2) ov_clear(&ov_rhythm);
-	if (ov_openflags & 4) ov_clear(&ov_guitar);
-	ov_openflags=0;
+	close_ovfile(0,&ov_song);
+	close_ovfile(1,&ov_rhythm);
+	close_ovfile(2,&ov_guitar);
 }
 
 void tPlaying::open_song()
 {
+	// use char arrays here for thread safety reasons
 	char namelocal[2148];
+	int i;
 	strncpy(namelocal,songname,2048);
 	namelocal[2048]=0;
-	decodepos[0]=decodepos[1]=decodepos[2]=0;
-	ogg_bs[0]=ogg_bs[1]=ogg_bs[2]=0;
+	for (i=0; i<3; i++)
+	{
+		decodepos[i]=0;
+		ogg_bs[i]=0;
+		sisopen[i]=0;
+		// zero length by default
+		stopsat[i]=0;
+	}
 	SDL_LockAudio();
 	playpos=0;
 	pause=0;
@@ -293,15 +330,21 @@ void tPlaying::open_song()
 	int l=strlen(namelocal);
 	if (!l) return;
 	if (namelocal[l-1]=='/') strcat(namelocal,"song.ogg");
-	if (ov_fopen(namelocal, &ov_song) >=0) ov_openflags |= 1;
-	if (namelocal[l-1]!='/') return;
-	namelocal[l]=0;
-	strcat(namelocal,"rhythm.ogg");
-	if (ov_fopen(namelocal, &ov_rhythm) >=0) ov_openflags |= 2;
-	namelocal[l]=0;
-	strcat(namelocal,"guitar.ogg");
-	if (ov_fopen(namelocal, &ov_guitar) >=0) ov_openflags |= 4;
-	
+	if (ov_fopen(namelocal, &ov_song) >=0) { sisopen[0]=1; stopsat[0]=1000000000; }
+	if (namelocal[l-1]=='/')
+	{
+		namelocal[l]=0;
+		strcat(namelocal,"rhythm.ogg");
+		if (ov_fopen(namelocal, &ov_rhythm) >=0) { sisopen[1]=1; stopsat[1]=1000000000; }
+		namelocal[l]=0;
+		strcat(namelocal,"guitar.ogg");
+		if (ov_fopen(namelocal, &ov_guitar) >=0) { sisopen[2]=1; stopsat[2]=1000000000; }
+	}
+	// we do this here, otherwise the
+	// callback might clear them if stopsat[]
+	// is not yet initialized
+	songended=0;	
+	stalled=1;
 }
 
 int tPlaying::decode(int idx, OggVorbis_File *ovf)
@@ -318,9 +361,29 @@ int tPlaying::decode(int idx, OggVorbis_File *ovf)
 	int pos=decodepos[idx];
 	while (target>0)
 	{
+		if (!sisopen[idx])
+		{
+			// when song is not open, just fill with zeros
+			// this may be wasteful, but it's not going to be
+			// any slower than actually decoding the song
+			for (i=0; i<target; i++)
+			{
+				buffer[idx*2  ][pos%SONG_BUFFER_SIZE]=0;
+				buffer[idx*2+1][pos%SONG_BUFFER_SIZE]=0;
+				pos++;
+			}
+			decodepos[idx]=pos;
+			target=0;
+			break;
+		}
 		int ret=ov_read(ovf,(char *)buf,8192,0,2,1,&ogg_bs[idx]);
-		if (!ret) return 1;
-		
+		if (!ret) 
+		{
+			stopsat[idx]=pos;
+			sisopen[idx]=0;
+			close_ovfile(1,ovf);
+			continue;
+		}
 		int locchn=ov_info(ovf,-1)->channels;
 		int locrate=ov_info(ovf,-1)->rate;
 		int samples=ret/2/locchn;
@@ -339,10 +402,11 @@ int tPlaying::decode(int idx, OggVorbis_File *ovf)
 	return 0;
 }
 
-void tPlaying::close_ovfile(int mask, OggVorbis_File *ovf)
+void tPlaying::close_ovfile(int id, OggVorbis_File *ovf)
 {
+	if (!sisopen[id]) return;
+	sisopen[id]=0;
 	ov_clear(ovf);
-	ov_openflags &= ~mask;
 }
 
 void tPlaying::some_predecode()
@@ -351,9 +415,9 @@ void tPlaying::some_predecode()
 	decode_ticks=thistime-decode_lasttime;
 	if (decode_ticks>500) decode_ticks=500;
 	decode_lasttime=thistime;
-	if (ov_openflags & 1) if (decode(0,&ov_song)) close_ovfile(1,&ov_song);
-	if (ov_openflags & 2) if (decode(1,&ov_rhythm)) close_ovfile(2,&ov_rhythm);
-	if (ov_openflags & 4) if (decode(2,&ov_guitar)) close_ovfile(4,&ov_guitar);
+	decode(0,&ov_song);
+	decode(1,&ov_rhythm);
+	decode(2,&ov_guitar);
 }
 
 void audio_yield()
@@ -364,7 +428,7 @@ void audio_yield()
 		if (playing.songname[0]) playing.open_song();
 		playing.refreshsong=0;
 	}
-	if (playing.ov_openflags) playing.some_predecode();
+	playing.some_predecode();
 }
 
 double song_time()
