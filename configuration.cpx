@@ -28,7 +28,7 @@ int read_config()
 	if (!fc) return 0;
 	fscanf(fc,"%s\n",a);
 	//currently very dumb
-	MESSAGE("%s" &a);
+	//MESSAGE("%s" &a);
 	fscanf(fc,"%d", &numkeys);
 	config::keys.resize(0);
 	config::kcname.resize(0);

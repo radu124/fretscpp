@@ -173,8 +173,20 @@ GLfloat fadespeed(int scene)
 
 void scenehandleevent(SDL_Event &event)
 {
+	SDL_Event e=event;
+	// perform translation before sending to scene
+	if (e.type==SDL_JOYBUTTONDOWN)
+	{
+		e.type=SDL_KEYDOWN;
+		e.key.keysym.sym=(SDLKey) (1000000+256*e.jbutton.which+e.jbutton.button);
+	}
+	if (e.type==SDL_JOYBUTTONUP)
+	{
+		e.type=SDL_KEYUP;
+		e.key.keysym.sym=(SDLKey) (1000000+256*e.jbutton.which+e.jbutton.button);
+	}
 	if (!scenes[scn.current]) return;
-	scenes[scn.current]->handleevent(event);
+	scenes[scn.current]->handleevent(e);
 }
 
 void renderscene()

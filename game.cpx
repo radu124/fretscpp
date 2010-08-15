@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 *******************************************************************/  
   
-uses includes, utils, font, sprites, globals, scnMainMenu, scnGuitar, scnKeydef, scene, audio, midiparser, verbosity;
+uses includes, utils, font, sprites, globals, scnMainMenu, scnGuitar, scnKeydef, scene, audio, midiparser, verbosity, joystick;
 
 void drawglstuff()
 {
@@ -37,7 +37,7 @@ int main( int argc, char* argv[] )
 	SDL_WM_SetCaption("Frets-on-fire-CPP", "SDL");
 	/* create window */
 	SDL_Surface* screen = SDL_SetVideoMode(globals::scr_width, globals::scr_height, 0, SDL_OPENGL);
-
+	init_joysticks();
 	glEnable( GL_TEXTURE_2D );
 	glEnable (GL_BLEND); 
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -118,6 +118,7 @@ int main( int argc, char* argv[] )
 	/* cleanup SDL */
 	SDL_Quit();
 	write_config();
+	done_joysticks();
 	//DBG(GAME,"CBK=%d F:%d Fo:%d chn:%d buf%d\n",
 	//	callbacklen,desired.format, obtained.format, obtained.channels, obtained.samples);
 	return 0;

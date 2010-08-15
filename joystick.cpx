@@ -1,0 +1,28 @@
+interface
+
+void init_joysticks();
+void done_joysticks();
+
+int num_joysticks;
+vector<SDL_Joystick *> joysticks;
+implementation
+
+void init_joysticks()
+{
+	int i;
+	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+	num_joysticks=SDL_NumJoysticks();
+	MESSAGE("Joysticks: %d\n" &num_joysticks);
+	for (i=0; i<num_joysticks; i++)
+	{
+		joysticks.push_back(SDL_JoystickOpen(i));
+	}
+	SDL_JoystickEventState(SDL_ENABLE);
+}
+
+void done_joysticks()
+{
+	int i;
+	for (i=0; i<joysticks.size(); i++)
+		if (joysticks[i]) SDL_JoystickClose(joysticks[i]);
+}

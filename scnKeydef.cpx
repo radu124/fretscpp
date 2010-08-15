@@ -30,6 +30,14 @@ implementation
 
 uses sprites, scnTable, globals;
 
+string keyname(int id)
+{
+	char a[32];
+	if (id<1000000) return SDL_GetKeyName((SDLKey) id);
+	sprintf(a,"Joy #%d %c",(id-1000000)/256,'a'+(id-1000000)%256);
+	return a;
+}
+
 void tScnKeydef::enter()
 {
 	int res,i,j;
@@ -53,7 +61,7 @@ void tScnKeydef::enter()
 		additem("");
 		additem("ODefine all");
 		for (j=0; j<8; j++)
-			additem(string("O")+SDL_GetKeyName((SDLKey) config::keys[i][j]));
+			additem(string("O")+keyname(config::keys[i][j]));
 	}
 	newcol();
 	additem("OAdd New");
@@ -65,13 +73,16 @@ void tScnKeydef::enter()
 
 void tScnKeydef::handleevent(SDL_Event &a)
 {
+	int evt=a.type;
+	int ch=a.key.keysym.sym;
+	
 	if (!redefining)
 	{
 		tScnTable::handleevent(a);
 		return;
 	}
-	if (a.type!=SDL_KEYDOWN) return;
-	int ch=a.key.keysym.sym;
+	
+	if (evt!=SDL_KEYDOWN) return;
 	if (ch==SDLK_ESCAPE)
 	{
 		redefining=0;
@@ -79,7 +90,7 @@ void tScnKeydef::handleevent(SDL_Event &a)
 		return;
 	}
 	config::keys[selx-1][sely-3]=ch;
-	entries[selx][sely]=string("O")+SDL_GetKeyName((SDLKey) config::keys[selx-1][sely-3]);
+	entries[selx][sely]=string("O")+keyname(ch);
 	if (redefining==1 || sely==10) redefining=0;
 	else {
 		sely++;
