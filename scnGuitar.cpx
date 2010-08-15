@@ -44,6 +44,7 @@ public:
 	void renderFlame(int col, GLfloat sz);
 	void renderFlames();
 	void renderMultiplier();
+	void renderMultiplierVal();
 	void noteRegion();
 	void origGlow(int n);
 	void rfFlame(int n, GLfloat sz);
@@ -63,7 +64,7 @@ GLfloat keycolors[5][3]={
 
 implementation
 
-uses audio,player,keyboard,globals,sgFlames,sgNeck,sgNotes,sgKeys;
+uses audio,player,keyboard,globals,sgFlames,sgNeck,sgNotes,sgKeys,sgStats;
 
 void tSceneGuitar::render()
 {
@@ -93,9 +94,10 @@ void tSceneGuitar::render()
 		renderFlames();
 		renderMultiplier();
 		scene_setOrtho();
+		renderMultiplierVal();
+		renderStats();
 	}
 	
-	renderStats();
 	if (menumode)
 	{
 		glLoadIdentity();
@@ -143,27 +145,6 @@ void tSceneGuitar::init()
 	boardlen=4;
 	boardline=3;
 	necktop=2;
-}
-
-void tSceneGuitar::renderStats()
-{
-	char a[256];
-	player[0].passtime();
-	glLoadIdentity();
-	glColor4f(1.0,1.0,1.0,1.0);
-	sprintf(a,"streak: %d",player[0].streak);
-	deffont.displayString(a,20,20,20,0);
-	sprintf(a,"score: %d",player[0].score);
-	deffont.displayString(a,20,40,20,0);
-	if (statsmode==1)
-	{
-		sprintf(a,"playing: %d",playing.playpos);
-		deffont.displayString(a,20,80,20,0);
-		sprintf(a,"decode: %d-%d-%d",playing.decodepos[0],playing.decodepos[1],playing.decodepos[2]);
-		deffont.displayString(a,20,100,20,0);
-		sprintf(a,"stop: %d-%d-%d",playing.stopsat[0],playing.stopsat[1],playing.stopsat[2]);
-		deffont.displayString(a,20,120,20,0);
-	}
 }
 
 void tSceneGuitar::handleevent(SDL_Event &a)

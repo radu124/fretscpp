@@ -20,7 +20,9 @@ class tScnKeydef:public tScnTable
 {
 public:
 	tScnKeydef() { scenes.add(this,SCN_KEYDEF); }
+	int redefining;
 	void enter();
+	void handleevent(SDL_Event &a);
 	void itemClicked(int i, int j);
 } SCNKeyDef;
 
@@ -30,7 +32,8 @@ uses sprites, scnTable, globals;
 
 void tScnKeydef::enter()
 {
-	int res,i;
+	int res,i,j;
+	redefining=0;
 	makeempty();
 	additem("ODone");
 	additem("");
@@ -43,30 +46,15 @@ void tScnKeydef::enter()
 	additem("^Pick");
 	additem("^Alt Pick");
 	additem("^Whammy");
-	newcol();
-	additem("OKeyboard");
-	additem("");
-	additem("ODefine all");
-	additem("OF1");
-	additem("OF2");
-	additem("OF3");
-	additem("OF4");
-	additem("OF5");
-	additem("OEnter");
-	additem("ORShift");
-	additem("OTab");
-	newcol();
-	additem("OJoystick1");
-	additem("");
-	additem("ODefine all");
-	additem("Ojoy#1");
-	additem("Ojoy#2");
-	additem("Ojoy#3");
-	additem("Ojoy#4");
-	additem("Ojoy#5");
-	additem("Ojoy#6");
-	additem("Ojoy#7");
-	additem("Ojoy#8");
+	for (i=0; i<config::keys.size(); i++)
+	{
+		newcol();
+		additem(string("O")+config::kcname[i]);
+		additem("");
+		additem("ODefine all");
+		for (j=0; j<8; j++)
+			additem(string("O")+SDL_GetKeyName((SDLKey) config::keys[i][j]));
+	}
 	newcol();
 	additem("OAdd New");
 	fixedcols=1;
@@ -75,18 +63,69 @@ void tScnKeydef::enter()
 	optinit();
 }
 
+void tScnKeydef::handleevent(SDL_Event &a)
+{
+	if (!redefining)
+	{
+		tScnTable::handleevent(a);
+		return;
+	}
+	if (a.type!=SDL_KEYDOWN) return;
+	int ch=a.key.keysym.sym;
+	if (ch==SDLK_ESCAPE)
+	{
+		redefining=0;
+		entries[selx][sely]=string("O")+SDL_GetKeyName((SDLKey) config::keys[selx-1][sely-3]);
+		return;
+	}
+	config::keys[selx-1][sely-3]=ch;
+	entries[selx][sely]=string("O")+SDL_GetKeyName((SDLKey) config::keys[selx-1][sely-3]);
+	if (redefining==1 || sely==10) redefining=0;
+	else {
+		sely++;
+		entries[selx][sely]="O<press key>";
+	}
+}
+
 void tScnKeydef::itemClicked(int i, int j)
 {
+	int q;
 	if (j==-1)
 	{
 		fadetoscene(SCN_MAINMENU);
 		return;
 	}
-	if (j==0)
+	if (j==0 && i==0)
 	{
 		fadetoscene(SCN_MAINMENU);
 		return;
 	}
-	
+	if (j==0 && i==entries.size()-1)
+	{
+		opt[i].resize(11);
+		entries[i].resize(11);
+		opt[i][0]=opt[i][1]=opt[i][2]=0;
+		entries[i][0]="OAdded";
+		entries[i][1]="";
+		entries[i][2]="ODefine All";
+		config::kcname.push_back(entries[i][0].substr(1));
+		config::keys.push_back(vint());
+		for (q=0; q<8; q++)
+		{
+			entries[i][q+3]="O-";
+			config::keys.back().push_back(0);
+		}
+		newcol();
+		additem("OAdd New");
+	}
+	if (j<2) return;
+	if (j==2)
+	{
+		redefining=2;
+		sely++;
+	} else {
+		redefining=1;
+	}
+	entries[selx][sely]="O<press key>";
 }
 

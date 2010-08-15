@@ -20,18 +20,19 @@ uses scnGuitar,includes;
 
 void tSceneGuitar::renderMultiplier()
 {
-	if (timenow-player[0].timemultiplier<40000)
+	tPlayer &pp=player[cplayer];
+	if (timenow-pp.timemultiplier<40000)
 	{
-		GLfloat sv=(timenow-player[0].timemultiplier)/8000.0;
+		GLfloat sv=(timenow-pp.timemultiplier)/8000.0;
 		glPushMatrix();
 		glTranslatef(0, 2, 0);
 		glRotatef(60, 1, 0, 0);
 		glTranslatef(0, 1, 0);
 		glScalef(sv,sv,1);
 		
-		if (player[0].streak>=30) spc.m4.draw3d();
-		else if (player[0].streak>=20) spc.m3.draw3d();
-		else if (player[0].streak>=10) spc.m2.draw3d();
+		if (pp.streak>=30) spc.m4.draw3d();
+		else if (pp.streak>=20) spc.m3.draw3d();
+		else if (pp.streak>=10) spc.m2.draw3d();
 		glPopMatrix();
 	}
 }

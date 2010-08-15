@@ -26,7 +26,7 @@ public:
 	void enter();
 	void handleevent(SDL_Event &a);
 	virtual void itemClicked(int i, int j=0);
-	virtual void itemClickedSep(int k, int i, int j=0) {;}
+	virtual void itemClickedSep(int k, int i, int j, int &o) {;}
 	void additem(string s);
 	void selfix();
 	void optinit();
@@ -164,7 +164,7 @@ void tScnTable::itemClicked(int i, int j)
 	int q, k=0, ii=0;
 	if (i<0 || j<0)
 	{
-		itemClickedSep(-1,-1,-1);
+		itemClickedSep(-1,-1,-1,q);
 		return;
 	}
 	for (q=0; q<j && q<entries[i].size(); q++)
@@ -172,7 +172,7 @@ void tScnTable::itemClicked(int i, int j)
 		ii++;
 		if (entries[i][q]=="") { k++; ii=0; }
 	}
-	itemClickedSep(i,k,ii);
+	itemClickedSep(i,k,ii,opt[i][j]);
 }
 
 /**

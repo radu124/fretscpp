@@ -15,7 +15,7 @@ void guitarkey(int ev, int key)
 	{
 		for (q=0; q<2; q++)
 		{
-			if (q!=pl && globals::numplayers==2) continue;
+			if (!(config::keyselector[pl] & (1<<q))) continue;
 			int id=-1;
 			for (i=0; i<7; i++)
 			{

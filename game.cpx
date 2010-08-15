@@ -117,6 +117,7 @@ int main( int argc, char* argv[] )
 
 	/* cleanup SDL */
 	SDL_Quit();
+	write_config();
 	//DBG(GAME,"CBK=%d F:%d Fo:%d chn:%d buf%d\n",
 	//	callbacklen,desired.format, obtained.format, obtained.channels, obtained.samples);
 	return 0;

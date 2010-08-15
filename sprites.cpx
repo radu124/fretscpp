@@ -48,6 +48,7 @@ struct tsprites
 	sprite note[4][5];
 	sprite noteline;
 	static void unbind();
+	sprite guitar[8];
 } spc;
 
 implementation
@@ -153,5 +154,12 @@ void init_sprites()
 	spc.m2.load("data/2x.png",1);
 	spc.m3.load("data/3x.png",1);
 	spc.m4.load("data/4x.png",1);
-	
+	spc.guitar[0].load("data/guitar1ok.png");
+	spc.guitar[1].load("data/guitar1gs.png");
+	spc.guitar[2].load("data/guitar2ok.png");
+	spc.guitar[3].load("data/guitar2gs.png");
+	spc.guitar[4].load("data/guitar3ok.png");
+	spc.guitar[5].load("data/guitar3gs.png");
+	spc.guitar[6].load("data/guitar4ok.png");
+	spc.guitar[7].load("data/guitar4gs.png");
 }

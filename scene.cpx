@@ -91,6 +91,12 @@ void scene_setOrtho()
 	glLoadIdentity();
 }
 
+GLfloat sskewmatrix[16]={
+	1,0,0,0,
+	0,1,0,0,
+	0,0,1,0,
+	0,0,0,1};
+
 void scene_setNeck(int i)
 {
 	glMatrixMode(GL_PROJECTION);
@@ -110,6 +116,12 @@ void scene_setNeck(int i)
 	{
 		glTranslatef(-1.5+3*i,0,0);
 		glScalef(0.5,0.7,1);
+		sskewmatrix[4]=-0.4+i*0.8;
+		sskewmatrix[12]=i*3-1.5;
+		sskewmatrix[8]=0.1-0.2*i;
+		// ok, there are more ways of doing it, i like it like this
+		//sskewmatrix[8]=0.8-1.6*i;
+		glMultMatrixf(sskewmatrix);
 	}
 }
 

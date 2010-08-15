@@ -28,7 +28,8 @@ public:
 	int getDifficulty(int i);
 	void selInstrument(int i, int j=-1);
 	void selDifficulty(int i, int j=-1);
-	void itemClickedSep(int i, int k, int j);
+	void itemClickedSep(int i, int k, int j, int &o);
+	void setKeySels(int i);
 	string lastInstr[2];
 	int lastDiffi[2];
 	int lastP2controller;
@@ -36,7 +37,7 @@ public:
 
 implementation
 
-uses sprites, scnTable, globals, player;
+uses sprites, scnTable, globals, player, configuration;
 
 void tScnSetSongOpt::enableDisableMulti()
 {
@@ -48,6 +49,7 @@ void tScnSetSongOpt::enableDisableMulti()
 			opt[1][i]=0;
 		opt[1][0]=1;
 		selInstrument(1);
+		setKeySels(1);
 	} else {
 		globals::numplayers=1;
 		for (i=1; i<opt[1].size(); i++)
@@ -141,18 +143,28 @@ void tScnSetSongOpt::enter()
 	additem("AHard");
 	additem("");
 	additem("|Controller:");
-	additem("CKeyboard1");
-	additem("CGuitar1");
-	
+	for (i=0; i<config::keys.size(); i++)
+	{
+		additem(string("C")+config::kcname[i]);
+	}
 	dupcol();
 	entries[1][0]="OPlayer 2";
 	optinit();
+	setKeySels(0);
 	globals::numplayers=3-globals::numplayers;
 	enableDisableMulti();
 	selInstrument(0);
 }
 
-void tScnSetSongOpt::itemClickedSep(int i, int k, int j)
+void tScnSetSongOpt::setKeySels(int i)
+{
+	int j,q;
+	int base=groupStart(i,3);
+	for (j=0; j<config::keys.size(); j++)
+		opt[i][base+1+j]=(config::keyselector[i] & (1<<j))!=0;
+}
+
+void tScnSetSongOpt::itemClickedSep(int i, int k, int j, int &o)
 {
 	DBG(SCNSONGOPT,"SEPclick %d %d %d\n" &i &k &j);
 	
@@ -180,6 +192,12 @@ void tScnSetSongOpt::itemClickedSep(int i, int k, int j)
 	{
 		selDifficulty(i,j);
 		return;
+	}
+	if (k==3)
+	{
+		MESSAGE("%d \n"&o);
+		if (o) config::keyselector[i] |= (1<<(j-1));
+		else config::keyselector[1] &= ~(1<<(j-1));
 	}
 }
 
