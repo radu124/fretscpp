@@ -127,7 +127,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 		playing.stalled=0;
 		DBG(AUDIO,"unstalled\n");
 	}
-	if (poslong>playing.stopsat[0] && poslong>playing.stopsat[1] && poslong>playing.stopsat[2])
+	if (poslong>playing.stopsat[0] && poslong>playing.stopsat[2])
 	{
 		playing.playing=0;
 		playing.songended=1;
