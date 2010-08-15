@@ -21,6 +21,7 @@ class tScnScore:public sceneBase
 public:
 	tScnScore() { scenes.add(this,SCN_SCORE); }
 	GLfloat fadespeed() { return 1; }
+	int editing;
 	void enter();
 	void render();
 	void handleevent(SDL_Event &a);
@@ -32,7 +33,7 @@ uses sprites, scnTable, globals;
 
 void tScnScore::enter()
 {
-	
+	editing=0;
 }
 
 void tScnScore::render()
@@ -40,19 +41,27 @@ void tScnScore::render()
 	char a[128];
 	paintrotback();
 	int percentage=100;
-	if (player[0].notetotal>0) percentage=player[0].notegood*100/player[0].notetotal;
-	glLoadIdentity();
-	glColor4f(1.0,1.0,1.0,1.0);
-	sprintf(a,"%d/%d (%d%%)",player[0].notegood,player[0].notetotal,percentage);
-	if (player[0].notegood+player[0].notexmiss!=player[0].notetotal)
+	int i;
+	for (i=0; i<globals::numplayers; i++)
 	{
-		sprintf(a+strlen(a)," and %d extra misses",player[0].notexmiss);
+		tPlayer &pp=player[i];
+		
+		if (pp.notetotal>0) percentage=pp.notegood*100/pp.notetotal;
+		glLoadIdentity();
+		glColor4f(1.0,1.0,1.0,1.0);
+		sprintf(a,"%d/%d (%d%%)",pp.notegood,pp.notetotal,percentage);
+		if (pp.notegood==pp.notetotal && player[0].notexmiss)
+		{
+			sprintf(a+strlen(a)," and %d extra misses",player[0].notexmiss);
+		}
+		deffont.displayString(a,20+i*w/2,20,20,0);
+		sprintf(a,"%d points",pp.score);
+		deffont.displayString(a,40+i*w/2,40,20,0);
+		string s=pp.name;
+		if (i==editing && (((int) (scn.time*2))&1)) s+='_';
+		sprintf(a,"name: %s",s.c_str());
+		deffont.displayString(a,20+i*w/2,60,20,0);
 	}
-	deffont.displayString(a,20,20,20,0);
-	sprintf(a,"%d points",player[0].score);
-	deffont.displayString(a,40,40,20,0);
-	sprintf(a,"name: %s",player[0].name.c_str());
-	deffont.displayString(a,20,60,20,0);
 }
 
 void tScnScore::handleevent(SDL_Event &a)
@@ -67,17 +76,22 @@ void tScnScore::handleevent(SDL_Event &a)
 				player[0].notegood, player[0].score, 
 				player[0].name.c_str(), globals::selectedsong.c_str());
 			fclose(scf);
+			editing=-1;
 			fadetoscene(SCN_SONGS);
 			return;
 		}
-		if (isalnum(ch) || ch=='.')
+		if (editing>=0)
 		{
-			if (player[0].name.size()<16) player[0].name+=(char) ch;
-		}
-		if (ch==SDLK_BACKSPACE)
-		{
-			int q=player[0].name.size();
-			if (q>0) player[0].name=player[0].name.substr(0,q-1);
+			if (ch==SDLK_TAB) editing=(editing+1)%globals::numplayers;
+			if (isalnum(ch) || ch=='.')
+			{
+				if (player[editing].name.size()<16) player[editing].name+=(char) ch;
+			}
+			if (ch==SDLK_BACKSPACE)
+			{
+				int q=player[editing].name.size();
+				if (q>0) player[editing].name=player[editing].name.substr(0,q-1);
+			}
 		}
 	}
 }

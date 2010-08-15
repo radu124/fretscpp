@@ -81,7 +81,8 @@ void tPlayer::releasekey(int i)
 
 void tPlayer::holdscore(int ts)
 {
-	const int SCOREDIV=180;
+// guitarscene line 334
+	const int SCOREDIV=441;
 	int multiplier=1+streak/10;
 	if (multiplier>4) multiplier=4;
 	if (ts<holdaccounted) return;
@@ -93,7 +94,8 @@ void tPlayer::holdscore(int ts)
 
 void tPlayer::unhitactive(int ts)
 {
-	holdscore(ts);
+	if (hitactive)
+		holdscore(ts);
 	hitactive=0;
 }
 
@@ -180,7 +182,7 @@ void tPlayer::handlehit()
 		notegood++;
 		history[crtnote-1]=2;
 		score+=50*hitactive*multiplier;
-		holdaccounted=cnotes[0][crtnote-1].timestamp+5500;
+		holdaccounted=cnotes[0][crtnote-1].timestamp+8000; // actually song.period*1.1/4
 		if (streak==10 || streak==20 || streak==30) timemultiplier=timenow;
 	}
 	else {
