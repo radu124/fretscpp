@@ -105,6 +105,12 @@ void scene_setNeck(int i)
 	//float fvViewMatrix[ 16 ]; 
 	//glGetFloatv( GL_MODELVIEW_MATRIX, fvViewMatrix );
 	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	if (globals::numplayers!=1)
+	{
+		glTranslatef(-1.5+3*i,0,0);
+		glScalef(0.5,0.7,1);
+	}
 }
 
 void sceneBase::setdim()

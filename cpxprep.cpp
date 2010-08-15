@@ -39,6 +39,15 @@ const char *exename="cpxprep";
 
 char *namespacename(char *filename);
 
+#ifdef _WINDOWS
+// not defined in my library version under windows
+// so i define it myself
+int isblank(char c)
+{
+    return c==' ' || c=='\t';
+}
+#endif
+
 void assume(int b,const char *c,const char *extra="")
 {
     if (b) return;

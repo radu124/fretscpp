@@ -132,7 +132,7 @@ void tPlayer::passtime()
 		{
 			hitactive=0;
 			streak=0;
-			playing.gp0=0;
+			playing.gp[id]=0;
 		}
 		crtnote++;
 	}
@@ -177,7 +177,7 @@ void tPlayer::handlehit()
 			if (lastkeys[i]) lasthit[i]=timenow;
 		
 		streak++;
-		playing.gp0=1;
+		playing.gp[id]=1;
 		hitactive=cnotes[0][crtnote-1].hashit(difficulty);
 		notegood++;
 		history[crtnote-1]=2;
@@ -188,7 +188,7 @@ void tPlayer::handlehit()
 	else {
 		effect_start(1+rand()%4,0);
 		streak=0;
-		playing.gp0=0;
+		playing.gp[id]=0;
 		hitactive=0;
 		notexmiss++;
 	}

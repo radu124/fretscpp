@@ -29,6 +29,16 @@ implementation
 
 uses verbosity, message;
 
+#ifdef _WINDOWS
+// this is not defined under Windows, at least in my version of libvorbis
+int ov_fopen(char *path,OggVorbis_File *vf)
+{
+	FILE *fin;
+	fin=fopen(path,"rb");
+	ov_open(fin,vf,NULL,0);
+}
+#endif
+
 struct tEffects
 {
 	int count;
@@ -48,7 +58,7 @@ struct tPlaying
 	int effectchn[8];
 	int effectpos[8];
 	
-	volatile int gp0;
+	volatile int gp[2];
 	volatile int playpos;
 	volatile int decodepos[3];
 	volatile int stopsat[3];
@@ -130,7 +140,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 		DBG(AUDIO,"stalled\n");
 	}
 	int en_play=(playing.playing);
-	int vol1, vol2, vol3;
+	int vol1, vol2, vol3a, vol3b;
 	
 	int16_t *effs[8];
 	int16_t *eff0=NULL;
@@ -138,7 +148,14 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 	int vole0=85;
 	int vole1=85;
 	vol1=vol2=85;
-	vol3=playing.gp0*200+20;
+	if (globals::numplayers==1)
+	{
+		vol3a=vol3b=playing.gp[0]*100+20;
+	} else {
+		vol3a=playing.gp[0]*120;
+		vol3b=playing.gp[1]*120;
+		if (!vol3a && !vol3b) vol3a=vol3b=16;
+	}
 	
 	for (i=0; i<8; i++)
 	{
@@ -172,7 +189,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 		{
 			s+=vol1*playing.buffer[0][pos];
 			s+=vol2*playing.buffer[2][pos];
-			s+=vol3*playing.buffer[4][pos];
+			s+=vol3a*playing.buffer[4][pos];
 		}
 		if (eff0) s+=vole0* *eff0;
 		if (eff1) s+=vole0* *eff1;
@@ -184,7 +201,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 		{
 			s+=vol1*playing.buffer[1][pos];
 			s+=vol2*playing.buffer[3][pos];
-			s+=vol3*playing.buffer[5][pos];
+			s+=vol3b*playing.buffer[5][pos];
 		}
 		if (eff0) s+=vole0* *eff0++;
 		if (eff1) s+=vole0* *eff1++;
@@ -284,7 +301,8 @@ int load_effects(const char *fn)
 
 int song_start(const char *path)
 {
-	playing.gp0=1;
+	playing.gp[0]=1;
+	playing.gp[1]=1;
 	strncpy(playing.songname,path,2047);
 	playing.songname[2048]=0;
 	playing.refreshsong=1;
@@ -377,7 +395,7 @@ int tPlaying::decode(int idx, OggVorbis_File *ovf)
 			break;
 		}
 		int ret=ov_read(ovf,(char *)buf,8192,0,2,1,&ogg_bs[idx]);
-		if (!ret) 
+		if (ret<=0) 
 		{
 			stopsat[idx]=pos;
 			sisopen[idx]=0;
@@ -392,8 +410,18 @@ int tPlaying::decode(int idx, OggVorbis_File *ovf)
 		DBG(AUDIO,"Read (idx %d) %d chn:%d sr:%d\n" &idx &samples &locchn &locrate);
 		for (i=0; i<samples; i++)
 		{
-			buffer[idx*2  ][pos%SONG_BUFFER_SIZE]=buf[i*locchn];
-			buffer[idx*2+1][pos%SONG_BUFFER_SIZE]=buf[i*locchn+chn2];
+			int qa=buf[i*locchn];
+			int qb=buf[i*locchn+chn2];
+			if (globals::numplayers==2)
+			{
+				int t=(qa*5+qb*3)/8;
+				qb=(qa*3+qb*5)/8;
+				qa=t;
+				// reduce the stereo effect since
+				// each player has his own track to play
+			}
+			buffer[idx*2  ][pos%SONG_BUFFER_SIZE]=qa;
+			buffer[idx*2+1][pos%SONG_BUFFER_SIZE]=qb;				
 			pos++;
 		}
 		decodepos[idx]=pos;

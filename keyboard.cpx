@@ -1,0 +1,29 @@
+interface
+
+implementation
+
+void guitarkey(int ev, int key);
+
+uses configuration;
+
+uses includes, player, configuration;
+
+void guitarkey(int ev, int key)
+{
+	int i,pl,q;
+	for (pl=0; pl<globals::numplayers; pl++)
+	{
+		for (q=0; q<2; q++)
+		{
+			if (q!=pl && globals::numplayers==2) continue;
+			int id=-1;
+			for (i=0; i<7; i++)
+			{
+				if (key==config::keys[q][i]) id=i;
+			}
+			if (id==6) id=5;
+			if (id>=0 && ev==SDL_KEYDOWN) player[pl].presskey(id);
+			if (id>=0 && ev==SDL_KEYUP)   player[pl].releasekey(id);
+		}
+	}
+}

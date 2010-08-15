@@ -25,8 +25,12 @@ uses includes;
 double gettimefloat()
 {
 	timeval t;
+#ifdef _WINDOWS
+	return SDL_GetTicks()*0.001;
+#else
 	gettimeofday(&t,NULL);
 	return t.tv_sec*1.0+t.tv_usec*0.000001;
+#endif
 }
 
 double origtime=gettimefloat();

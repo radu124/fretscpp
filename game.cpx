@@ -28,6 +28,7 @@ void drawglstuff()
 
 int main( int argc, char* argv[] )
 {
+	init_config();
 	assume(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO), "Unable to initialize SDL: %s\n");
 	// SDL_GetError());
 	init_fonts();

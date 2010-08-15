@@ -124,7 +124,9 @@ void init_sprites()
 	int i,j;
 	ilInit();
 	iluInit();
+#ifndef _WINDOWS
 	ilutRenderer(ILUT_OPENGL);
+#endif
 //	ilGenImages(1,&baseiname);
 	spc.logo.load("data/logo.png");
 	spc.back.load("data/keyboard.png");

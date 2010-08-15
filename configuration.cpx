@@ -1,0 +1,27 @@
+interface
+
+uses includes;
+
+namespace config
+{
+	vvint keys;
+}
+
+void init_config();
+
+implementation
+
+int defkeys[]={ SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_RETURN, SDLK_RSHIFT, SDLK_TAB };
+int defkey2[]={ '1','2','3','4','5','k','m','l' };
+
+void init_config()
+{
+	int i;
+	config::keys.resize(0); // make sure it's clear
+	config::keys.resize(2);
+	for (i=0; i<8; i++) 
+	{
+		config::keys[0].push_back(defkeys[i]);
+		config::keys[1].push_back(defkey2[i]);
+	}
+}
