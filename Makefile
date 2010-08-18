@@ -41,17 +41,17 @@ game64: game.cpp
 	g++ -m64 -MMD -MF $@.d $< -O0 -g3 -ggdb -o $@ $(LIBS)
 
 install: game-r
-	install -d $(DESTDIR)/bin
-	install -d /usr
-	install -d /usr/share
-	install -d /usr/share/games
-	install -d /usr/share/games/fretscpp
-	install -d /usr/share/games/fretscpp/data
-	install -d /usr/share/games/fretscpp/data/songs
-	install -d /usr/share/games/fretscpp/data/songs/tutorial
-	install -m 755 game-r $(DESTDIR)/bin/fretscpp
-	install -m 644 $(wildcard data/*) /usr/share/games/fretscpp/data
-	install -m 644 $(wildcard data/songs/tutorial/*) /usr/share/games/fretscpp/data/songs/tutorial
+	install -d $(DESTDIR)/usr
+	install -d $(DESTDIR)/usr/bin
+	install -d $(DESTDIR)/usr/share
+	install -d $(DESTDIR)/usr/share/games
+	install -d $(DESTDIR)/usr/share/games/fretscpp
+	install -d $(DESTDIR)/usr/share/games/fretscpp/data
+	install -d $(DESTDIR)/usr/share/games/fretscpp/data/songs
+	install -d $(DESTDIR)/usr/share/games/fretscpp/data/songs/tutorial
+	install -m 755 game-r $(DESTDIR)/usr/bin/fretscpp
+	install -m 644 $(filter-out data/songs,$(wildcard data/*)) $(DESTDIR)/usr/share/games/fretscpp/data
+	install -m 644 $(wildcard data/songs/tutorial/*) $(DESTDIR)/usr/share/games/fretscpp/data/songs/tutorial
 	
 
 .PHONY: run install all
