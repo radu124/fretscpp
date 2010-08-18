@@ -355,6 +355,19 @@ int MidiParser::doparse()
 				DUMP_READMID("MIDI note-off: %4d %4d %s\n" & notenum & velo & a.stat);
 				continue;
 			}
+			if (evhi==0xc || evhi==0xd)
+			{
+				readbyte(); 
+				DUMP_READMID("MIDI event: %x !!!\n" & event);
+				continue;
+			}
+			if (evhi==0xb || evhi==0xa || evhi==0xe)
+			{
+				readbyte(); readbyte();
+				DUMP_READMID("MIDI event: %x !!!\n" & event);
+				continue;
+			}
+			
 			INFO_READMID("Event %d 0x%02x, delta %d\n" &event &event &delta);
 			
 			break;

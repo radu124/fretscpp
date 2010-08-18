@@ -104,7 +104,7 @@ void init_config()
 {
 	int i;
 #ifdef _WINDOWS
-	configFile="fretscpp.ini"
+	configFile="fretscpp.ini";
 	homeconfdir="";
 	datadir="";
 #else

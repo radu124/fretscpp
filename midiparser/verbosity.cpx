@@ -1,7 +1,7 @@
 interface
 
 const int INFOREADMID=1;
-const int DUMPREADMID=0;
+const int DUMPREADMID=1;
 
 #define INFO_READMID(msg) __COND_DBG_OUT(INFOREADMID,msg)
 #define DUMP_READMID(msg) __COND_DBG_OUT(DUMPREADMID,msg)

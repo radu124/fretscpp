@@ -305,7 +305,9 @@ int song_start(string path)
 	if (len>2047) len=2047;
 	playing.gp[0]=1;
 	playing.gp[1]=1;
+	INFO(AUDIO,"Song start: >%s<\n" &path);
 	strncpy(playing.songname,path.c_str(),len);
+	playing.songname[len]=0;
 	playing.songname[2048]=0;
 	playing.refreshsong=1;
 	// need some thread protection here, in case we read this string at the same time
@@ -330,6 +332,7 @@ void tPlaying::close_song()
 void tPlaying::open_song()
 {
 	// use char arrays here for thread safety reasons
+	DBG(AUDIO,"opening song: >%s<\n" &songname);
 	char namelocal[2148];
 	int i;
 	strncpy(namelocal,songname,2048);

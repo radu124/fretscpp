@@ -52,9 +52,9 @@ protected:
 	unsigned int readshort();
 	unsigned int readlong();
 	unsigned int readvarlen();
-	void applydelay();
 	void timeincrement(int delta);
 public:
+	void applydelay(int delay);
 	vvnotestatus trk_notes;
 	vector<int> trk_difficulties;
 	vector<string> trk_instrument;
@@ -65,6 +65,22 @@ public:
 implementation
 
 uses message,verbosity;
+
+void MidiParser::applydelay(int delay)
+{
+	int tr,j;
+	delay=delay*441/10;
+	for (tr=0; tr<trk_notes.size(); tr++)
+	{
+		for (j=0; j<trk_notes[tr].size(); j++)
+		{
+			int ts=trk_notes[tr][j].timestamp;
+			ts+=delay;
+			if (ts<0) ts=0;
+			trk_notes[tr][j].timestamp=ts;
+		}
+	}
+}
 
 int notestatus::hashit(int difficulty)
 { 
@@ -418,6 +434,18 @@ int MidiParser::doparse()
 				if (a.stat[ournote]=='-' || a.stat[ournote]==' ') a.stat[ournote]='X';
 				else a.stat[ournote]='B';
 				DBG(READMID,"MIDI note-off: %4d %4d %s\n" & notenum & velo & a.stat);
+				continue;
+			}
+			if (evhi==0xc || evhi==0xd)
+			{
+				readbyte(); 
+				DBG(READMID,"MIDI event: %x !!!\n" & event);
+				continue;
+			}
+			if (evhi==0xb || evhi==0xa || evhi==0xe)
+			{
+				readbyte(); readbyte();
+				DBG(READMID,"MIDI event: %x !!!\n" & event);
 				continue;
 			}
 			INFO(READMID,"Event %d 0x%02x, delta %d\n" &event &event &delta);

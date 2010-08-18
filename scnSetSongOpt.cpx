@@ -131,9 +131,16 @@ void tScnSetSongOpt::enter()
 {
 	int res,ires,i;
 	int delay=0;
+	res=crtSong.openfile((selectedsong+"/notes.mid").c_str());
+	
 	crtIni=tSongini();
 	ires=crtIni.load(selectedsong+"/song.ini");
-	res=crtSong.openfile((selectedsong+"/notes.mid").c_str());
+	if (crtIni.delay!=0) 
+	{
+		INFO(SONGINI,"Applying delay as read from song.ini (%d)\n" &crtIni.delay);
+		crtSong.applydelay(crtIni.delay);
+	}
+	
 	if (!res) jumptoscene(1);
 	makeempty();
 	additem("OStart");
