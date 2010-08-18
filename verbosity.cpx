@@ -23,5 +23,7 @@ interface
 #define MSG_SCNGUITAR    LEV_DBG
 #define MSG_SCNSONGOPT   LEV_INFO
 #define MSG_GL           LEV_INFO
+#define MSG_JOYSTICK     LEV_INFO
+#define MSG_SONGINI      LEV_INFO
 
 implementation

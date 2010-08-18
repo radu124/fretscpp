@@ -79,7 +79,7 @@ void tSceneGuitar::render()
 	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
 	glClear( GL_COLOR_BUFFER_BIT );
 	timenow=playing.playpos;
-	for (cplayer=0; cplayer<globals::numplayers; cplayer++)
+	for (cplayer=0; cplayer<numplayers; cplayer++)
 	{
 		cinstrument=player[cplayer].instrument;
 		cdifficulty=player[cplayer].difficulty;
@@ -105,9 +105,9 @@ void tSceneGuitar::render()
 		glBegin(GL_TRIANGLE_FAN);
 		glColor4f(0.0f,0.0f,0.0f,0.30f);
 		glVertex3f(0,0,0);
-		glVertex3f(globals::scr_width,0,0);
-		glVertex3f(globals::scr_width,globals::scr_height,0);
-		glVertex3f(0,globals::scr_height,0);
+		glVertex3f(scr_width,0,0);
+		glVertex3f(scr_width,scr_height,0);
+		glVertex3f(0,scr_height,0);
 		glEnd();
 		glLoadIdentity();
 		rendertext();
@@ -119,10 +119,10 @@ void tSceneGuitar::enter()
 	int i;
 	tScnMenuBase::enter();
 	SDL_EnableKeyRepeat(0,0);
-	for (i=0; i<globals::numplayers; i++) player[i].init(i);
+	for (i=0; i<numplayers; i++) player[i].init(i);
 	menumode=0;
 	statsmode=0;
-	song_start((globals::selectedsong+"/").c_str());
+	song_start((selectedsong+"/").c_str());
 }
 
 void tSceneGuitar::init()
@@ -135,9 +135,9 @@ void tSceneGuitar::init()
 	additem("Settings");
 	additem("Quit to Main Menu");
 	menumode=1;
-	posx=globals::scr_width*0.2;
-	posy=globals::scr_height*0.4;
-	scale=globals::scr_height*0.04;
+	posx=scr_width*0.2;
+	posy=scr_height*0.4;
+	scale=scr_height*0.04;
 	tScnMenuBase::init();
 	viewOffset=0;
 	viewSize=6;

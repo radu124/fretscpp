@@ -14,9 +14,10 @@ GNU General Public License for more details.
 
 interface
 
-uses includes, scene, scnTable, midiparser;
+uses includes, scene, scnTable, midiparser, songini;
 
 MidiParser crtSong;
+tSongini   crtIni;
 
 class tScnSetSongOpt:public tScnTable
 {
@@ -37,21 +38,21 @@ public:
 
 implementation
 
-uses sprites, scnTable, globals, player, configuration;
+uses sprites, scnTable, globals, player, configuration, songini;
 
 void tScnSetSongOpt::enableDisableMulti()
 {
 	int i;
-	if (globals::numplayers==1)
+	if (numplayers==1)
 	{
-		globals::numplayers=2;
+		numplayers=2;
 		for (i=1; i<opt[1].size(); i++)
 			opt[1][i]=0;
 		opt[1][0]=1;
 		selInstrument(1);
 		setKeySels(1);
 	} else {
-		globals::numplayers=1;
+		numplayers=1;
 		for (i=1; i<opt[1].size(); i++)
 			opt[1][i]=2;
 		opt[1][0]=0;
@@ -128,8 +129,11 @@ void tScnSetSongOpt::selDifficulty(int i, int j)
 
 void tScnSetSongOpt::enter()
 {
-	int res,i;
-	res=crtSong.openfile((globals::selectedsong+"/notes.mid").c_str());
+	int res,ires,i;
+	int delay=0;
+	crtIni=tSongini();
+	ires=crtIni.load(selectedsong+"/song.ini");
+	res=crtSong.openfile((selectedsong+"/notes.mid").c_str());
 	if (!res) jumptoscene(1);
 	makeempty();
 	additem("OStart");
@@ -143,15 +147,15 @@ void tScnSetSongOpt::enter()
 	additem("AHard");
 	additem("");
 	additem("|Controller:");
-	for (i=0; i<config::keys.size(); i++)
+	for (i=0; i<keydefs.size(); i++)
 	{
-		additem(string("C")+config::kcname[i]);
+		additem(string("C")+keyconfname[i]);
 	}
 	dupcol();
 	entries[1][0]="OPlayer 2";
 	optinit();
 	setKeySels(0);
-	globals::numplayers=3-globals::numplayers;
+	numplayers=3-numplayers;
 	enableDisableMulti();
 	selInstrument(0);
 }
@@ -160,8 +164,8 @@ void tScnSetSongOpt::setKeySels(int i)
 {
 	int j,q;
 	int base=groupStart(i,3);
-	for (j=0; j<config::keys.size(); j++)
-		opt[i][base+1+j]=(config::keyselector[i] & (1<<j))!=0;
+	for (j=0; j<keydefs.size(); j++)
+		opt[i][base+1+j]=(keydefselector[i] & (1<<j))!=0;
 }
 
 void tScnSetSongOpt::itemClickedSep(int i, int k, int j, int &o)
@@ -196,8 +200,8 @@ void tScnSetSongOpt::itemClickedSep(int i, int k, int j, int &o)
 	if (k==3)
 	{
 		MESSAGE("%d \n"&o);
-		if (o) config::keyselector[i] |= (1<<(j-1));
-		else config::keyselector[1] &= ~(1<<(j-1));
+		if (o) keydefselector[i] |= (1<<(j-1));
+		else keydefselector[1] &= ~(1<<(j-1));
 	}
 }
 

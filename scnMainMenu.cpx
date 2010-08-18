@@ -35,9 +35,9 @@ void tScnMenuMain::init()
 	additem("Settings");
 	additem("Define controls");
 	additem("Quit");
-	posx=globals::scr_width*0.2;
-	posy=globals::scr_height*0.4;
-	scale=globals::scr_height*0.08;
+	posx=scr_width*0.2;
+	posy=scr_height*0.4;
+	scale=scr_height*0.08;
 	tScnMenuBase::init();
 }
 
@@ -50,15 +50,15 @@ void tScnMenuMain::itemClicked(int i)
 		gameover = 1;
 		break;
 	case 0:
-		globals::numplayers=1;
+		numplayers=1;
 		fadetoscene(2);
 		break;
 	case 1:
-		globals::numplayers=2;
+		numplayers=2;
 		fadetoscene(2);
 		break;
 	case 3:
-		globals::numplayers=2;
+		numplayers=2;
 		fadetoscene(SCN_KEYDEF);
 		break;
 	}

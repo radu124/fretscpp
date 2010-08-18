@@ -109,8 +109,8 @@ void tScnMenuBase::rendertext()
 	
 	if (scn.menufade==1) return;
 	GLfloat v,x,y,h,w;
-	h=globals::scr_height;
-	w=globals::scr_width;
+	h=scr_height;
+	w=scr_width;
 	x=posx; y=posy;
 	v=faderot*faderot;
 	int i;

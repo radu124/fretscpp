@@ -15,8 +15,8 @@ GNU General Public License for more details.
 interface
 
 void init_audio();
-int load_effects(char *fn);
-int song_start(const char *path);
+int load_effects(string fn);
+int song_start(string path);
 void song_stop();
 void audio_yield();
 double song_time();
@@ -148,7 +148,7 @@ void my_audio_callback(void *userdata, Uint8 *stream, int len)
 	int vole0=85;
 	int vole1=85;
 	vol1=vol2=85;
-	if (globals::numplayers==1)
+	if (numplayers==1)
 	{
 		vol3a=vol3b=playing.gp[0]*100+20;
 	} else {
@@ -243,7 +243,7 @@ int16_t interpolate(int16_t *buf, int pos, int chn=1)
 	return buf[pos/256];
 }
 
-int load_effects(const char *fn)
+int load_effects(string fn)
 {
 	int padding=BUF_SIZE;
 	int16_t buf[4112];
@@ -253,7 +253,7 @@ int load_effects(const char *fn)
 	int allocd=220500;
 	
 	OggVorbis_File vf;
-	if(ov_fopen((char *) fn, &vf) < 0) return 0;
+	if(ov_fopen((char *) fn.c_str(), &vf) < 0) return 0;
 	int channels = ov_info(&vf,0)->channels;
 	int samplerate = ov_info(&vf,0)->rate;
 	int cnt=effects.count;
@@ -299,11 +299,13 @@ int load_effects(const char *fn)
 	return ++effects.count;
 }
 
-int song_start(const char *path)
+int song_start(string path)
 {
+	int len=path.length();
+	if (len>2047) len=2047;
 	playing.gp[0]=1;
 	playing.gp[1]=1;
-	strncpy(playing.songname,path,2047);
+	strncpy(playing.songname,path.c_str(),len);
 	playing.songname[2048]=0;
 	playing.refreshsong=1;
 	// need some thread protection here, in case we read this string at the same time
@@ -412,7 +414,7 @@ int tPlaying::decode(int idx, OggVorbis_File *ovf)
 		{
 			int qa=buf[i*locchn];
 			int qb=buf[i*locchn+chn2];
-			if (globals::numplayers==2)
+			if (numplayers==2)
 			{
 				int t=(qa*5+qb*3)/8;
 				qb=(qa*3+qb*5)/8;

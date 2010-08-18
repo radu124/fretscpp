@@ -42,7 +42,7 @@ void tScnScore::render()
 	paintrotback();
 	int percentage=100;
 	int i;
-	for (i=0; i<globals::numplayers; i++)
+	for (i=0; i<numplayers; i++)
 	{
 		tPlayer &pp=player[i];
 		
@@ -74,7 +74,7 @@ void tScnScore::handleevent(SDL_Event &a)
 			FILE *scf=fopen("scores.txt","a");
 			fprintf(scf,"%d %d %s %s\n",
 				player[0].notegood, player[0].score, 
-				player[0].name.c_str(), globals::selectedsong.c_str());
+				player[0].name.c_str(), selectedsong.c_str());
 			fclose(scf);
 			editing=-1;
 			fadetoscene(SCN_SONGS);
@@ -82,7 +82,7 @@ void tScnScore::handleevent(SDL_Event &a)
 		}
 		if (editing>=0)
 		{
-			if (ch==SDLK_TAB) editing=(editing+1)%globals::numplayers;
+			if (ch==SDLK_TAB) editing=(editing+1)%numplayers;
 			if (isalnum(ch) || ch=='.')
 			{
 				if (player[editing].name.size()<16) player[editing].name+=(char) ch;

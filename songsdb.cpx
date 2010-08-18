@@ -30,7 +30,7 @@ void updatesongdb();
 
 implementation
 
-uses fileio;
+uses fileio,configuration;
 
 void readsongsdir(string songsroot)
 {
@@ -57,10 +57,12 @@ void readsongsdir(string songsroot)
 		a.issong=1;
 		if (hasini && hasmid) songsdb.push_back(a);
 	}
-	INFO(SONGDB,"Song database contains %d entries\n" &songsdb.size());
+	INFO(SONGDB,"Song database contains %d entries\n"  & (int)songsdb.size());
 }
 
 void updatesongdb()
 {
+	readsongsdir(homeconfdir+"/data/songs");
+	readsongsdir("/usr/share/games/fretsonfire/data/songs");
 	readsongsdir("data/songs");
 }

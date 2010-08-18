@@ -86,7 +86,7 @@ void scene_setOrtho()
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
-	glOrtho(0.0f, globals::scr_width, globals::scr_height, 0.0f, -1.0f, 1.0f);
+	glOrtho(0.0f, scr_width, scr_height, 0.0f, -1.0f, 1.0f);
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 }
@@ -101,7 +101,7 @@ void scene_setNeck(int i)
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(90.0f, 1.0f * globals::scr_width / globals::scr_height, 1.0f, 100.0f);
+	gluPerspective(90.0f, 1.0f * scr_width / scr_height, 1.0f, 100.0f);
 	gluLookAt(
 		camerapos[0], camerapos[1], camerapos[2],
 		0.0f, 0.0f, 0.0f,
@@ -112,7 +112,7 @@ void scene_setNeck(int i)
 	//glGetFloatv( GL_MODELVIEW_MATRIX, fvViewMatrix );
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	if (globals::numplayers!=1)
+	if (numplayers!=1)
 	{
 		glTranslatef(-1.5+3*i,0,0);
 		glScalef(0.5,0.7,1);
@@ -127,8 +127,8 @@ void scene_setNeck(int i)
 
 void sceneBase::setdim()
 {
-	w=globals::scr_width;
-	h=globals::scr_height;
+	w=scr_width;
+	h=scr_height;
 	ms=w/640.0;
 	t=scn.timesc*0.33;
 }
@@ -173,20 +173,8 @@ GLfloat fadespeed(int scene)
 
 void scenehandleevent(SDL_Event &event)
 {
-	SDL_Event e=event;
-	// perform translation before sending to scene
-	if (e.type==SDL_JOYBUTTONDOWN)
-	{
-		e.type=SDL_KEYDOWN;
-		e.key.keysym.sym=(SDLKey) (1000000+256*e.jbutton.which+e.jbutton.button);
-	}
-	if (e.type==SDL_JOYBUTTONUP)
-	{
-		e.type=SDL_KEYUP;
-		e.key.keysym.sym=(SDLKey) (1000000+256*e.jbutton.which+e.jbutton.button);
-	}
 	if (!scenes[scn.current]) return;
-	scenes[scn.current]->handleevent(e);
+	scenes[scn.current]->handleevent(event);
 }
 
 void renderscene()

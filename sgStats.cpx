@@ -10,8 +10,8 @@ void tSceneGuitar::renderMultiplierVal()
 	int mult=pp.streak/10*2;
 	int mr=pp.streak%10;
 	if (pp.streak>=40) { mult=6; mr=10; }
-	h=globals::scr_height;
-	w=globals::scr_width;
+	h=scr_height;
+	w=scr_width;
 	glPushMatrix();
 	glTranslatef(w*(1+cplayer*12)/14.0,h*1/3,0);
 	glScalef(w/14,-w/7,0);

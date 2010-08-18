@@ -1,25 +1,126 @@
 interface
 
+void guitarkey(int ev, int key);
+string keyname(int id);
+void translateandhandleevent(SDL_Event &event);
+
 implementation
 
-void guitarkey(int ev, int key);
-
 uses configuration;
+uses includes, player, configuration, joystick;
 
-uses includes, player, configuration;
+string keyname(int id)
+{
+	char a[32];
+	if (id<1000000) return SDL_GetKeyName((SDLKey) id);
+	if (id<2000000)
+	{
+		id-=1000000;
+		sprintf(a,"Joy #%d %c",id/256,'a'+id%256);
+	} else if (id<3000000) {
+		id-=2000000;
+		sprintf(a,"Joy #%d hat%d%c,",id/1024,(id&1023)/4,"NSWE"[id&3]);
+	} else if (id<4000000) {
+		id-=3000000;
+		sprintf(a,"Joy #%d axis%d",id/256,id%256);
+	} else if (id<5000000) {
+		id-=4000000;
+		sprintf(a,"Joy #%d ball%d%c",id/512,(id&511)/2,"XY"[id&1]);
+	} else return "config err";
+	return a;
+}
+
+const int JOY_BALL_SENSITIVITY=10000;
+const int JOY_AXIS_DETECT_SENSITIVITY=5000;
+// perform translation before sending to scene
+void translateandhandleevent(SDL_Event &event)
+{
+	SDL_Event e=event;
+	
+	// translate hat to buttons
+	// a single hat event may generate multiple button events
+	if (e.type==SDL_JOYAXISMOTION)
+	{
+		int joy=e.jaxis.which;
+		int axis=e.jaxis.axis;
+		int value=e.jaxis.value;
+		int oldval=joysticks[joy].axes[axis];
+		DBG(JOYSTICK, "Joy axis %d %d %d\n" &(int) e.jaxis.which &(int) e.jaxis.axis &(int) e.jaxis.value);
+		joysticks[joy].axes[axis]=value;
+		scenehandleevent(e);
+		if (joydetect_enable && oldval!=-1000000 && abs(oldval-value)>JOY_AXIS_DETECT_SENSITIVITY)
+		{
+			joydetect_enable=0;
+			e.type=SDL_KEYDOWN;
+			e.key.keysym.sym=(SDLKey) (3000000+e.jaxis.which*256+e.jaxis.axis);
+			scenehandleevent(e);
+		}
+		return;
+	}
+	if (e.type==SDL_JOYBALLMOTION)
+	{
+		DBG(JOYSTICK, "Ball motion %d %d %d %d\n" &(int) e.jball.which &(int) e.jball.ball &(int) e.jball.xrel &(int) e.jball.yrel);
+		// motion detect for the power-up
+		if (e.jball.xrel<-JOY_BALL_SENSITIVITY || e.jball.xrel>JOY_BALL_SENSITIVITY)
+		{
+			e.type=SDL_KEYDOWN;
+			e.key.keysym.sym=(SDLKey) (4000000+e.jball.which*512+e.jball.ball*2);
+			scenehandleevent(e);
+		}
+		if (e.jball.yrel<-JOY_BALL_SENSITIVITY || e.jball.yrel>JOY_BALL_SENSITIVITY)
+		{
+			e.type=SDL_KEYDOWN;
+			e.key.keysym.sym=(SDLKey) (4000000+e.jball.which*512+e.jball.ball*2+1);
+			scenehandleevent(e);
+		}
+		return;
+	}
+	
+	if (e.type==SDL_JOYHATMOTION)
+	{
+		int joy=e.jhat.which;
+		int hat=e.jhat.hat;
+		int hval=e.jhat.value;
+		int prev=joysticks[joy].hats[hat];
+		int base=2000000+joy*1024+hat*4;
+		e.type=SDL_KEYDOWN;
+		if ((hval & SDL_HAT_UP   ) && !(prev & SDL_HAT_UP   )) { e.key.keysym.sym=(SDLKey) base;     scenehandleevent(e); }
+		if ((hval & SDL_HAT_DOWN ) && !(prev & SDL_HAT_DOWN )) { e.key.keysym.sym=(SDLKey) (base+1); scenehandleevent(e); }
+		if ((hval & SDL_HAT_LEFT ) && !(prev & SDL_HAT_LEFT )) { e.key.keysym.sym=(SDLKey) (base+2); scenehandleevent(e); }
+		if ((hval & SDL_HAT_RIGHT) && !(prev & SDL_HAT_RIGHT)) { e.key.keysym.sym=(SDLKey) (base+3); scenehandleevent(e); }
+		e.type=SDL_KEYUP;
+		if (!(hval & SDL_HAT_UP   ) && (prev & SDL_HAT_UP   )) { e.key.keysym.sym=(SDLKey) base;     scenehandleevent(e); }
+		if (!(hval & SDL_HAT_DOWN ) && (prev & SDL_HAT_DOWN )) { e.key.keysym.sym=(SDLKey) (base+1); scenehandleevent(e); }
+		if (!(hval & SDL_HAT_LEFT ) && (prev & SDL_HAT_LEFT )) { e.key.keysym.sym=(SDLKey) (base+2); scenehandleevent(e); }
+		if (!(hval & SDL_HAT_RIGHT) && (prev & SDL_HAT_RIGHT)) { e.key.keysym.sym=(SDLKey) (base+3); scenehandleevent(e); }
+		joysticks[joy].hats[hat]=hval;
+		return;
+	}
+	if (e.type==SDL_JOYBUTTONDOWN)
+	{
+		e.type=SDL_KEYDOWN;
+		e.key.keysym.sym=(SDLKey) (1000000+256*e.jbutton.which+e.jbutton.button);
+	}
+	if (e.type==SDL_JOYBUTTONUP)
+	{
+		e.type=SDL_KEYUP;
+		e.key.keysym.sym=(SDLKey) (1000000+256*e.jbutton.which+e.jbutton.button);
+	}
+	scenehandleevent(e);
+}
 
 void guitarkey(int ev, int key)
 {
 	int i,pl,q;
-	for (pl=0; pl<globals::numplayers; pl++)
+	for (pl=0; pl<numplayers; pl++)
 	{
 		for (q=0; q<2; q++)
 		{
-			if (!(config::keyselector[pl] & (1<<q))) continue;
+			if (!(keydefselector[pl] & (1<<q))) continue;
 			int id=-1;
 			for (i=0; i<7; i++)
 			{
-				if (key==config::keys[q][i]) id=i;
+				if (key==keydefs[q][i]) id=i;
 			}
 			if (id==6) id=5;
 			if (id>=0 && ev==SDL_KEYDOWN) player[pl].presskey(id);

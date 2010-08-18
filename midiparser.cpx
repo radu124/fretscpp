@@ -52,6 +52,7 @@ protected:
 	unsigned int readshort();
 	unsigned int readlong();
 	unsigned int readvarlen();
+	void applydelay();
 	void timeincrement(int delta);
 public:
 	vvnotestatus trk_notes;
@@ -144,7 +145,11 @@ unsigned int MidiParser::readvarlen()
 
 int MidiParser::openfile(const char *name)
 {
-	fd=open(name,O_RDONLY);
+	int oflags=O_RDONLY;
+#ifdef _WINDOWS
+	oflags |= O_BINARY;
+#endif
+	fd=open(name,oflags);
 	if (fd<0) return 0;
 	size=lseek(fd,0,SEEK_END);
 	lseek(fd,0,SEEK_SET);

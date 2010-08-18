@@ -16,13 +16,12 @@ interface
 
 uses includes;
 
-namespace globals
-{
-	int scr_width=800;
-	int scr_height=600;
-	string selectedsong="";
-	int numplayers=1;
-	int glfontaa=GL_LINEAR;
-};
+// gave up namespaces
+
+int scr_width=800;
+int scr_height=600;
+string selectedsong="";
+int numplayers=1;
+int glfontaa=GL_LINEAR;
 
 implementation

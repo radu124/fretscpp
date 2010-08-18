@@ -3,22 +3,26 @@ interface
 uses includes;
 
 string configFile;
+string homeconfdir;
+string datadir;
+// just decided namespaces are evil
+// namespaces allow you to have two things with the same name
+// why would you want that, just to create confusion?
+// namespace config
 
-namespace config
-{
-	vvint keys;
-	vstring kcname;
+vvint keydefs;
+vstring keyconfname;
 	
-	// bit mask describing the last selected input devices
-	long keyselector[2];
-}
-
+// bit mask describing the last selected input devices
+//we don't expect more than 8 players
+long keydefselector[8];
 void init_config();
+
 
 implementation
 
-int defkeys[]={ SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_RETURN, SDLK_RSHIFT, SDLK_TAB };
-int defkey2[]={ '1','2','3','4','5','k','m','l' };
+int defkeys[]={ SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_RETURN, SDLK_RSHIFT, SDLK_TAB, 'p'};
+int defkey2[]={ '1','2','3','4','5','k','m','l','p' };
 
 int read_config()
 {
@@ -30,20 +34,31 @@ int read_config()
 	//currently very dumb
 	//MESSAGE("%s" &a);
 	fscanf(fc,"%d", &numkeys);
-	config::keys.resize(0);
-	config::kcname.resize(0);
-	config::keys.resize(numkeys);
+	keydefs.resize(0);
+	keyconfname.resize(0);
+	keydefs.resize(numkeys);
 	for (i=0; i<numkeys; i++)
 	{
 		for (j=0; j<8; j++)
 		{
 			fscanf(fc, "%d", &v); 
-			config::keys[i].push_back(v);
+			keydefs[i].push_back(v);
 		}
-		fscanf(fc,"%s\n",a);
-		config::kcname.push_back(a);
+		fscanf(fc,"%s",a);
+		if (a[0]>='0' && a[0]<='9')
+		{
+			// for the 5 pepole who already tried the first version
+			// of the game and have the settings file
+			sscanf(a,"%d",&v);
+			keydefs[i].push_back(v);
+			//MESSAGE("new config\n");
+			fscanf(fc,"%s",a);
+		} else keydefs[i].push_back(0);
+		fscanf(fc,"\n");
+		keyconfname.push_back(a);
 	}
-	fscanf(fc,"%ld %ld\n",&config::keyselector[0],&config::keyselector[1]);
+	for (i=0; i<8; i++) fscanf(fc,"%ld",keydefselector+i);
+	fscanf(fc,"\n");
 	fclose(fc);
 	if (numkeys<2) return 0;
 	return 1;
@@ -54,34 +69,35 @@ void write_config()
 	int i,j;
 	FILE *fou=fopen(configFile.c_str(),"w");
 	if (!fou) return;
-	fprintf(fou,":keyboard\n%d\n",config::keys.size());
-	for (i=0; i<config::keys.size(); i++)
+	fprintf(fou,":keyboard\n%d\n",keydefs.size());
+	for (i=0; i<keydefs.size(); i++)
 	{
-		for (j=0; j<8; j++)
+		for (j=0; j<9; j++)
 		{
-			fprintf(fou,"%d ",config::keys[i][j]);
+			fprintf(fou,"%d ",keydefs[i][j]);
 		}
-		fprintf(fou,"%s\n",config::kcname[i].c_str());
+		fprintf(fou,"%s\n",keyconfname[i].c_str());
 	}
-	fprintf(fou,"%ld %ld\n",config::keyselector[0],config::keyselector[1]);
+	for (i=0; i<8; i++) fprintf(fou,"%ld ",keydefselector[i]);
+	fprintf(fou,"\n");
 	fclose(fou);
 }
 
 void default_config()
 {
 	int i;
-	config::keys.resize(0); // make sure it's clear
-	config::keys.resize(2);
-	config::kcname.resize(0);
-	config::kcname.push_back("Keyboard");
-	config::kcname.push_back("Keyb#2");
-	for (i=0; i<8; i++) 
+	keydefs.resize(0); // make sure it's clear
+	keydefs.resize(2);
+	keyconfname.resize(0);
+	keyconfname.push_back("Keyboard");
+	keyconfname.push_back("Keyb#2");
+	for (i=0; i<9; i++) 
 	{
-		config::keys[0].push_back(defkeys[i]);
-		config::keys[1].push_back(defkey2[i]);
+		keydefs[0].push_back(defkeys[i]);
+		keydefs[1].push_back(defkey2[i]);
 	}
-	config::keyselector[0]=1;
-	config::keyselector[1]=2;
+	keydefselector[0]=1;
+	keydefselector[1]=2;
 }
 
 void init_config()
@@ -89,13 +105,18 @@ void init_config()
 	int i;
 #ifdef _WINDOWS
 	configFile="fretscpp.ini"
+	homeconfdir="";
+	datadir="";
 #else
-	configFile=getenv("HOME");
-	configFile+="/.config/fretscpp";
-	system((string("mkdir -p ")+configFile).c_str());
-	configFile+="/fretscpp.ini";
+	homeconfdir=getenv("HOME");
+	homeconfdir+="/.config/fretscpp";
+	system((string("mkdir -p ")+homeconfdir).c_str());
+	configFile=homeconfdir+"/fretscpp.ini";
 #endif
+	if (fileExists(homeconfdir+"/data/keyboard.png")) datadir=homeconfdir+"/data";
+	else if (fileExists("data/keyboard.png")) datadir="data";
+	else if (fileExists("/usr/share/games/fretscpp/data")) datadir="/usr/share/games/fretscpp/data";
+	else datadir="/usr/share/games/fretsonfire/data";
 	if (read_config()) return;
 	default_config();
-	
 }

@@ -147,7 +147,7 @@ void tScnSongs::handleevent(SDL_Event &event)
 			else previewlock=-1;
 			break;
 		case SDLK_RETURN:
-			globals::selectedsong=songsdb[selected].dir;
+			selectedsong=songsdb[selected].dir;
 			fadetoscene(SCN_SETSONGOPT);
 			break;
 		}

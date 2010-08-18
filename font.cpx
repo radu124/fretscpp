@@ -22,7 +22,7 @@ public:
 	static const int FONT_SCALE_H=64;
 	static const int NUM_CHARS=256;
 	enum {ALIGN_LEFT=0, ALIGN_CENTER=1, ALIGN_RIGHT=2, ALIGN_VONETHIRD=4, ALIGN_VHALFA=8};
-	int open(const char *fname);
+	int open(string fname);
 	GLuint textures[NUM_CHARS];
 	int texvalid[NUM_CHARS];
 	GLfloat cadvance[NUM_CHARS];
@@ -91,11 +91,11 @@ void TFont::getMinMax(FT_GlyphSlot g, int &max_v, int &max_h)
 }
 
 /// @return 0 in case of error
-int TFont::open(const char *fname)
+int TFont::open(string fname)
 {
 	int i,res,j,k,ch;
 	unsigned char a[FONT_SCALE_H][FONT_SCALE_H];
-	if (FT_New_Face(font_library,fname,0,&face)) return 0;
+	if (FT_New_Face(font_library,fname.c_str(),0,&face)) return 0;
 	//FT_Set_Char_Size( face, h << 6, h << 6, 96, 96);
 	FT_Set_Char_Size( face, 32*64, 32*64, 96, 96);
 	
@@ -148,8 +148,8 @@ int TFont::open(const char *fname)
 			a[dx][dy]=bmp.buffer[j*bmp.width+k];
 		}
 		glBindTexture( GL_TEXTURE_2D, textures[ch]);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,globals::glfontaa);//GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,globals::glfontaa);//GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,glfontaa);//GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,glfontaa);//GL_LINEAR);
 		//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 		//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
