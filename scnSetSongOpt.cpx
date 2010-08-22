@@ -24,38 +24,69 @@ class tScnSetSongOpt:public tScnTable
 public:
 	tScnSetSongOpt() { scenes.add(this,SCN_SETSONGOPT); }
 	void enter();
-	void enableDisableMulti();
+	void enableDisable(int i);
 	int getInstrument(int i);
 	int getDifficulty(int i);
 	void selInstrument(int i, int j=-1);
 	void selDifficulty(int i, int j=-1);
 	void itemClickedSep(int i, int k, int j, int &o);
 	void setKeySels(int i);
-	string lastInstr[2];
-	int lastDiffi[2];
 	int lastP2controller;
+	
+	/**
+	 * If selected players are not the first ones reorder
+	 * the list so they end up first
+	 * 
+	 * set numPlayers to the appropriate value
+	 */
+	void regroupPlayers();
 } SongOpt;
 
 implementation
 
 uses sprites, scnTable, globals, player, configuration, songini;
 
-void tScnSetSongOpt::enableDisableMulti()
+void tScnSetSongOpt::regroupPlayers()
+{
+	int i, l;
+	long ks;
+	tPlayer tmp;
+	player[0].enabled=1;
+	l=1;
+	for (i=1; i<MAX_PLAYERS; i++)
+	{
+		if (!player[i].enabled) continue;
+		if (i!=l) 
+		{
+			tmp=player[i];
+			player[i]=player[l];
+			player[l]=tmp;
+			ks=keydefselector[i];
+			keydefselector[i]=keydefselector[l];
+			keydefselector[l]=ks;
+		}
+		l++;
+	}
+	numplayers=l;
+}
+
+void tScnSetSongOpt::enableDisable(int pl)
 {
 	int i;
-	if (numplayers==1)
+	if (!player[pl].enabled)
 	{
-		numplayers=2;
+		player[pl].enabled=1;
 		for (i=1; i<opt[1].size(); i++)
-			opt[1][i]=0;
-		opt[1][0]=1;
-		selInstrument(1);
-		setKeySels(1);
+			opt[pl][i]=0;
+		opt[pl][0]=1;
+		selInstrument(pl);
+		setKeySels(pl);
 	} else {
+		player[pl].enabled=0;
 		numplayers=1;
 		for (i=1; i<opt[1].size(); i++)
-			opt[1][i]=2;
-		opt[1][0]=0;
+			opt[pl][i]=2;
+		opt[pl][0]=0;
 	}
 }
 
@@ -67,9 +98,9 @@ void tScnSetSongOpt::selInstrument(int i, int j)
 	{
 		j=0;
 		for (q=0; q<crtSong.trk_instrument.size(); q++)
-			if (lastInstr[i]==crtSong.trk_instrument[q]) j=q;
+			if (player[i].lastInstr==crtSong.trk_instrument[q]) j=q;
 	} else 
-		lastInstr[i]=crtSong.trk_instrument[j];
+		player[i].lastInstr=crtSong.trk_instrument[j];
 	base=groupStart(i,1);
 	DBG(SCNSONGOPT,"col: %d base:%d\n" &i &base);
 	for (q=0; q<crtSong.trk_instrument.size(); q++)
@@ -114,8 +145,8 @@ void tScnSetSongOpt::selDifficulty(int i, int j)
 		opt[i][base+q]=(crtSong.trk_difficulties[instr]&dff)?0:2;
 		dff<<=1;
 	}
-	if (j==-1) j=lastDiffi[i];
-	else lastDiffi[i]=j;
+	if (j==-1) j=player[i].lastDiffi;
+	else player[i].lastDiffi=j;
 	// this difficulty level does not exist for this song/instrument
 	if (opt[i][base+j])
 	{
@@ -132,7 +163,7 @@ void tScnSetSongOpt::enter()
 	int res,ires,i;
 	int delay=0;
 	res=crtSong.openfile((selectedsong+"/notes.mid").c_str());
-	
+	colsvisible=4;
 	crtIni=tSongini();
 	ires=crtIni.load(selectedsong+"/song.ini");
 	if (crtIni.delay!=0) 
@@ -159,11 +190,26 @@ void tScnSetSongOpt::enter()
 		additem(string("C")+keyconfname[i]);
 	}
 	dupcol();
+	dupcol();
+	dupcol();
 	entries[1][0]="OPlayer 2";
+	entries[2][0]="OPlayer 3";
+	entries[3][0]="OPlayer 4";
 	optinit();
 	setKeySels(0);
-	numplayers=3-numplayers;
-	enableDisableMulti();
+	setKeySels(1);
+	setKeySels(2);
+	setKeySels(3);
+	// we initialize with the opposite value
+	// because enableDisable will invert it
+	// players 2 and 3 keep their previous state
+	// if multiplayer is enabled
+	player[1].enabled=numplayers==1;
+	player[2].enabled=numplayers==1 || !player[2].enabled;
+	player[3].enabled=numplayers==1 || !player[3].enabled;
+	enableDisable(1);
+	enableDisable(2);
+	enableDisable(3);
 	selInstrument(0);
 }
 
@@ -186,12 +232,13 @@ void tScnSetSongOpt::itemClickedSep(int i, int k, int j, int &o)
 	}
 	if (i==0 && k==0)
 	{
+		regroupPlayers();
 		fadetoscene(SCN_PLAYING);
 		return;
 	}
-	if (i==1 && k==0)
+	if (i>0 && k==0)
 	{
-		enableDisableMulti();
+		enableDisable(i);
 		return;
 	}
 	if (k==1) 

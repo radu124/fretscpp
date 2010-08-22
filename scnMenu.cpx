@@ -42,6 +42,7 @@ void tScnMenuBase::init()
 	selected=0;
 	viewOffset=0;
 	viewSize=6;
+	sceneBase::init();
 }
 
 void tScnMenuBase::additem(const char *v)

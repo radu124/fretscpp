@@ -66,7 +66,6 @@ int main( int argc, char* argv[] )
 					      );
 	}
 	MainMenu.init();
-	guitarScene.init();
 	
 	glViewport( 0, 0, scr_width, scr_height );
 	glClear( GL_COLOR_BUFFER_BIT );
@@ -116,9 +115,9 @@ int main( int argc, char* argv[] )
 	//SDL_FreeSurface(bg);
 
 	/* cleanup SDL */
-	SDL_Quit();
 	write_config();
 	done_joysticks();
+	SDL_Quit();
 	//DBG(GAME,"CBK=%d F:%d Fo:%d chn:%d buf%d\n",
 	//	callbacklen,desired.format, obtained.format, obtained.channels, obtained.samples);
 	return 0;

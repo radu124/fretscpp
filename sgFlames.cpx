@@ -122,6 +122,7 @@ void tSceneGuitar::origGlow(int n)
 	GLfloat size[2];
 	GLfloat x,y,t,sf,isf=0;
 	GLfloat f=1;
+	GLfloat ms;
 	x=n-2;
 	y=-boardline;
 	
@@ -158,6 +159,7 @@ void tSceneGuitar::origGlow(int n)
 // to fix...
 void tSceneGuitar::rfFlames2()
 {
+	GLfloat ms;
 	int i,j;
 	const int flameLimit = 10.0;
 	const int flameLimitHalf = flameLimit/2;

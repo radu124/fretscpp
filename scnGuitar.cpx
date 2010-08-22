@@ -18,13 +18,15 @@ class tSceneGuitar:public tScnMenuBase
 {
 public:
 	tSceneGuitar() { scenes.add(this,SCN_PLAYING); };
-	GLfloat fadespeed() { return 1000; }
+	GLfloat fadespeed() { return 0.33; }
+	GLfloat fadeoutspeed() { return 1000; }
 	GLfloat boardlen,boardline,necktop;
 	int timenow;
 	int cplayer;
 	int cinstrument;
 	int cdifficulty;
 	int statsmode;
+	int shouldstillstart;
 	vector<notestatus> *cnotes;
 	void enter();
 	void init();
@@ -52,6 +54,7 @@ public:
 	int menumode;
 	void itemClicked(int i);
 	GLfloat notePos(int timestamp);
+	void updatetime();
 } guitarScene;
 
 GLfloat keycolors[5][3]={
@@ -66,6 +69,25 @@ implementation
 
 uses audio,player,keyboard,globals,sgFlames,sgNeck,sgNotes,sgKeys,sgStats;
 
+void tSceneGuitar::updatetime()
+{
+	MESSAGE("fade: %f\n" &scn.fade);
+	if (scn.fade>0.0001)
+	{
+		if (scn.fade<0.66) timenow=(int) (-133636*scn.fade);
+		else (timenow=-88200-9000*sin((scn.fade-0.66)*9.51));
+	} else {
+		if (shouldstillstart && !menumode)
+		{
+			MESSAGE("Starting playback.\n");
+			shouldstillstart=0;
+			playing.pause=0;
+		}
+		timenow=playing.playpos;
+	}
+
+}
+
 void tSceneGuitar::render()
 {
 //	fprintf(stderr,"P%d:S%d:E%d:Pl%d %d/%d-%d-%d--%d-%d-%d\n",playing.pause,playing.stalled,playing.songended,playing.playing,playing.playpos,
@@ -78,7 +100,7 @@ void tSceneGuitar::render()
 	}
 	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
 	glClear( GL_COLOR_BUFFER_BIT );
-	timenow=playing.playpos;
+	updatetime();
 	for (cplayer=0; cplayer<numplayers; cplayer++)
 	{
 		cinstrument=player[cplayer].instrument;
@@ -104,10 +126,10 @@ void tSceneGuitar::render()
 		glBindTexture(GL_TEXTURE_2D,NULL);
 		glBegin(GL_TRIANGLE_FAN);
 		glColor4f(0.0f,0.0f,0.0f,0.30f);
-		glVertex3f(0,0,0);
-		glVertex3f(scr_width,0,0);
-		glVertex3f(scr_width,scr_height,0);
-		glVertex3f(0,scr_height,0);
+		glVertex3f(-scr_lrlim,-scr_tblim,0);
+		glVertex3f( scr_lrlim,-scr_tblim,0);
+		glVertex3f( scr_lrlim, scr_tblim,0);
+		glVertex3f(-scr_lrlim, scr_tblim,0);
 		glEnd();
 		glLoadIdentity();
 		rendertext();
@@ -118,11 +140,14 @@ void tSceneGuitar::enter()
 {
 	int i;
 	tScnMenuBase::enter();
+	MESSAGE("entered GUITAR\n");
 	SDL_EnableKeyRepeat(0,0);
 	for (i=0; i<numplayers; i++) player[i].init(i);
 	menumode=0;
 	statsmode=0;
-	song_start((selectedsong+"/").c_str());
+	shouldstillstart=1;
+	song_start((selectedsong+"/").c_str(),1);
+	playing.pause=1;
 }
 
 void tSceneGuitar::init()
@@ -135,9 +160,9 @@ void tSceneGuitar::init()
 	additem("Settings");
 	additem("Quit to Main Menu");
 	menumode=1;
-	posx=scr_width*0.2;
-	posy=scr_height*0.4;
-	scale=scr_height*0.04;
+	posx=-24;
+	posy=-6;
+	scale=3;
 	tScnMenuBase::init();
 	viewOffset=0;
 	viewSize=6;
@@ -176,6 +201,7 @@ void tSceneGuitar::itemClicked(int i)
 		playing.pause=0;
 		return;
 	case 1: // restart
+		fadetoscene(SCN_PLAYING);
 		return;
 	case 2: // change song
 		fadetoscene(SCN_SONGS);
@@ -184,6 +210,7 @@ void tSceneGuitar::itemClicked(int i)
 		fadetoscene(SCN_SCORE);
 		return;
 	case 4: // settings
+		pushscene(SCN_SETTINGS);
 		return;
 	case 5: // main menu
 		fadetoscene(SCN_MAINMENU);

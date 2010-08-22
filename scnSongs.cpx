@@ -20,7 +20,7 @@ class tScnSongs:public sceneBase
 {
 public:
 	tScnSongs();
-	void init();
+	void enter();
 	void render();
 	void handleevent(SDL_Event &a);
 	GLfloat fadespeed() { return 100; }
@@ -30,7 +30,7 @@ public:
 	int previewlock;
 	GLfloat selecttime;
 	int viewOffset;
-	void enter();
+
 } scnSongs;
 
 implementation
@@ -47,15 +47,16 @@ tScnSongs::tScnSongs()
 void tScnSongs::enter()
 {
 	SDL_EnableKeyRepeat(133,33);
+	sceneBase::enter();
 }
 
 void tScnSongs::render()
 {
 	GLfloat x,y;
 	paintrotback();
-	scale=h*0.05;
-	y=scale*2;
-	x=scale;
+	scale=3;
+	y=-24;
+	x=-37;
 	if (songsdb.size()==0) updatesongdb();
 	
 	int i;

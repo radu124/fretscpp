@@ -14,6 +14,8 @@ GNU General Public License for more details.
   
 interface
 
+uses midiparser;
+
 class tPlayer
 {
 public:
@@ -21,7 +23,7 @@ public:
 	int score;
 	int streak;
 	int lastkeys[6];
-	int lasthit[5];
+	int lasthit[6]; // time of last hit per key [5]=any
 	int keys;
 	int hit;
 	int crtnote;
@@ -39,14 +41,18 @@ public:
 	int notegood;
 	int notetotal;
 	int notexmiss;
-	
+	int lasttime; // last time we called passtime()
 	int timemultiplier;
-	
+	int whammy;
+	int whammyon;
 	// how much of the current note they player already
 	// got credit for (timestamp)
 	int holdaccounted; 
+	int enabled;
 	
 	string name;
+	string lastInstr;
+	int lastDiffi;
 	
 	void handlehit();
 	void passtime();
@@ -55,28 +61,37 @@ public:
 	void releasekey(int i);
 	void unhitactive(int ts);
 	void holdscore(int ts);
+	void addwhammy(int i);
 	int notematch(int i);
 	vector<notestatus> *cnotes;
 	vector<int> history;
 };
 
-tPlayer player[2];
+const int MAX_PLAYERS=8;
+
+tPlayer player[MAX_PLAYERS];
 
 implementation
 
-uses audio;
+uses audio,scnGuitar,scnSetSongOpt;
+
+void tPlayer::addwhammy(int i)
+{
+	if (hitactive) whammy+=i;
+}
 
 void tPlayer::presskey(int i)
 {
 	lastkeys[i]=1;
-	if (i<5) unhitactive(playing.playpos);	
-	if (i>=5) handlehit(); 
+	if (i<5) unhitactive(guitarScene.timenow);	
+	if (i>=5 && i<=6) handlehit(); 
+	if (i==7) addwhammy(15000);
 }
 
 void tPlayer::releasekey(int i)
 {
 	lastkeys[i]=0;
-	if (i<5) unhitactive(playing.playpos);
+	if (i<5) unhitactive(guitarScene.timenow);
 }
 
 void tPlayer::holdscore(int ts)
@@ -84,9 +99,12 @@ void tPlayer::holdscore(int ts)
 // guitarscene line 334
 	const int SCOREDIV=441;
 	int multiplier=1+streak/10;
+	int scoreplus;
 	if (multiplier>4) multiplier=4;
 	if (ts<holdaccounted) return;
-	scorefrac+=multiplier*(ts-holdaccounted); //hitactive*
+	scoreplus=multiplier*(ts-holdaccounted);
+	if (whammyon) scoreplus*=2;
+	scorefrac+=scoreplus; //hitactive*
 	holdaccounted=ts;
 	score+=scorefrac/SCOREDIV;
 	scorefrac%=SCOREDIV;
@@ -103,6 +121,7 @@ void tPlayer::init(int iid)
 {
 	int i;
 	id=iid;
+	whammy=0;
 	scorefrac=0;
 	crtnote=0;
 	hittnote=-1;
@@ -112,6 +131,7 @@ void tPlayer::init(int iid)
 	notegood=0;
 	notexmiss=0;
 	streak=0;
+	lasttime=0;
 	for (i=0; i<cnotes->size(); i++) if (cnotes[0][i].hashit(difficulty)) notetotal++;
 	history.resize(cnotes->size());
 	for (i=0; i<history.size(); i++) history[i]=0;
@@ -122,8 +142,17 @@ void tPlayer::init(int iid)
 
 void tPlayer::passtime()
 {
-	int timenow=playing.playpos;
+	int timenow=guitarScene.timenow;
+	int timeincr=timenow-lasttime;
 	int j;
+	lasttime=timenow;
+	if (timeincr>0)
+	{
+		// whammy fades out
+		whammy=(int) (whammy*exp(-timeincr*0.0001)-timeincr*0.01);
+		if (whammy<0) whammy=0;
+	}
+	playing.wh[id]=whammyon=hitactive && (whammy>5000) && (timenow-lasthit[5]>20000);
 	while (crtnote<crtSong.trk_notes[instrument].size())
 	{
 		notestatus &cn=cnotes[0][crtnote];
@@ -154,7 +183,7 @@ int tPlayer::notematch(int i)
 
 void tPlayer::handlehit()
 {
-	int timenow=playing.playpos;
+	int timenow=guitarScene.timenow;
 	int i,found=-1,good=0,j;
 	int multiplier=streak/10+1;
 	if (multiplier>4) multiplier=4;
@@ -176,7 +205,7 @@ void tPlayer::handlehit()
 	if (good) {
 		for (i=0; i<5; i++)
 			if (lastkeys[i]) lasthit[i]=timenow;
-		
+		lasthit[5]=timenow;
 		streak++;
 		playing.gp[id]=1;
 		hitactive=cnotes[0][crtnote-1].hashit(difficulty);

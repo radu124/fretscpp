@@ -1,6 +1,6 @@
 interface
 
-uses includes;
+uses includes,player;
 
 string configFile;
 string homeconfdir;
@@ -12,12 +12,28 @@ string datadir;
 
 vvint keydefs;
 vstring keyconfname;
+
+struct tNeckpos
+{
+	GLfloat xdisp,ydisp;
+	GLfloat scale,stretch;
+	GLfloat skew;
+	int statpos;
+	tNeckpos():xdisp(0),ydisp(0),scale(1),stretch(1),skew(0),statpos(0) {;}
+};
 	
 // bit mask describing the last selected input devices
 //we don't expect more than 8 players
 long keydefselector[8];
 void init_config();
 
+int conf_stretch=0;
+const int NECKPOS_COUNT=MAX_PLAYERS*(MAX_PLAYERS+1)/2;
+tNeckpos neckpos[NECKPOS_COUNT];
+GLfloat neckpos_extend;
+GLfloat tolerance_early=100;
+GLfloat tolerance_late=100;
+int enablehopos;
 
 implementation
 
@@ -80,6 +96,14 @@ void write_config()
 	}
 	for (i=0; i<8; i++) fprintf(fou,"%ld ",keydefselector[i]);
 	fprintf(fou,"\n");
+	fprintf(fou,"viewports:\n%d\n",NECKPOS_COUNT);
+	for (i=0; i<NECKPOS_COUNT; i++)
+	{
+		fprintf(fou,"%f %f %f %f %f %d\n",
+			neckpos[i].xdisp, neckpos[i].ydisp,
+			neckpos[i].scale, neckpos[i].stretch,
+			neckpos[i].skew, neckpos[i].statpos);
+	}
 	fclose(fou);
 }
 

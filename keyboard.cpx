@@ -114,11 +114,11 @@ void guitarkey(int ev, int key)
 	int i,pl,q;
 	for (pl=0; pl<numplayers; pl++)
 	{
-		for (q=0; q<2; q++)
+		for (q=0; q<keydefs.size(); q++)
 		{
 			if (!(keydefselector[pl] & (1<<q))) continue;
 			int id=-1;
-			for (i=0; i<7; i++)
+			for (i=0; i<9; i++)
 			{
 				if (key==keydefs[q][i]) id=i;
 			}

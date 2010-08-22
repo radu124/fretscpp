@@ -259,16 +259,17 @@ void tScnTable::rendertext()
 
 	int i,j,cc;
 	GLfloat x,y,scale;
-	colsize=(w-xpos*2)/(fixedcols+colsvisible);
-	scale=h*0.05;
+	colsize=80/(fixedcols+colsvisible);
+	// (w-xpos*2)/... why?
+	scale=3;
 	glLoadIdentity();
 			
 	for (j=0; j<fixedcols+colsvisible; j++)
 	{
 		if (j<fixedcols) cc=j;
 		else cc=j-fixedcols+baseh;
-		y=2*scale;
-		x=scale+colsize*j;
+		y=2*scale-30;
+		x=colsize*j-37;
 		if (cc>=entries.size()) continue;
 		for (i=0; i<entries[cc].size(); i++)
 		{

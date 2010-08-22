@@ -10,11 +10,9 @@ void tSceneGuitar::renderMultiplierVal()
 	int mult=pp.streak/10*2;
 	int mr=pp.streak%10;
 	if (pp.streak>=40) { mult=6; mr=10; }
-	h=scr_height;
-	w=scr_width;
 	glPushMatrix();
-	glTranslatef(w*(1+cplayer*12)/14.0,h*1/3,0);
-	glScalef(w/14,-w/7,0);
+	glTranslatef(-35+cplayer*60,-10,0);
+	glScalef(5,-10,0);
 	//deffont.displayString(".",0,1,1,0);
 	spc.guitar[mult].bind();
 	glColor4f(1,1,1,1);
@@ -43,23 +41,37 @@ void tSceneGuitar::renderStats()
 	glLoadIdentity();
 	glColor4f(1.0,1.0,1.0,1.0);
 	int align=0;
-	int x=20;
+	int x=-38;
 	if (cplayer==1) 
 	{
 		align=TFont::ALIGN_RIGHT;
-		x=w-20;
+		x=38;
 	}
 	sprintf(a,"streak: %d",pp.streak);
-	deffont.displayString(a,x,h/2+40,20,align);
+	deffont.displayString(a,x,4,2,align);
 	sprintf(a,"score: %d",pp.score);
-	deffont.displayString(a,x,h/2+60,20,align);
-	if (statsmode==1)
+	deffont.displayString(a,x,6,2,align);
+	switch (statsmode)
 	{
+	case 1:
 		sprintf(a,"playing: %d",playing.playpos);
-		deffont.displayString(a,20,20,20,0);
+		deffont.displayString(a,-38,-28,2,0);
 		sprintf(a,"decode: %d-%d-%d",playing.decodepos[0],playing.decodepos[1],playing.decodepos[2]);
-		deffont.displayString(a,20,40,20,0);
+		deffont.displayString(a,-38,-26,2,0);
 		sprintf(a,"stop: %d-%d-%d",playing.stopsat[0],playing.stopsat[1],playing.stopsat[2]);
-		deffont.displayString(a,20,60,20,0);
+		deffont.displayString(a,-38,-24,2,0);
+		break;
+	case 2:
+		sprintf(a,"Whammy: %d %d",player[0].whammy,player[1].whammy);
+		deffont.displayString(a,-38,-28,2,0);
+		sprintf(a,"crtnote: %d %d  farnote: %d %d",
+			player[0].crtnote, player[1].crtnote,
+			player[0].farrnote, player[1].farrnote
+			);
+		deffont.displayString(a,-38,-26,2,0);
+		sprintf(a,"shouldstart: %d time %d",shouldstillstart,timenow);
+		deffont.displayString(a,-38,-24,2,0);
+		
+		break;
 	}
 }

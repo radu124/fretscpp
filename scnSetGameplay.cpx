@@ -1,0 +1,22 @@
+interface
+
+uses scnSetBase;
+
+class tScnSetGameplay:public tScnSetBase
+{
+public:
+	tScnSetGameplay() { scenes.add(this,SCN_SETGAMEPLAY); }
+	void init();
+} scnSetGameplay;
+
+implementation
+
+uses configuration,scene;
+
+void tScnSetGameplay::init()
+{
+	MESSAGE("Initialized scene: SetGameplay\n");
+	additem(new tSIrange("Early tolerance",20,500,&tolerance_early,10));
+	additem(new tSIrange("Late tolerance",20,500,&tolerance_late,10));
+	additem(new tSIcheckbox("Enable HOPOs",&enablehopos));
+}

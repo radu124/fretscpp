@@ -16,79 +16,59 @@ interface
 
 uses includes, globals, sprites, scene, scnMenu;
 
-class tScnMenuMain:public tScnMenuBase
+class tScnSettings:public tScnMenuBase
 {
 public:
-	tScnMenuMain() { scenes.add(this,SCN_MAINMENU); }
+	tScnSettings() { scenes.add(this,SCN_SETTINGS); }
 	GLfloat fadespeed() { return 100; }
 	void init();
 	void render();
 	void itemClicked(int i);
-} MainMenu;
+} scnSettings;
 
 implementation
 
-void tScnMenuMain::init()
+uses scene;
+
+void tScnSettings::init()
 {
-	additem("Start game");
-	additem("Multiplayer");
-	additem("Settings");
-	additem("Define controls");
-	additem("Quit");
-	posx=-24;
-	posy=-6;
-	scale=4.8;
+	additem("Gameplay");
+	additem("Layout");
+	additem("Video");
+	additem("Theme");
+	additem("Return to Main Menu");
+	posx=-38;
+	posy=-4;
+	scale=3;
 	tScnMenuBase::init();
 }
 
-void tScnMenuMain::itemClicked(int i)
+void tScnSettings::itemClicked(int i)
 {
 	switch (i)
 	{
 	case -1:
 	case 4:
-		gameover = 1;
+		popscene();
 		break;
 	case 0:
-		numplayers=1;
-		fadetoscene(2);
+		pushscene(SCN_SETGAMEPLAY);
 		break;
 	case 1:
-		numplayers=2;
-		fadetoscene(2);
+		pushscene(SCN_SETLAYOUT);
 		break;
 	case 2:
-		pushscene(SCN_SETTINGS);
+		pushscene(SCN_SETVIDEO);
 		break;
 	case 3:
-		fadetoscene(SCN_KEYDEF);
+		pushscene(SCN_SETTHEME);
 		break;
 	}
 }
 
-void tScnMenuMain::render()
+void tScnSettings::render()
 {
 	paintrotback();
-	GLfloat t=scn.timesc*0.33;
-	GLfloat fade2=scn.fade*2;
-	if (fade2>1) fade2=1;
-	GLfloat v=fade2*fade2; // 1-v in original
-	GLfloat logoscale=1+0.025*sin(t*17)*(1-v)-v*v*v;
-	
-	if (logoscale>0.01)
-	{
-		glLoadIdentity();
-		glTranslatef(0,-18,0);
-		glScalef(1+0.025*sin(t*16), logoscale,1.0);
-		glScalef(1.25,1.25,1.0);
-		spc.logo.draw();
-	}
-	glLoadIdentity();
-	glTranslatef(20+v*v*80, 8.5, 0);
-	glScalef(0.9,0.9,1.0);
-	glScalef(1.25,1.25,1.0);
-	spc.guyk.draw();
-	
 	rendertext();
 }
 

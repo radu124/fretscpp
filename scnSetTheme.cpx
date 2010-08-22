@@ -1,0 +1,15 @@
+interface
+
+uses scnSetBase;
+
+class tScnSetTheme:public tScnSetBase
+{
+public:
+	tScnSetTheme() { scenes.add(this,SCN_SETTHEME); }
+	GLfloat fadespeed() { return 100; }
+} scnSetTheme;
+
+
+implementation
+
+uses configuration,scene;

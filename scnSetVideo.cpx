@@ -1,0 +1,11 @@
+interface
+
+implementation
+
+class tScnSetVideo:public tScnSetBase
+{
+public:
+	tScnSetVideo() { scenes.add(this,SCN_SETVIDEO); }
+} scnSetVideo;
+
+uses configuration,scene;

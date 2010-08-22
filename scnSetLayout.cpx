@@ -1,0 +1,13 @@
+interface
+
+uses scnSetBase;
+
+class tScnSetLayout:public tScnSetBase
+{
+public:
+	tScnSetLayout() { scenes.add(this,SCN_SETLAYOUT); }
+} scnSetLayout;
+
+implementation
+
+uses configuration,scene;

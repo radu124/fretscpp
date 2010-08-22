@@ -54,13 +54,13 @@ void tScnScore::render()
 		{
 			sprintf(a+strlen(a)," and %d extra misses",player[0].notexmiss);
 		}
-		deffont.displayString(a,20+i*w/2,20,20,0);
+		deffont.displayString(a,-38+i*40,-26,3,0);
 		sprintf(a,"%d points",pp.score);
-		deffont.displayString(a,40+i*w/2,40,20,0);
+		deffont.displayString(a,-36+i*40,-23,3,0);
 		string s=pp.name;
 		if (i==editing && (((int) (scn.time*2))&1)) s+='_';
 		sprintf(a,"name: %s",s.c_str());
-		deffont.displayString(a,20+i*w/2,60,20,0);
+		deffont.displayString(a,-38+i*40,-18,3,0);
 	}
 }
 

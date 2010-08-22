@@ -86,7 +86,12 @@ void sprite::load(const char *fname, int flags)
 	*/
 	//height=200;
 	//width=500;
-	centerx=cx*width; centery=cy*height;
+	// original assumed to match 800x600 resolution
+	// while our coordinate system is 80x60
+	height/=10;
+	width/=10;
+	centerx=cx*width; 
+	centery=cy*height;
 }
 
 void sprite::draw(GLfloat x, GLfloat y)

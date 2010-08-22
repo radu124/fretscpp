@@ -16,7 +16,7 @@ interface
 
 implementation
 
-uses scnGuitar;
+uses scnGuitar,midiparser,globals,scnSetSongOpt;
 
 GLfloat tSceneGuitar::notePos(int timestamp)
 {
@@ -102,8 +102,10 @@ void tSceneGuitar::renderNoteLine(int col, GLfloat from, GLfloat to, int flags)
 		{
 			if (from+i*0.2+0.2>to) break;
 			GLfloat a1=0.1*sin(timenow*0.0001+i*0.3)+0.1*sin(timenow*0.0001754-i*0.3)+0.1*sin(timenow*0.0001754);
-			glTexCoord2f(0.0f,1); glVertex3f(col-lw-a1,from+i*0.2,0);
-			glTexCoord2f(1.0f,1); glVertex3f(col+lw+a1,from+i*0.2,0);
+			GLfloat a2=0;
+			if (pp.whammyon) a2=0.1*sin(i*0.5-timenow*0.0001);
+			glTexCoord2f(0.0f,1); glVertex3f(col-lw-a1+a2,from+i*0.2,0);
+			glTexCoord2f(1.0f,1); glVertex3f(col+lw+a1+a2,from+i*0.2,0);
 		}
 		glTexCoord2f(0.0f,0); glVertex3f(col-lw,to,0);
 		glTexCoord2f(1.0f,0); glVertex3f(col+lw,to,0);
