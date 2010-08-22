@@ -20,7 +20,7 @@ public:
 	tSceneGuitar() { scenes.add(this,SCN_PLAYING); };
 	GLfloat fadespeed() { return 0.33; }
 	GLfloat fadeoutspeed() { return 1000; }
-	GLfloat boardlen,boardline,necktop;
+	int activeneckpos;
 	int timenow;
 	int cplayer;
 	int cinstrument;
@@ -71,7 +71,7 @@ uses audio,player,keyboard,globals,sgFlames,sgNeck,sgNotes,sgKeys,sgStats;
 
 void tSceneGuitar::updatetime()
 {
-	MESSAGE("fade: %f\n" &scn.fade);
+	//MESSAGE("fade: %f\n" &scn.fade);
 	if (scn.fade>0.0001)
 	{
 		if (scn.fade<0.66) timenow=(int) (-133636*scn.fade);
@@ -106,7 +106,7 @@ void tSceneGuitar::render()
 		cinstrument=player[cplayer].instrument;
 		cdifficulty=player[cplayer].difficulty;
 		cnotes=&crtSong.trk_notes[cinstrument];
-		scene_setNeck(cplayer);
+		scene_setNeck(cplayer,numplayers);
 		noteRegion();
 		renderNeck();
 		renderTracks();
@@ -115,11 +115,17 @@ void tSceneGuitar::render()
 		renderNotes();
 		renderFlames();
 		renderMultiplier();
-		scene_setOrtho();
+	}
+	scene_setOrtho();
+	for (cplayer=0; cplayer<numplayers; cplayer++)
+	{
+		activeneckpos=cplayer+numplayers*(numplayers-1)/2;
+		cinstrument=player[cplayer].instrument;
+		cdifficulty=player[cplayer].difficulty;
+		cnotes=&crtSong.trk_notes[cinstrument];
 		renderMultiplierVal();
 		renderStats();
 	}
-	
 	if (menumode)
 	{
 		glLoadIdentity();
@@ -166,10 +172,6 @@ void tSceneGuitar::init()
 	tScnMenuBase::init();
 	viewOffset=0;
 	viewSize=6;
-	
-	boardlen=4;
-	boardline=3;
-	necktop=2;
 }
 
 void tSceneGuitar::handleevent(SDL_Event &a)

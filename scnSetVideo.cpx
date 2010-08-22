@@ -6,6 +6,16 @@ class tScnSetVideo:public tScnSetBase
 {
 public:
 	tScnSetVideo() { scenes.add(this,SCN_SETVIDEO); }
+	void init();
 } scnSetVideo;
 
 uses configuration,scene;
+
+void tScnSetVideo::init()
+{
+	additem(new tSIcheckbox("Fullscreen",NULL));
+	additem(new tSIcheckbox("VSync",NULL));
+	additem(new tSIcheckbox("Frame Limiter",NULL));
+	additem(new tSIrange("FPS",25,100,NULL,1));
+	tScnSetBase::init();
+}

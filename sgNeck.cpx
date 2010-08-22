@@ -38,7 +38,7 @@ void tSceneGuitar::renderNeck()
 	glTexCoord2f(1.0f,s0);
 	glVertex3f(2.3,2.0f,0);
 	
-	glColor4f(1.0f,1.0f,1.0f,1.0f-scn.fade);
+	glColor4f(1.0f,1.0f,1.0f,1.0f);
 	glTexCoord2f(0.0f,s1);
 	glVertex3f(-2.3,1.0f,0);
 	glTexCoord2f(1.0f,s1);

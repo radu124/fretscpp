@@ -19,4 +19,5 @@ void tScnSetGameplay::init()
 	additem(new tSIrange("Early tolerance",20,500,&tolerance_early,10));
 	additem(new tSIrange("Late tolerance",20,500,&tolerance_late,10));
 	additem(new tSIcheckbox("Enable HOPOs",&enablehopos));
+	tScnSetBase::init();
 }

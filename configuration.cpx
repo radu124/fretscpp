@@ -19,7 +19,7 @@ struct tNeckpos
 	GLfloat scale,stretch;
 	GLfloat skew;
 	int statpos;
-	tNeckpos():xdisp(0),ydisp(0),scale(1),stretch(1),skew(0),statpos(0) {;}
+//	tNeckpos():xdisp(0),ydisp(0),scale(1),stretch(1),skew(0),statpos(0) {;}
 };
 	
 // bit mask describing the last selected input devices
@@ -33,6 +33,23 @@ tNeckpos neckpos[NECKPOS_COUNT];
 GLfloat neckpos_extend;
 GLfloat tolerance_early=100;
 GLfloat tolerance_late=100;
+GLfloat boardlen=4;
+GLfloat boardline=3;
+GLfloat necktop=2;
+
+tNeckpos defneckpos[10]={
+{0.000000,0.000000,1.000000,1.000000,0.000000,0},
+{-3.250000,0.000000,1.000000,0.700000,-0.220000,0},
+{3.250000,0.000000,1.000000,0.700000,0.220000,1},
+{-3.500000,-0.250000,0.800000,0.600000,-0.150000,0},
+{0.000000,0.500000,0.900000,0.600000,0.000000,1},
+{3.500000,-0.250000,0.800000,0.600000,0.150000,1},
+{-3.000000,-1.000000,0.600000,1.000000,0.000000,0},
+{-1.750000,4.000000,1.300000,0.500000,0.000000,0},
+{3.000000,4.000000,1.300000,0.500000,0.000000,1},
+{3.500000,-1.000000,0.600000,1.000000,0.000000,1}
+};
+
 int enablehopos;
 
 implementation
@@ -75,6 +92,22 @@ int read_config()
 	}
 	for (i=0; i<8; i++) fscanf(fc,"%ld",keydefselector+i);
 	fscanf(fc,"\n");
+	fscanf(fc,"%s\n",a);
+	fscanf(fc,"%d", &i);
+	if (i==10)
+	{
+		for (i=0; i<10; i++)
+		{
+			fscanf(fc,"%f %f %f %f %f %d\n",
+				&neckpos[i].xdisp,
+				&neckpos[i].ydisp,
+				&neckpos[i].scale,
+				&neckpos[i].stretch,
+				&neckpos[i].skew,
+				&neckpos[i].statpos);
+		}
+		if (neckpos[i].scale<0.5 || neckpos[i].scale>4) neckpos[i]=defneckpos[i];
+	}
 	fclose(fc);
 	if (numkeys<2) return 0;
 	return 1;
@@ -122,6 +155,7 @@ void default_config()
 	}
 	keydefselector[0]=1;
 	keydefselector[1]=2;
+	for (i=0; i<10; i++) neckpos[i]=defneckpos[i];
 }
 
 void init_config()
@@ -141,6 +175,7 @@ void init_config()
 	else if (fileExists("data/keyboard.png")) datadir="data";
 	else if (fileExists("/usr/share/games/fretscpp/data")) datadir="/usr/share/games/fretscpp/data";
 	else datadir="/usr/share/games/fretsonfire/data";
+	default_config();
 	if (read_config()) return;
 	default_config();
 }

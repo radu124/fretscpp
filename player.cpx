@@ -67,7 +67,7 @@ public:
 	vector<int> history;
 };
 
-const int MAX_PLAYERS=8;
+const int MAX_PLAYERS=4;
 
 tPlayer player[MAX_PLAYERS];
 

@@ -82,7 +82,7 @@ public:
 };
 
 void scene_setOrtho();
-void scene_setNeck(int i=0);
+void scene_setNeck(int i=0, int np=1);
 
 tscenelist scenes;
 
@@ -122,8 +122,10 @@ GLfloat sskewmatrix[16]={
 	0,0,1,0,
 	0,0,0,1};
 
-void scene_setNeck(int i)
+void scene_setNeck(int i, int np)
 {
+	int active=i+np*(np-1)/2;
+	assume(active>=0 && active<NECKPOS_COUNT,"trying to set wrong neckpos");
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(90.0f, 1.0f * scr_width / scr_height, 1.0f, 100.0f);
@@ -137,17 +139,19 @@ void scene_setNeck(int i)
 	//glGetFloatv( GL_MODELVIEW_MATRIX, fvViewMatrix );
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	if (numplayers!=1)
-	{
-		glTranslatef(-1.5+3*i,0,0);
-		glScalef(0.5,0.7,1);
-		sskewmatrix[4]=-0.4+i*0.8;
-		sskewmatrix[12]=i*3-1.5;
-		sskewmatrix[8]=0.1-0.2*i;
-		// ok, there are more ways of doing it, i like it like this
-		//sskewmatrix[8]=0.8-1.6*i;
-		glMultMatrixf(sskewmatrix);
-	}
+
+	
+	glTranslatef(neckpos[active].xdisp,neckpos[active].ydisp,0); //-1.5+3*i,0,0);
+	glScalef(neckpos[active].scale*neckpos[active].stretch,neckpos[active].scale,1);
+	sskewmatrix[4]=neckpos[active].xdisp*0.16+neckpos[active].skew;
+	sskewmatrix[8]=-neckpos[active].xdisp*0.1;
+	//sskewmatrix[4]=-0.4+i*0.8;
+	//sskewmatrix[12]=-neckpos[active].xdisp;
+	//sskewmatrix[8]=0.1-0.2*i;
+	// ok, there are more ways of doing it, i like it like this
+	//sskewmatrix[8]=0.8-1.6*i;
+	glMultMatrixf(sskewmatrix);
+
 }
 
 void sceneBase::setdim()

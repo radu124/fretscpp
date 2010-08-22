@@ -3,10 +3,10 @@ interface
 struct tSettingsItem
 {
 public:
-	enum {TYP_CHECKBOX,TYP_LISTBOX,TYP_RANGE,TYP_EDITBOX};
+	enum {TYP_NULL=0,TYP_CHECKBOX,TYP_LISTBOX,TYP_RANGE,TYP_EDITBOX};
 	string title;
 	int typ;
-	tSettingsItem(string tv, int ty):title(tv),typ(ty) {;}
+	tSettingsItem(string tv="", int ty=0):title(tv),typ(ty) {;}
 	virtual int handleevent(SDL_Event &event) { return 0; }
 	virtual string toString() { return ""; }
 };
@@ -23,12 +23,37 @@ struct tSIcheckbox:public tSettingsItem
 struct tSIrange:public tSettingsItem
 {
 	tSIrange(string v, GLfloat miv, GLfloat mav, GLfloat *vv, GLfloat stv):
-		tSettingsItem(v,TYP_RANGE),min(miv),max(mav),val(vv),step(stv) { if (!vv) val=&locval; }
+		tSettingsItem(v,TYP_RANGE),min(miv),max(mav),val(vv),step(stv) { if (!vv) val=&locval; capval(); }
 	GLfloat *val;
 	GLfloat min,max,step,locval;
+	void capval() { if (*val<min) *val=min; if (*val>max) *val=max; }
 	int handleevent(SDL_Event &event);
 	string toString();
 };
+
+struct tSIintrange:public tSettingsItem
+{
+	tSIintrange(string v, int miv, int mav, int *vv, int stv=1):
+		tSettingsItem(v,TYP_RANGE),min(miv),max(mav),val(vv),step(stv) { if (!vv) val=&locval; capval(); }
+	int *val;
+	int min,max,step,locval;
+	void capval() { if (*val<min) *val=min; if (*val>max) *val=max; }
+	int handleevent(SDL_Event &event);
+	string toString();
+};
+
+struct tSIlist:public tSettingsItem
+{
+	tSIlist(string v, vector<string> cv,int *vv):
+		tSettingsItem(v,TYP_RANGE),choices(cv),val(vv) { if (!vv) val=&locval; capval(); }
+	vector<string> choices;
+	int *val;
+	int min,max,step,locval;
+	void capval() { if (*val<0) *val=0; if (*val>=choices.size()) *val=choices.size()-1; }
+	int handleevent(SDL_Event &event);
+	string toString();
+};
+
 
 class tScnSetBase: public sceneBase
 {
@@ -55,7 +80,7 @@ string tSIcheckbox::toString()
 {
 	string result;
 	result="[";
-	if (val) result+="v";
+	if (*val) result+="v";
 	else result+=" ";
 	result+="] ";
 	result+=title;
@@ -73,12 +98,75 @@ string tSIrange::toString()
 	return result;
 }
 
+string tSIlist::toString()
+{
+	char a[32];
+	string result;
+	if (*val>0) result+="< ";
+	else result+="  ";
+	result+=title+": ";
+	result+=choices[*val];
+	if (*val<choices.size()-1) result+=" >";
+	return result;
+}
+
+string tSIintrange::toString()
+{
+	char a[32];
+	string result="<-- ";
+	result+=title;
+	sprintf(a,": %d",*val);
+	result+=a;
+	result+=" -->";
+	return result;
+}
+
+
 int tSIcheckbox::handleevent(SDL_Event &event)
 {
 	if (event.type!=SDL_KEYDOWN) return 0;
 	if (event.key.keysym.sym!=SDLK_RETURN) return 0;
 	*val=1-*val;
 	return 1;
+}
+
+
+int tSIintrange::handleevent(SDL_Event &event)
+{
+	if (event.type!=SDL_KEYDOWN) return 0;
+	switch(event.key.keysym.sym)
+	{
+	case SDLK_LEFT:
+		if (*val<=min) return 0;
+		*val-=step;
+		if (*val<min) *val=min;
+		return 1;
+	case SDLK_RIGHT:
+		if (*val>=max) return 0;
+		*val+=step;
+		if (*val>max) *val=max;
+		return 1;
+	}
+	return 0;
+}
+
+int tSIlist::handleevent(SDL_Event &event)
+{
+	if (event.type!=SDL_KEYDOWN) return 0;
+	switch(event.key.keysym.sym)
+	{
+	case SDLK_LEFT:
+		if (*val<=0) return 0;
+		*val-=step;
+		capval();
+		return 1;
+	case SDLK_RIGHT:
+		if (*val>=choices.size()-1) return 0;
+		*val+=step;
+		capval();
+		return 1;
+	}
+	return 0;
 }
 
 int tSIrange::handleevent(SDL_Event &event)
@@ -102,9 +190,14 @@ int tSIrange::handleevent(SDL_Event &event)
 
 void tScnSetBase::init()
 {
+	// TOFIX: this will create trouble during song play
+	SDL_EnableKeyRepeat(133,33);
 	selected=0;
 	viewOffset=0;
-	viewSize=6;
+	viewSize=12;
+	posx=-38;
+	posy=-6;
+	scale=3;
 	sceneBase::init();
 }
 
@@ -122,6 +215,7 @@ void tScnSetBase::handleevent(SDL_Event &event)
 		{
 			case SDLK_ESCAPE:
 			case SDLK_q:
+				itemAdjusted(-1);
 				popscene();
 				break;
 			case SDLK_UP:
@@ -184,6 +278,7 @@ void tScnSetBase::rendertext()
 		if (selected==i && scn.menufade==0)
 			dy=sin(scn.time*8)*scale*0.1;
 		string itemstring=item[i]->toString();
+		//MESSAGE("item:%s %f %f %f\n" &itemstring &x &(y+dy) &scale);
 		deffont.displayString(itemstring.c_str(),x-(v/4)*scale+scale*0.05,y+scale*0.05+dy,scale);
 		
 		if (selected==i && scn.menufade==0)

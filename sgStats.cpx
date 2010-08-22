@@ -11,7 +11,11 @@ void tSceneGuitar::renderMultiplierVal()
 	int mr=pp.streak%10;
 	if (pp.streak>=40) { mult=6; mr=10; }
 	glPushMatrix();
-	glTranslatef(-35+cplayer*60,-10,0);
+	GLfloat xp;
+	xp=6*(-1+2*neckpos[activeneckpos].statpos)*neckpos[activeneckpos].scale*neckpos[activeneckpos].stretch;
+	xp+=neckpos[activeneckpos].xdisp*6;
+	// bad...
+	glTranslatef(-35+70*cplayer,-10,0);
 	glScalef(5,-10,0);
 	//deffont.displayString(".",0,1,1,0);
 	spc.guitar[mult].bind();
