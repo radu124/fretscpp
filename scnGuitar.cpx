@@ -190,6 +190,12 @@ void tSceneGuitar::handleevent(SDL_Event &a)
 	else {
 		if (a.type==SDL_KEYDOWN) guitarkey(a.type,a.key.keysym.sym);
 		if (a.type==SDL_KEYUP) guitarkey(a.type,a.key.keysym.sym);
+		if (a.type==SDL_JOYAXISMOTION)
+		{ 
+			int axisid=3000000+a.jaxis.which*256+a.jaxis.axis;
+			//MESSAGE("WHAMMYAXIS %d %d\n" &axisid &a.jaxis.value);
+			guitarkey(a.type,axisid,a.jaxis.value);
+		}
 	}
 }
 

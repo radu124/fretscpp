@@ -1,6 +1,6 @@
 interface
 
-void guitarkey(int ev, int key);
+void guitarkey(int ev, int key, int other=0);
 string keyname(int id);
 void translateandhandleevent(SDL_Event &event);
 
@@ -39,7 +39,7 @@ void translateandhandleevent(SDL_Event &event)
 	
 	// translate hat to buttons
 	// a single hat event may generate multiple button events
-	if (e.type==SDL_JOYAXISMOTION)
+	if (e.type==SDL_JOYAXISMOTION && joydetect_enable)
 	{
 		int joy=e.jaxis.which;
 		int axis=e.jaxis.axis;
@@ -109,7 +109,7 @@ void translateandhandleevent(SDL_Event &event)
 	scenehandleevent(e);
 }
 
-void guitarkey(int ev, int key)
+void guitarkey(int ev, int key, int other)
 {
 	int i,pl,q;
 	for (pl=0; pl<numplayers; pl++)
@@ -125,6 +125,7 @@ void guitarkey(int ev, int key)
 			if (id==6) id=5;
 			if (id>=0 && ev==SDL_KEYDOWN) player[pl].presskey(id);
 			if (id>=0 && ev==SDL_KEYUP)   player[pl].releasekey(id);
+			if (id==7 && ev==SDL_JOYAXISMOTION) player[pl].whammyaxis(other);
 		}
 	}
 }

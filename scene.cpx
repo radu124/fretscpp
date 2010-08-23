@@ -141,9 +141,10 @@ void scene_setNeck(int i, int np)
 	glLoadIdentity();
 
 	
-	glTranslatef(neckpos[active].xdisp,neckpos[active].ydisp,0); //-1.5+3*i,0,0);
+	glTranslatef(neckpos[active].xdisp,neckpos[active].ydisp/2,neckpos[active].ydisp); //-1.5+3*i,0,0);
 	glScalef(neckpos[active].scale*neckpos[active].stretch,neckpos[active].scale,1);
-	sskewmatrix[4]=neckpos[active].xdisp*0.16+neckpos[active].skew;
+	sskewmatrix[4]=neckpos[active].xdisp*0.16+neckpos[active].skew; // Y adds to X
+	sskewmatrix[6]=neckpos[active].ydisp*0.08; // Y adds to Z
 	sskewmatrix[8]=-neckpos[active].xdisp*0.1;
 	//sskewmatrix[4]=-0.4+i*0.8;
 	//sskewmatrix[12]=-neckpos[active].xdisp;
@@ -188,7 +189,8 @@ void popscene()
 		nxt=scenestack.back();
 		scenestack.pop_back();
 	}
-	fadetoscene(nxt);
+	//fadetoscene(nxt);
+	scn.current=nxt;
 }
 
 void fadetoscene(int i)
