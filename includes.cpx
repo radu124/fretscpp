@@ -54,6 +54,7 @@ typedef vector<int> vint;
 typedef vector<vint> vvint;
 
 int gameover;
+volatile int uu;
 
 implementation
 

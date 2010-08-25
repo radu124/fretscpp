@@ -68,16 +68,16 @@ public:
 		static vector<sceneBase*> res;
 		return res;
 	}
-	void add(sceneBase *s, int idx)
+	void add(sceneBase *s, ENUM_SCENES idx)
 	{
 		if (idx>=get().size()) get().resize(idx+1);
 		get()[idx]=s;
 	}
-	int add(sceneBase *s)
-	{
-		get().push_back(s);
-		return get().size()-1;
-	}
+//	int add(sceneBase *s)
+//	{
+//		get().push_back(s);
+//		return get().size()-1;
+//	}
 	sceneBase * operator [] (int i);
 };
 

@@ -54,6 +54,8 @@ int enablehopos;
 
 implementation
 
+uses fileio;
+
 int defkeys[]={ SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_RETURN, SDLK_RSHIFT, SDLK_TAB, 'p'};
 int defkey2[]={ '1','2','3','4','5','k','m','l','p' };
 
@@ -63,10 +65,10 @@ int read_config()
 	int i, j, v, numkeys;
 	FILE *fc=fopen(configFile.c_str(),"r");
 	if (!fc) return 0;
-	fscanf(fc,"%s\n",a);
+	uu=fscanf(fc,"%s\n",a);
 	//currently very dumb
 	//MESSAGE("%s" &a);
-	fscanf(fc,"%d", &numkeys);
+	uu=fscanf(fc,"%d", &numkeys);
 	keydefs.resize(0);
 	keyconfname.resize(0);
 	keydefs.resize(numkeys);
@@ -74,10 +76,10 @@ int read_config()
 	{
 		for (j=0; j<8; j++)
 		{
-			fscanf(fc, "%d", &v); 
+			uu=fscanf(fc, "%d", &v); 
 			keydefs[i].push_back(v);
 		}
-		fscanf(fc,"%s",a);
+		uu=fscanf(fc,"%s",a);
 		if (a[0]>='0' && a[0]<='9')
 		{
 			// for the 5 pepole who already tried the first version
@@ -85,20 +87,20 @@ int read_config()
 			sscanf(a,"%d",&v);
 			keydefs[i].push_back(v);
 			//MESSAGE("new config\n");
-			fscanf(fc,"%s",a);
+			uu=fscanf(fc,"%s",a);
 		} else keydefs[i].push_back(0);
-		fscanf(fc,"\n");
+		uu=fscanf(fc,"\n");
 		keyconfname.push_back(a);
 	}
-	for (i=0; i<8; i++) fscanf(fc,"%ld",keydefselector+i);
-	fscanf(fc,"\n");
-	fscanf(fc,"%s\n",a);
-	fscanf(fc,"%d", &i);
+	for (i=0; i<8; i++) uu=fscanf(fc,"%ld",keydefselector+i);
+	uu=fscanf(fc,"\n");
+	uu=fscanf(fc,"%s\n",a);
+	uu=fscanf(fc,"%d", &i);
 	if (i==10)
 	{
 		for (i=0; i<10; i++)
 		{
-			fscanf(fc,"%f %f %f %f %f %d\n",
+			uu=fscanf(fc,"%f %f %f %f %f %d\n",
 				&neckpos[i].xdisp,
 				&neckpos[i].ydisp,
 				&neckpos[i].scale,
@@ -158,6 +160,17 @@ void default_config()
 	for (i=0; i<10; i++) neckpos[i]=defneckpos[i];
 }
 
+void trydatadir(string td)
+{
+	if (datadir!="") return;
+	MESSAGE("Looking for game data in: %s\n" &td);
+	if (fileExists(td+"/default.ttf"))
+	{
+		datadir=td;
+		MESSAGE("found!\n");
+	}
+}
+
 void init_config()
 {
 	int i;
@@ -168,13 +181,14 @@ void init_config()
 #else
 	homeconfdir=getenv("HOME");
 	homeconfdir+="/.config/fretscpp";
-	system((string("mkdir -p ")+homeconfdir).c_str());
+	uu=system((string("mkdir -p ")+homeconfdir).c_str());
 	configFile=homeconfdir+"/fretscpp.ini";
 #endif
-	if (fileExists(homeconfdir+"/data/keyboard.png")) datadir=homeconfdir+"/data";
-	else if (fileExists("data/keyboard.png")) datadir="data";
-	else if (fileExists("/usr/share/games/fretscpp/data")) datadir="/usr/share/games/fretscpp/data";
-	else datadir="/usr/share/games/fretsonfire/data";
+	trydatadir(homeconfdir+"/data");
+	trydatadir("./data");
+	trydatadir("/usr/share/games/fretscpp/data");
+	trydatadir("/usr/local/share/games/fretscpp/data");
+	trydatadir("/usr/share/games/fretsonfire/data");
 	default_config();
 	if (read_config()) return;
 	default_config();

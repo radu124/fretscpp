@@ -1,0 +1,30 @@
+#! /bin/sh
+
+DEPS=
+if !which g++; then DEPS="$DEPS g++"; fi
+if ! [ -e "/usr/include/SDL/SDL.h" ]; then DEPS="$DEPS SDL"; fi
+if ! [ -e "/usr/include/freetype2/freetype/freetype.h"]; then DEPS="$DEPS freetype2"; fi
+if ! [ -e "/usr/include/GL/gl.h" ]; then DEPS="$DEPS openGL"; fi
+if ! [ -e "/usr/include/IL/il.h" ]; then DEPS="$DEPS libdevil"; fi
+if ! [ -e "/usr/include/IL/ilu.h" ]; then DEPS="$DEPS libdevil"; fi
+if ! [ -e "/usr/include/IL/ilut.h" ]; then DEPS="$DEPS libdevil"; fi
+
+echo -en "\033[31m"
+
+for i in $DEPS; do 
+    echo "Missing (or not found in the expected place): $DEPS"
+done
+
+echo -en "\033[32m"
+
+echo "DUMMY configure"
+echo "sorry, you'll have to resolve this manually"
+echo "for debian based distributions (ubuntu) do"
+echo "     sudo apt-get install build-essential libsdl-dev libdevil-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev"
+echo "     optionally: sudo apt-get install fretsonfire-songs-sectoid fretsonfire-songs-muldjord"
+echo "I need to look up the package names under other distributions"
+echo
+echo -en "\033[0m"
+echo "other problems:"
+echo upon install it might happen that the program does not find its data files
+echo one solution is to just run it in the current directory

@@ -53,6 +53,8 @@ struct tsprites
 
 implementation
 
+uses configuration;
+
 void sprite::bind()
 {
 	glBindTexture(GL_TEXTURE_2D,tex);
@@ -67,16 +69,21 @@ void sprite::load(const char *fname, int flags)
 {
 	GLfloat cx=0.5f, cy=0.5f;
 	ILuint iname;
+	string ffullname=datadir+"/"+fname;
 	ilGenImages(1,&iname);
 	ilBindImage(iname);
-	ilLoadImage((char *) fname);
+	ilLoadImage(ffullname.c_str());
 	height =ilGetInteger(IL_IMAGE_HEIGHT);
 	width  =ilGetInteger(IL_IMAGE_WIDTH);
 	if (flags & 1) { height=1; width=1; }
-	//tex= ilutGLLoadImage((char *) fname);
+	//tex= ilutGLLoadImage(ffullname.c_str());
 	tex=ilutGLBindTexImage();
 	
 	INFO(SPRITES,"Loading: %s, iname: %d tex:%d size:%dx%d\n" &fname &iname &tex &width &height);
+	if (!width)
+	{
+		MESSAGE("Could not load file: %s/%s\n" &datadir &fname);
+	}
 	ilDeleteImages(1,&iname);
 	/*
 	ilutEnable(ILUT_OPENGL_CONV);
@@ -134,37 +141,37 @@ void init_sprites()
 	ilutRenderer(ILUT_OPENGL);
 #endif
 //	ilGenImages(1,&baseiname);
-	spc.logo.load("data/logo.png");
-	spc.back.load("data/keyboard.png");
-	spc.guyk.load("data/pose.png");
-	spc.neck.load("data/neck.png");
-	spc.ball.load("data/ball2.png",1);
+	spc.logo.load("logo.png");
+	spc.back.load("keyboard.png");
+	spc.guyk.load("pose.png");
+	spc.neck.load("neck.png");
+	spc.ball.load("ball2.png",1);
 	for (i=0; i<5; i++)
 	{
 		char a[32];
-		sprintf(a,"data/key%d.png",i+1);
+		sprintf(a,"key%d.png",i+1);
 		spc.key[i].load(a,1);
 		for (j=0; j<4; j++)
 		{
-			sprintf(a,"data/note%d%d.png",j,i+1);
+			sprintf(a,"note%d%d.png",j,i+1);
 			spc.note[j][i].load(a,1);			
 		}
 	}
-	spc.hitg1.load("data/hitglow1.png",1);
-	spc.hitg2.load("data/hitglow2.png",1);
-	spc.hitf1.load("data/hitflames1.png",1);
-	spc.hitf2.load("data/hitflames2.png",1);
-	spc.glow.load("data/glow.png",1);
-	spc.noteline.load("data/note.png",1);
-	spc.m2.load("data/2x.png",1);
-	spc.m3.load("data/3x.png",1);
-	spc.m4.load("data/4x.png",1);
-	spc.guitar[0].load("data/guitar1ok.png");
-	spc.guitar[1].load("data/guitar1gs.png");
-	spc.guitar[2].load("data/guitar2ok.png");
-	spc.guitar[3].load("data/guitar2gs.png");
-	spc.guitar[4].load("data/guitar3ok.png");
-	spc.guitar[5].load("data/guitar3gs.png");
-	spc.guitar[6].load("data/guitar4ok.png");
-	spc.guitar[7].load("data/guitar4gs.png");
+	spc.hitg1.load("hitglow1.png",1);
+	spc.hitg2.load("hitglow2.png",1);
+	spc.hitf1.load("hitflames1.png",1);
+	spc.hitf2.load("hitflames2.png",1);
+	spc.glow.load("glow.png",1);
+	spc.noteline.load("note.png",1);
+	spc.m2.load("2x.png",1);
+	spc.m3.load("3x.png",1);
+	spc.m4.load("4x.png",1);
+	spc.guitar[0].load("guitar1ok.png");
+	spc.guitar[1].load("guitar1gs.png");
+	spc.guitar[2].load("guitar2ok.png");
+	spc.guitar[3].load("guitar2gs.png");
+	spc.guitar[4].load("guitar3ok.png");
+	spc.guitar[5].load("guitar3gs.png");
+	spc.guitar[6].load("guitar4ok.png");
+	spc.guitar[7].load("guitar4gs.png");
 }

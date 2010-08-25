@@ -1,0 +1,14 @@
+Installation instructions
+=========================
+
+The standard procedure:
+
+configure
+-- check for output manually
+
+make && make install
+
+should install the game
+configure is a simplified shell script that checks for the
+necessary libraries and recommends steps to fix the problems
+
