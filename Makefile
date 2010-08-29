@@ -1,8 +1,12 @@
-LIBS:=`sdl-config --cflags --libs` -lGL -lGLU -lIL -lILU -lILUT -lfreetype -logg -lvorbis -lvorbisfile -I/usr/include/freetype2
+
+DIR_FREETYPE2_INC=-I/usr/include/freetype2
+DIR_FREETYPE2_LIB=
+
+LIBS:=`sdl-config --cflags --libs` -lGL -lGLU -lIL -lILU -lILUT -lfreetype -logg -lvorbis -lvorbisfile $(DIR_FREETYPE2_INC)
 #Windows libs, for now, manually uncomment
 #LIBS:= -D_WINDOWS -Ic:/Dev-Cpp/include/SDL -Ic:/Dev-Cpp/include -Ic:/Dev-Cpp/include/GL -Ic:/Dev-Cpp/include/GLU -Ic:/Dev-Cpp/include/freetype2 -Dmain=SDL_main -Lc:/Dev-Cpp/lib -lmingw32 -lSDLmain -lSDL -mwindows -lfreetype -logg -lvorbisfile -lopengl32 -ldevil -lglu32 -lvorbis -lILU -lILUT
 
-DESTDIR?=/usr
+DESTDIR?=
 
 all: game
 
@@ -38,17 +42,17 @@ game64: fretscpp.cpp
 	g++ -m64 -MMD -MF $@.d $< -O0 -g3 -ggdb -o $@ $(LIBS)
 
 install: fretscpp
-	install -d $(DESTDIR)
-	install -d $(DESTDIR)/bin
-	install -d $(DESTDIR)/share
-	install -d $(DESTDIR)/share/games
-	install -d $(DESTDIR)/share/games/fretscpp
-	install -d $(DESTDIR)/share/games/fretscpp/data
-	install -d $(DESTDIR)/share/games/fretscpp/data/songs
-	install -d $(DESTDIR)/share/games/fretscpp/data/songs/tutorial
-	install -m 755 fretscpp $(DESTDIR)/bin/fretscpp
-	install -m 644 $(filter-out data/songs,$(wildcard data/*)) $(DESTDIR)/share/games/fretscpp/data
-	install -m 644 $(wildcard data/songs/tutorial/*) $(DESTDIR)/share/games/fretscpp/data/songs/tutorial
+	install -d $(DESTDIR)/usr
+	install -d $(DESTDIR)/usr/bin
+	install -d $(DESTDIR)/usr/share
+	install -d $(DESTDIR)/usr/share/games
+	install -d $(DESTDIR)/usr/share/games/fretscpp
+	install -d $(DESTDIR)/usr/usr/share/games/fretscpp/data
+	install -d $(DESTDIR)/usr/share/games/fretscpp/data/songs
+	install -d $(DESTDIR)/usr/share/games/fretscpp/data/songs/tutorial
+	install -m 755 fretscpp $(DESTDIR)/usr/bin/fretscpp
+	install -m 644 $(filter-out data/songs,$(wildcard data/*)) $(DESTDIR)/usr/share/games/fretscpp/data
+	install -m 644 $(wildcard data/songs/tutorial/*) $(DESTDIR)/usr/share/games/fretscpp/data/songs/tutorial
 	
 
 .PHONY: run install all

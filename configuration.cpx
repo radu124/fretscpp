@@ -36,6 +36,8 @@ GLfloat tolerance_late=100;
 GLfloat boardlen=4;
 GLfloat boardline=3;
 GLfloat necktop=2;
+int video_glflush=0;
+int video_glfinish=0;
 
 tNeckpos defneckpos[10]={
 {0.000,0.000,1.000,1.000,0.000,0},

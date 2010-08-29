@@ -4,6 +4,36 @@ implementation
 
 uses scnGuitar,font;
 
+void tSceneGuitar::statPosition()
+{
+	GLfloat xp,yp,xsc,gsc,xlim;
+	int sp=neckpos[activeneckpos].statpos;
+	
+	gsc=neckpos[activeneckpos].scale;
+	xsc=gsc*neckpos[activeneckpos].stretch;
+	if (xsc<gsc) gsc=xsc;	
+	xp=30*(-1+2*sp)*gsc;
+	xp+=neckpos[activeneckpos].xdisp*6;
+	yp=-neckpos[activeneckpos].ydisp*6;
+	yp-=gsc*10;
+	xlim=40-5*gsc;
+	if (xp<-xlim) xp=-xlim;
+	if (xp>xlim) xp=xlim;
+	
+	multvalx=xp;
+	multvaly=yp;
+	staty=yp+13*gsc;
+	statfontsize=3*gsc;
+	multvalscale=gsc;
+	if (sp) {
+		statx=xp+5*gsc;
+		statalign=TFont::ALIGN_RIGHT;
+	} else {
+		statx=xp-5*gsc;
+		statalign=0;
+	}
+}
+
 void tSceneGuitar::renderMultiplierVal()
 {
 	tPlayer &pp=player[cplayer];
@@ -11,12 +41,10 @@ void tSceneGuitar::renderMultiplierVal()
 	int mr=pp.streak%10;
 	if (pp.streak>=40) { mult=6; mr=10; }
 	glPushMatrix();
-	GLfloat xp;
-	xp=6*(-1+2*neckpos[activeneckpos].statpos)*neckpos[activeneckpos].scale*neckpos[activeneckpos].stretch;
-	xp+=neckpos[activeneckpos].xdisp*6;
-	// bad...
-	glTranslatef(-35+70*cplayer,-10,0);
-	glScalef(5,-10,0);
+	statPosition();
+	glTranslatef(multvalx,multvaly,0);
+	glScalef(multvalscale*5,-multvalscale*10,0);
+	
 	//deffont.displayString(".",0,1,1,0);
 	spc.guitar[mult].bind();
 	glColor4f(1,1,1,1);
@@ -41,20 +69,14 @@ void tSceneGuitar::renderStats()
 {
 	tPlayer &pp=player[cplayer];
 	char a[256];
-	pp.passtime();
 	glLoadIdentity();
 	glColor4f(1.0,1.0,1.0,1.0);
-	int align=0;
-	int x=-38;
-	if (cplayer==1) 
-	{
-		align=TFont::ALIGN_RIGHT;
-		x=38;
-	}
 	sprintf(a,"streak: %d",pp.streak);
-	deffont.displayString(a,x,4,2,align);
+	deffont.displayString(a,statx,staty,statfontsize,statalign);
 	sprintf(a,"score: %d",pp.score);
-	deffont.displayString(a,x,6,2,align);
+	deffont.displayString(a,statx,staty+statfontsize,statfontsize,statalign);
+	
+	if (!cplayer) return;
 	switch (statsmode)
 	{
 	case 1:

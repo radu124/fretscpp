@@ -106,8 +106,9 @@ int main( int argc, char* argv[] )
 		//SDL_BlitSurface(bg, NULL, screen, NULL);
 		/* update the screen */
 		//SDL_UpdateRect(screen, 0, 0, 0, 0);
-		
 		drawglstuff();
+		if (video_glflush) glFlush();
+		if (video_glfinish) glFlush();
 		SDL_GL_SwapBuffers();
 	}
 

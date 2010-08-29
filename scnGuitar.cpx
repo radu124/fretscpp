@@ -19,6 +19,9 @@ uses scene,scnMenu;
 class tSceneGuitar:public tScnMenuBase
 {
 public:
+	GLfloat multvalx,multvaly,multvalscale;
+	GLfloat statx,staty,statfontsize;
+	int statalign;
 	tSceneGuitar() { scenes.add(this,SCN_PLAYING); };
 	GLfloat fadespeed() { return 0.33; }
 	GLfloat fadeoutspeed() { return 1000; }
@@ -57,6 +60,7 @@ public:
 	void itemClicked(int i);
 	GLfloat notePos(int timestamp);
 	void updatetime();
+	void statPosition();
 } guitarScene;
 
 GLfloat keycolors[5][3]={
@@ -110,6 +114,7 @@ void tSceneGuitar::render()
 		cnotes=&crtSong.trk_notes[cinstrument];
 		scene_setNeck(cplayer,numplayers);
 		noteRegion();
+		player[cplayer].passtime();
 		renderNeck();
 		renderTracks();
 		renderNoteLines();
@@ -160,6 +165,7 @@ void tSceneGuitar::enter()
 
 void tSceneGuitar::init()
 {
+	if (initialized) return;
 	INFO(SCNGUITAR,"Init guitar scene\n");
 	additem("Return to Song");
 	additem("Restart Song");
