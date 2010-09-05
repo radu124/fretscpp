@@ -61,6 +61,7 @@ public:
 	GLfloat notePos(int timestamp);
 	void updatetime();
 	void statPosition();
+	void globalStats();
 } guitarScene;
 
 GLfloat keycolors[5][3]={
@@ -133,6 +134,7 @@ void tSceneGuitar::render()
 		renderMultiplierVal();
 		renderStats();
 	}
+	globalStats();
 	if (menumode)
 	{
 		glLoadIdentity();

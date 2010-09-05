@@ -227,6 +227,9 @@ GLfloat fadeoutspeed(int scene)
 void scenehandleevent(SDL_Event &event)
 {
 	if (!scenes[scn.current]) return;
+	int mkflags=0;
+	if (scn.current==SCN_SCORE) mkflags=1;
+	if (scn.current!=SCN_PLAYING && guitarScene.menumode==0) menukey(event,mkflags);
 	scenes[scn.current]->handleevent(event);
 }
 

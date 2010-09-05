@@ -75,10 +75,22 @@ void tSceneGuitar::renderStats()
 	deffont.displayString(a,statx,staty,statfontsize,statalign);
 	sprintf(a,"score: %d",pp.score);
 	deffont.displayString(a,statx,staty+statfontsize,statfontsize,statalign);
-	
-	if (!cplayer) return;
+}
+
+void tSceneGuitar::globalStats()
+{
+	char a[256];
+	int v1,v2;
+	glLoadIdentity();
+	glColor4f(1.0,1.0,1.0,1.0);
 	switch (statsmode)
 	{
+	case 0:
+		v1=playing.playpos/44100;
+		v2=crtSong.lastevent/44100;
+		sprintf(a,"%d.%02d/%d.%02d",v1/60,v1%60,v2/60,v2%60);
+		deffont.displayString(a,-38,-28,2,0);
+		break;
 	case 1:
 		sprintf(a,"playing: %d",playing.playpos);
 		deffont.displayString(a,-38,-28,2,0);

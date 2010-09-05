@@ -54,6 +54,7 @@ protected:
 	unsigned int readvarlen();
 	void timeincrement(int delta);
 public:
+	int lastevent;
 	uint8_t hash[20];
 	void applydelay(int delay);
 	vvnotestatus trk_notes;
@@ -81,6 +82,7 @@ void MidiParser::applydelay(int delay)
 			trk_notes[tr][j].timestamp=ts;
 		}
 	}
+	lastevent+=delay;
 }
 
 int notestatus::hashit(int difficulty)
@@ -162,6 +164,7 @@ unsigned int MidiParser::readvarlen()
 
 int MidiParser::openfile(const char *name)
 {
+	int lastevent=0;
 	int oflags=O_RDONLY;
 #ifdef _WINDOWS
 	oflags |= O_BINARY;
@@ -239,6 +242,7 @@ string processInstrumentName(string m)
 void MidiParser::timeincrement(int delta)
 {
 	int newtimestamp=a.timestamp+(int) (44100*tickduration*delta);
+	if (newtimestamp>lastevent) lastevent=newtimestamp;
 	DBG(READMID,"Time increment %5d,  1000ticks=%3.3fs, time is now %7.3fs    " 
 		&delta &(tickduration*1000) &(newtimestamp/44100.0));
 	score.push_back(a);

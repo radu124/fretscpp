@@ -12,3 +12,5 @@ should install the game
 configure is a simplified shell script that checks for the
 necessary libraries and recommends steps to fix the problems
 
+in case the game does not find its input files, try running
+it in the directory where it was compiled

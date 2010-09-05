@@ -4,6 +4,12 @@ void guitarkey(int ev, int key, int other=0);
 string keyname(int id);
 void translateandhandleevent(SDL_Event &event);
 
+/**
+ * Allow navigating the menus using the selected controller
+ * translate the event into Arrow keys and RETURN
+ */
+void menukey(SDL_Event &event, int flags=0);
+
 implementation
 
 uses configuration;
@@ -127,5 +133,41 @@ void guitarkey(int ev, int key, int other)
 			if (id>=0 && ev==SDL_KEYUP)   player[pl].releasekey(id);
 			if (id==7 && ev==SDL_JOYAXISMOTION) player[pl].whammyaxis(other);
 		}
+	}
+}
+
+void menukey(SDL_Event &event, int flags)
+{
+	if (event.type!=SDL_KEYDOWN && event.type!=SDL_KEYUP) return;
+	switch (event.key.keysym.sym)
+	{
+		// these keys are never remapped
+		case SDLK_ESCAPE:
+		case SDLK_RETURN:
+		case SDLK_UP:
+		case SDLK_DOWN:
+		case SDLK_LEFT:
+		case SDLK_RIGHT:
+		case SDLK_HOME:
+		case SDLK_END:
+		case SDLK_PAGEUP:
+		case SDLK_PAGEDOWN:
+		return;
+	}
+	// string input
+	if (event.key.keysym.sym>='a' && event.key.keysym.sym<='z' && (flags&1))
+		return;
+	
+	int i,pl,q,key=event.key.keysym.sym;
+	pl=0; // by default only player controller is remapped
+	for (q=0; q<keydefs.size(); q++)
+	{
+		if (!(keydefselector[pl] & (1<<q))) continue;
+		if (key==keydefs[q][0]) event.key.keysym.sym=SDLK_RETURN;
+		if (key==keydefs[q][1]) event.key.keysym.sym=SDLK_ESCAPE;
+		if (key==keydefs[q][2]) event.key.keysym.sym=SDLK_LEFT;
+		if (key==keydefs[q][3]) event.key.keysym.sym=SDLK_RIGHT;
+		if (key==keydefs[q][5]) event.key.keysym.sym=SDLK_UP;
+		if (key==keydefs[q][6]) event.key.keysym.sym=SDLK_DOWN;
 	}
 }
