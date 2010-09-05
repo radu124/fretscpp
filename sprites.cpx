@@ -46,9 +46,10 @@ struct tsprites
 	sprite glow;
 	sprite m2,m3,m4;
 	sprite note[4][5];
-	sprite noteline;
+	sprite noteline,thinline;
 	static void unbind();
 	sprite guitar[8];
+	sprite star1,star2;
 } spc;
 
 implementation
@@ -75,7 +76,7 @@ void sprite::load(const char *fname, int flags)
 	ilLoadImage(ffullname.c_str());
 	height =ilGetInteger(IL_IMAGE_HEIGHT);
 	width  =ilGetInteger(IL_IMAGE_WIDTH);
-	if (flags & 1) { height=1; width=1; }
+	if (flags & 1) { height=10; width=10; }
 	//tex= ilutGLLoadImage(ffullname.c_str());
 	tex=ilutGLBindTexImage();
 	
@@ -162,7 +163,8 @@ void init_sprites()
 	spc.hitf1.load("hitflames1.png",1);
 	spc.hitf2.load("hitflames2.png",1);
 	spc.glow.load("glow.png",1);
-	spc.noteline.load("note.png",1);
+	spc.noteline.load("noteline.png",1);
+	spc.thinline.load("thinline.png",1);
 	spc.m2.load("2x.png",1);
 	spc.m3.load("3x.png",1);
 	spc.m4.load("4x.png",1);
@@ -174,4 +176,6 @@ void init_sprites()
 	spc.guitar[5].load("guitar3gs.png");
 	spc.guitar[6].load("guitar4ok.png");
 	spc.guitar[7].load("guitar4gs.png");
+	spc.star1.load("star1.png",1);
+	spc.star2.load("star2.png",1);
 }

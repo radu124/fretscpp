@@ -56,5 +56,10 @@ typedef vector<vint> vvint;
 int gameover;
 volatile int uu;
 
+#ifdef _WINDOWS
+#include <windows.h>
+#include <shlobj.h>
+#endif
+
 implementation
 

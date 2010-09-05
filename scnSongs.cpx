@@ -28,14 +28,16 @@ public:
 	int previewsong;
 	int selected;
 	int previewlock;
+	int midiok;
 	GLfloat selecttime;
 	int viewOffset;
-
+	void renderStats();
+	void selectsong(int s);
 } scnSongs;
 
 implementation
 
-uses songsdb,sprites,audio;
+uses songsdb,sprites,audio,score,seScore;
 
 tScnSongs::tScnSongs()
 {
@@ -47,6 +49,8 @@ tScnSongs::tScnSongs()
 void tScnSongs::enter()
 {
 	SDL_EnableKeyRepeat(133,33);
+	if (songsdb.size()==0) updatesongdb();
+	selectsong(selected);
 	sceneBase::enter();
 }
 
@@ -101,6 +105,60 @@ void tScnSongs::render()
 		string sp=songsdb[selected].dir+"/";
 		song_start(sp.c_str());
 	}
+	renderStats();
+}
+
+void tScnSongs::renderStats()
+{
+	if (!midiok) return;
+	int i;
+	GLfloat h=35;
+	GLfloat wi=25;
+	GLfloat posx=40-wi-1; 
+	GLfloat posy=-29;
+	if (selected-viewOffset<8) posy=29-h;
+	spc.unbind();
+	glBegin(GL_TRIANGLE_FAN);
+	glColor4f(0.0f,0.0f,0.0f,0.30f);
+	glVertex3f(posx   ,posy   ,0);
+	glVertex3f(posx+wi,posy   ,0);
+	glVertex3f(posx+wi,posy+h ,0);
+	glVertex3f(posx   ,posy+h ,0);
+	glEnd();
+	glPushMatrix();
+	glTranslatef(posx+1,posy+1,0);
+	glScalef(1.5,1.5,1);
+	h/=1.5;
+	posy=0;
+	for (i=0; i<crtSong.trk_notes.size(); i++)
+	{
+		scoreStarsInstrument(i,posy);
+	}
+	i=0;
+	posy+=1;
+	// should add a nice scroll here
+	while (posy<h-1)
+	{
+		if (i>=scores.history.size()) break;
+		deffont.displayString(scores.history[i].c_str(),0,posy,1,0);
+		posy+=1;
+		i++;
+	}
+	glPopMatrix();
+}
+
+void tScnSongs::selectsong(int s)
+{
+	selected=s;
+	if (selected>=songsdb.size())
+	{
+		midiok=0;
+		return;
+	}
+	selectedsong=songsdb[selected].dir;
+	midiok=crtSong.openfile((selectedsong+"/notes.mid").c_str());
+	scores.setCurrent();
+	selecttime=scn.time;
 }
 
 void tScnSongs::handleevent(SDL_Event &event)
@@ -148,14 +206,12 @@ void tScnSongs::handleevent(SDL_Event &event)
 			else previewlock=-1;
 			break;
 		case SDLK_RETURN:
+			if (!midiok) break;
 			selectedsong=songsdb[selected].dir;
 			fadetoscene(SCN_SETSONGOPT);
 			break;
 		}
 		break;
 	}
-	if (selected!=oldsel)
-	{
-		selecttime=scn.time;
-	}
+	if (selected!=oldsel) selectsong(selected);
 }

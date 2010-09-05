@@ -3,6 +3,7 @@ interface
 uses includes,player;
 
 string configFile;
+string scoresFile;
 string homeconfdir;
 string datadir;
 // just decided namespaces are evil
@@ -53,6 +54,7 @@ tNeckpos defneckpos[10]={
 };
 
 int enablehopos;
+const char *difficultynames[4]={"SuperE","Easy","Medium","Hard"};
 
 implementation
 
@@ -122,7 +124,7 @@ void write_config()
 	int i,j;
 	FILE *fou=fopen(configFile.c_str(),"w");
 	if (!fou) return;
-	fprintf(fou,":keyboard\n%d\n",keydefs.size());
+	fprintf(fou,":keyboard\n%d\n",(int) keydefs.size());
 	for (i=0; i<keydefs.size(); i++)
 	{
 		for (j=0; j<9; j++)
@@ -177,15 +179,21 @@ void init_config()
 {
 	int i;
 #ifdef _WINDOWS
+	_TCHAR homefolder[MAX_PATH];
 	configFile="fretscpp.ini";
 	homeconfdir="";
+	i=SHGetFolderPath(NULL,CSIDL_PERSONAL,NULL,0/*SHGFP_TYPE_CURRENT*/,homefolder);
+	if (i!=S_OK) MESSAGE("Could not get home folder\n");
+	else homeconfdir=string(homefolder)+"/fretscpp";
+	CreateDirectory(homeconfdir.c_str(),NULL);
 	datadir="";
 #else
 	homeconfdir=getenv("HOME");
 	homeconfdir+="/.config/fretscpp";
 	uu=system((string("mkdir -p ")+homeconfdir).c_str());
-	configFile=homeconfdir+"/fretscpp.ini";
 #endif
+	configFile=homeconfdir+"/fretscpp.ini";
+	scoresFile=homeconfdir+"/scores.txt";
 	trydatadir(homeconfdir+"/data");
 	trydatadir("./data");
 	trydatadir("/usr/share/games/fretscpp/data");

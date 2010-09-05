@@ -22,7 +22,6 @@ int fileExists(std::string name);
 implementation
 
 #ifdef _WINDOWS
-#include <windows.h>
 
 vector<string> listDirContents(string dir, int flags)
 {

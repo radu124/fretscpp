@@ -26,6 +26,7 @@ public:
 	int lasthit[6]; // time of last hit per key [5]=any
 	int keys;
 	int hit;
+	int longeststreak;
 	int crtnote;
 	int nextnote;
 	int donenote;
@@ -41,6 +42,7 @@ public:
 	int notegood;
 	int notetotal;
 	int notexmiss;
+	int notehopo;
 	int lasttime; // last time we called passtime()
 	int timemultiplier;
 	int whammy;
@@ -53,6 +55,10 @@ public:
 	string name;
 	string lastInstr;
 	int lastDiffi;
+	int scorenomult;
+	int scorehits;
+	int scorehold;
+	int scorewham;
 	
 	void handlehit();
 	void passtime();
@@ -116,6 +122,9 @@ void tPlayer::holdscore(int ts)
 	scorefrac+=scoreplus; //hitactive*
 	holdaccounted=ts;
 	score+=scorefrac/SCOREDIV;
+	scorehold+=scorefrac/SCOREDIV;
+	if (whammyon) scorewham+=scorefrac/SCOREDIV/2;
+	scorenomult+=(scorefrac/SCOREDIV+multiplier-1)/multiplier; // not really good
 	scorefrac%=SCOREDIV;
 }
 
@@ -131,7 +140,12 @@ void tPlayer::init(int iid)
 	int i;
 	id=iid;
 	whammy=0;
+	longeststreak=0;
 	scorefrac=0;
+	scorenomult=0;
+	scorehits=0;
+	scorehold=0;
+	scorewham=0;
 	crtnote=0;
 	hittnote=-1;
 	nextnote=0;
@@ -139,6 +153,7 @@ void tPlayer::init(int iid)
 	notetotal=0;
 	notegood=0;
 	notexmiss=0;
+	notehopo=0;
 	streak=0;
 	lasttime=0;
 	for (i=0; i<cnotes->size(); i++) if (cnotes[0][i].hashit(difficulty)) notetotal++;
@@ -216,11 +231,14 @@ void tPlayer::handlehit()
 			if (lastkeys[i]) lasthit[i]=timenow;
 		lasthit[5]=timenow;
 		streak++;
+		if (streak>longeststreak) longeststreak=streak;
 		playing.gp[id]=1;
 		hitactive=cnotes[0][crtnote-1].hashit(difficulty);
 		notegood++;
 		history[crtnote-1]=2;
 		score+=50*hitactive*multiplier;
+		scorenomult+=50*hitactive;
+		scorehits+=50*hitactive*multiplier;
 		holdaccounted=cnotes[0][crtnote-1].timestamp+8000; // actually song.period*1.1/4
 		if (streak==10 || streak==20 || streak==30) timemultiplier=timenow;
 	}

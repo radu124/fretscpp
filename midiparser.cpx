@@ -54,6 +54,7 @@ protected:
 	unsigned int readvarlen();
 	void timeincrement(int delta);
 public:
+	uint8_t hash[20];
 	void applydelay(int delay);
 	vvnotestatus trk_notes;
 	vector<int> trk_difficulties;
@@ -64,7 +65,7 @@ public:
 
 implementation
 
-uses message,verbosity;
+uses message,verbosity,sha1;
 
 void MidiParser::applydelay(int delay)
 {
@@ -178,6 +179,7 @@ int MidiParser::openfile(const char *name)
 	buffer=new unsigned char[size];
 	size=read(fd,buffer,size);
 	INFO(READMID,"Read midi file of size %d\n" & size);
+	sha_buffer((char *) buffer,size,hash);
 	pos=0;
 	FAIL=0;
 	int res=doparse();

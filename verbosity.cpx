@@ -25,5 +25,6 @@ interface
 #define MSG_GL           LEV_INFO
 #define MSG_JOYSTICK     LEV_INFO
 #define MSG_SONGINI      LEV_INFO
+#define MSG_SCORES       LEV_DBG
 
 implementation
