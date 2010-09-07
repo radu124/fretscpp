@@ -5,6 +5,7 @@ uses includes;
 struct scoreline
 {
 	uint8_t midhash[20];
+	int flags;
 	uint64_t date;
 	char playername[36];
 	int instrument;
@@ -19,7 +20,6 @@ struct scoreline
 	int scorehits;
 	int scorehold;
 	int scorewham;
-	int flags;
 	uint8_t scorehash[20];
 	int read(FILE *f, int ver=1);
 	void write(FILE *f);
@@ -112,24 +112,24 @@ string scoreline::toStringDump()
 {
 	int i;
 	string res="";
-	char a[8];
+	char a[512];
 	for (i=0; i<sizeof(scoreline); i++)
 	{
-		sprintf(a,"%02x",midhash[i]);
-		res+=a;
+		sprintf(a+i*2,"%02x",midhash[i]);
 	}
+	res+=a;
 	return res;
 }
 
 void tscores::init()
 {
+	data.resize(0);
 	load(scoresFile);
 }
 
 void tscores::load(string file)
 {
 	FILE * fin=fopen(file.c_str(),"r");
-	data.resize(0);
 	if (!fin) return;
 	scoreline a;
 	INFO(SCORES,"Reading scores\n");
@@ -188,6 +188,21 @@ int readhash(const char *c, uint8_t *hash)
 	return 1;
 }
 
+void myprintll(FILE *f, uint64_t val)
+{
+	char a[20];
+	int i=14;
+	a[16]=0;
+	a[15]=val%10+'0';
+	while (val>=10)
+	{
+		val/=10;
+		a[i--]=val%10+'0';
+	}
+	a[i]=' ';
+	fprintf(f,"%s",a+i);
+}
+
 void scoreline::write(FILE *f)
 {
 	int i;
@@ -196,13 +211,23 @@ void scoreline::write(FILE *f)
 	fprintf(f," ");
 	sha_buffer((char *) midhash,scorehash-midhash,scorehash);
 	for (i=0; i<20; i++) fprintf(f,"%02x",scorehash[i]);
-	fprintf(f," %lld", tmpdate);
+	myprintll(f, tmpdate);
 	fprintf(f," %d %d %d %d %d %d %d %d %d %d %d %d %d %s\n",
 		instrument,difficulty,flags,
 		score,streak,notesgood,notestotal,xmisses,noteshopo,
 		scorenomult,scorehits,scorehold,scorewham,
 		playername);
-	//DBG(SCORES,"%s" &toStringDump());
+//	DBG(SCORES,"%s" &toStringDump());
+}
+
+// read long int manually since scanf(%lld) proved not to be portable
+uint64_t readnum(char *&p)
+{
+	uint64_t res=0;
+	while (*p==' ' || *p=='\t') p++;
+	while (*p>='0' && *p<='9') res=res*10+(*p++)-'0';
+	while (*p==' ' || *p=='\t') p++;
+	return res;
 }
 
 int scoreline::read(FILE *f, int ver)
@@ -226,15 +251,13 @@ int scoreline::read(FILE *f, int ver)
 		return 0;
 	}
 	p=s+82;
-	res=sscanf(p,"%lld %n",&tmpdate,&rr);
-	p+=rr;
+	date=readnum(p);
 	res=sscanf(p," %d %d %d %d %d %d %d %d %d %d %d %d %d %n",
 		&instrument, &difficulty, &flags,
 		&score, &streak, &notesgood, &notestotal, &xmisses, &noteshopo,
 		&scorenomult,&scorehits,&scorehold,&scorewham,
 		&rr);
 	p+=rr;
-	date=tmpdate;
 	if (res<8) 
 	{
 		DBG(SCORES,"Scores: too few items (%d) on line, chars:%d\n" &res &rr);
@@ -257,9 +280,10 @@ int scoreline::read(FILE *f, int ver)
 	if (0!=memcmp((char *)check,(char *)scorehash,20)) 
 	{
 		WARN(SCORES,"-- wrong score hash\n");
-		//DBG(SCORES,"%s" &toStringDump());
+//		DBG(SCORES,"%s\n" &toStringDump());
 		return 0;
 	}
 	else INFO(SCORES,"\n");
+//	DBG(SCORES,"%s\n" &toStringDump());
 	return 1;
 }

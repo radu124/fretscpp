@@ -49,7 +49,7 @@ struct tSIlist:public tSettingsItem
 	vector<string> choices;
 	int *val;
 	int min,max,step,locval;
-	void capval() { if (*val<0) *val=0; if (*val>=choices.size()) *val=choices.size()-1; }
+	void capval();
 	int handleevent(SDL_Event &event);
 	string toString();
 };
@@ -75,6 +75,21 @@ public:
 implementation
 
 uses configuration,scene;
+
+void tSIlist::capval()
+{
+	MESSAGE("cap %d %d\n" &*val &choices.size());
+	if (*val<0) 
+	{
+		MESSAGE("capdn\n");
+		*val=0; 
+	}
+	if (*val>=choices.size())
+	{
+		MESSAGE("capup\n");
+		*val=choices.size()-1; 
+	}
+}
 
 string tSIcheckbox::toString()
 {
@@ -126,7 +141,7 @@ int tSIcheckbox::handleevent(SDL_Event &event)
 {
 	if (event.type!=SDL_KEYDOWN) return 0;
 	if (event.key.keysym.sym!=SDLK_RETURN) return 0;
-	*val=1-*val;
+	*val=!*val;
 	return 1;
 }
 
@@ -153,16 +168,18 @@ int tSIintrange::handleevent(SDL_Event &event)
 int tSIlist::handleevent(SDL_Event &event)
 {
 	if (event.type!=SDL_KEYDOWN) return 0;
+	//MESSAGE("choices: %d %d\n" &*val &choices.size());
+	
 	switch(event.key.keysym.sym)
 	{
 	case SDLK_LEFT:
 		if (*val<=0) return 0;
-		*val-=step;
+		*val-=1;
 		capval();
 		return 1;
 	case SDLK_RIGHT:
 		if (*val>=choices.size()-1) return 0;
-		*val+=step;
+		*val+=1;
 		capval();
 		return 1;
 	}

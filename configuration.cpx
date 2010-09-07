@@ -13,6 +13,21 @@ string datadir;
 
 vvint keydefs;
 vstring keyconfname;
+SDL_Rect **videomodesdl;
+const SDL_VideoInfo *origmode;
+vstring videomodenames;
+int video_fsmodeid;
+int video_dofullscreen;
+int video_vsync;
+int video_limiter;
+GLfloat video_fpslim;
+
+struct tVideoMode
+{
+	int height,width,bpp;
+};
+
+vector<tVideoMode> videomodes;
 
 struct tNeckpos
 {
@@ -55,6 +70,7 @@ tNeckpos defneckpos[10]={
 
 int enablehopos;
 const char *difficultynames[4]={"SuperE","Easy","Medium","Hard"};
+void findvideomodes();
 
 implementation
 
@@ -111,8 +127,8 @@ int read_config()
 				&neckpos[i].stretch,
 				&neckpos[i].skew,
 				&neckpos[i].statpos);
+			if (neckpos[i].scale<0.5 || neckpos[i].scale>4) neckpos[i]=defneckpos[i];
 		}
-		if (neckpos[i].scale<0.5 || neckpos[i].scale>4) neckpos[i]=defneckpos[i];
 	}
 	fclose(fc);
 	if (numkeys<2) return 0;
@@ -175,9 +191,38 @@ void trydatadir(string td)
 	}
 }
 
+void findvideomodes()
+{
+	tVideoMode tmp;
+	int i;
+	origmode=SDL_GetVideoInfo();
+	tmp.bpp=origmode->vfmt->BitsPerPixel;
+	
+	videomodesdl=SDL_ListModes(NULL,SDL_FULLSCREEN|SDL_HWSURFACE);
+	videomodes.push_back(tmp);
+	videomodenames.push_back("Desktop");
+	if (videomodesdl==(void *)-1)
+	{
+		MESSAGE("ANY RESOLUTION ok\n");
+		return;
+	}
+	if (videomodesdl) for (i=0; videomodesdl[i]; i++)
+	{
+		MESSAGE("%d\n" &i);
+		char a[32];
+		tmp.width=videomodesdl[i]->w;
+		tmp.height=videomodesdl[i]->h;
+		sprintf(a,"%dx%dx%d",tmp.width,tmp.height,tmp.bpp);
+		videomodes.push_back(tmp);
+		videomodenames.push_back(a);
+	}
+}
+
 void init_config()
 {
 	int i;
+	//findvideomodes();
+	
 #ifdef _WINDOWS
 	_TCHAR homefolder[MAX_PATH];
 	configFile="fretscpp.ini";

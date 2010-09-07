@@ -7,17 +7,28 @@ class tScnSetVideo:public tScnSetBase
 public:
 	tScnSetVideo() { scenes.add(this,SCN_SETVIDEO); }
 	void init();
+	void enter();
 } scnSetVideo;
 
 uses configuration,scene;
 
 void tScnSetVideo::init()
 {
-	additem(new tSIcheckbox("Fullscreen",NULL));
+	additem(new tSIcheckbox("Fullscreen",&video_dofullscreen));
+	additem(new tSIlist("setMode",videomodenames,&video_fsmodeid));
+	additem(new tSIcheckbox("VSync",&video_vsync));
 	additem(new tSIcheckbox("glFlush",&video_glflush));
 	additem(new tSIcheckbox("glFinish",&video_glfinish));
-	additem(new tSIcheckbox("VSync",NULL));
-	additem(new tSIcheckbox("Frame Limiter",NULL));
-	additem(new tSIrange("FPS",25,100,NULL,1));
+	additem(new tSIcheckbox("Frame Limiter",&video_limiter));
+	additem(new tSIrange("FPS",25,100,&video_fpslim,1));
 	tScnSetBase::init();
+}
+
+void tScnSetVideo::enter()
+{
+	if (videomodenames.size()==0)
+	{
+		findvideomodes();
+	}
+	tScnSetBase::enter();
 }

@@ -26,6 +26,17 @@ void drawglstuff()
 	audio_yield();
 }
 
+void doResize(int w, int h)
+{
+	scr_width=w;
+	scr_height=h;
+	SDL_Surface *ns;
+	ns=SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL | SDL_RESIZABLE);
+	glViewport( 0, 0, scr_width, scr_height );
+	scene_setOrtho();
+	MESSAGE("RESIZE: %d %d %d\n" &(int) ns &scr_width &scr_height);
+}
+
 int main( int argc, char* argv[] )
 {
 	init_config();
@@ -36,7 +47,7 @@ int main( int argc, char* argv[] )
 	
 	SDL_WM_SetCaption("Frets-on-fire-CPP", "SDL");
 	/* create window */
-	SDL_Surface* screen = SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL);
+	SDL_Surface* screen = SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL | SDL_RESIZABLE);
 	init_joysticks();
 	glEnable( GL_TEXTURE_2D );
 	glEnable (GL_BLEND); 
@@ -91,7 +102,11 @@ int main( int argc, char* argv[] )
 			/* an event was found */
 			if (event.type==SDL_QUIT)
 				gameover=1;
-			else 
+			else if (event.type==SDL_VIDEORESIZE)
+			{
+				doResize(event.resize.w,event.resize.h);
+			}
+			else
 				translateandhandleevent(event);
 				
 			switch (event.type) {
@@ -108,7 +123,7 @@ int main( int argc, char* argv[] )
 		//SDL_UpdateRect(screen, 0, 0, 0, 0);
 		drawglstuff();
 		if (video_glflush) glFlush();
-		if (video_glfinish) glFlush();
+		if (video_glfinish) glFinish();
 		SDL_GL_SwapBuffers();
 	}
 
