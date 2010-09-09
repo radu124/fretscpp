@@ -118,7 +118,7 @@ void tScnMenuBase::rendertext()
 	for (i=viewOffset; (i<viewOffset+viewSize) && i<item.size(); i++)
 	{
 		glLoadIdentity();
-		glRotatef(v*45,0.0,0.0,1.0);
+		glRotatef(v*30,0.0,0.0,1.0);
 		glColor3f(0.0f,0.0f,0.0f);
 		GLfloat dy=0;
 		if (selected==i && scn.menufade==0)

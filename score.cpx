@@ -5,21 +5,21 @@ uses includes;
 struct scoreline
 {
 	uint8_t midhash[20];
-	int flags;
+	uint32_t flags;
 	uint64_t date;
 	char playername[36];
-	int instrument;
-	int difficulty;
-	int score;
-	int streak;
-	int notestotal;
-	int notesgood;
-	int xmisses;
-	int noteshopo;
-	int scorenomult;
-	int scorehits;
-	int scorehold;
-	int scorewham;
+	int32_t instrument;
+	int32_t difficulty;
+	int32_t score;
+	int32_t streak;
+	int32_t notestotal;
+	int32_t notesgood;
+	int32_t xmisses;
+	int32_t noteshopo;
+	int32_t scorenomult;
+	int32_t scorehits;
+	int32_t scorehold;
+	int32_t scorewham;
 	uint8_t scorehash[20];
 	int read(FILE *f, int ver=1);
 	void write(FILE *f);
@@ -146,7 +146,7 @@ void scoreline::readfromplayer(int num)
 	memcpy(midhash,crtSong.hash,20);
 	date=time(NULL);
 	memset(playername,0,36);
-	strncpy(playername,player[num].name.c_str(),32);
+	strncpy((char *) playername,player[num].name.c_str(),32);
 	playername[32]=0;
 	instrument  = player[num].instrument;
 	difficulty  = player[num].difficulty;
@@ -272,11 +272,11 @@ int scoreline::read(FILE *f, int ver)
 		else pe++;
 	}
 	memset(playername,0,36);
-	strncpy(playername,p,32);
+	strncpy((char *)playername,p,32);
 	playername[32]=0;
 	sha_buffer((char *) midhash,scorehash-midhash,check);
 
-	INFO(SCORES,"Read score: %d %d %s " &score &notesgood &playername);
+	INFO(SCORES,"Read score: %d %d %s " &score &notesgood &(char *)playername);
 	if (0!=memcmp((char *)check,(char *)scorehash,20)) 
 	{
 		WARN(SCORES,"-- wrong score hash\n");

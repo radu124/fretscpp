@@ -78,7 +78,7 @@ uses configuration,scene;
 
 void tSIlist::capval()
 {
-	MESSAGE("cap %d %d\n" &*val &choices.size());
+	MESSAGE("cap %d %d\n" &*val &(int)choices.size());
 	if (*val<0) 
 	{
 		MESSAGE("capdn\n");

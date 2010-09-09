@@ -17,11 +17,6 @@ uses includes, utils, font, sprites, globals, scnMainMenu, scnGuitar, scnKeydef,
 void drawglstuff()
 {
 	//DBG(GL,"%d\n" &((int) scn.time));
-	//glBegin( GL_TRIANGLES );
-	//...glVertex3f( 600, 400, 0 );
-	//glEnd();
-	//a.displayString("Elena",300,200,60+50*sin(time),TFont::ALIGN_CENTER | TFont::ALIGN_VONETHIRD);
-	//glTranslatef(0,0,0);
 	renderscene();
 	audio_yield();
 }
@@ -34,7 +29,7 @@ void doResize(int w, int h)
 	ns=SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL | SDL_RESIZABLE);
 	glViewport( 0, 0, scr_width, scr_height );
 	scene_setOrtho();
-	MESSAGE("RESIZE: %d %d %d\n" &(int) ns &scr_width &scr_height);
+	MESSAGE("RESIZE: %d %d\n" &scr_width &scr_height);
 }
 
 int main( int argc, char* argv[] )
