@@ -11,7 +11,69 @@ string datadir;
 // why would you want that, just to create confusion?
 // namespace config
 
-vvint keydefs;
+#define CONFIGLIST \
+CONFIGITEM(GLfloat,neckpos_extend,0) \
+CONFIGITEM(GLfloat,tolerance_early,100) \
+CONFIGITEM(GLfloat,tolerance_late,100) \
+CONFIGITEM(GLfloat,boardlen,4) \
+CONFIGITEM(GLfloat,boardline,3) \
+CONFIGITEM(GLfloat,necktop,2) \
+CONFIGITEM(int,video_glflush,0) \
+CONFIGITEM(int,video_glfinish,0) \
+CONFIGARRAY(GLfloat,neckpos,.xdisp,.xdisp) \
+CONFIGARRAY(GLfloat,neckpos,.ydisp,.ydisp) \
+CONFIGARRAY(GLfloat,neckpos,.scale,.scale) \
+CONFIGARRAY(GLfloat,neckpos,.stretch,.stretch) \
+CONFIGARRAY(GLfloat,neckpos,.skew,.skew) \
+CONFIGARRAY(int,neckpos,.statpos,.statpos) \
+CONFIGARRAY(int,keydefs,.key[0],.fret1) \
+CONFIGARRAY(int,keydefs,.key[1],.fret2) \
+CONFIGARRAY(int,keydefs,.key[2],.fret3) \
+CONFIGARRAY(int,keydefs,.key[3],.fret4) \
+CONFIGARRAY(int,keydefs,.key[4],.fret5) \
+CONFIGARRAY(int,keydefs,.key[5],.pick) \
+CONFIGARRAY(int,keydefs,.key[6],.altpick) \
+CONFIGARRAY(int,keydefs,.key[7],.whammy) \
+CONFIGARRAY(int,keydefs,.key[8],.power) \
+CONFIGARRAY(string,keyconfname,,) \
+	
+#define CONFWRITE_GLfloat(a) fprintf(fou,"%f",a)
+#define CONFWRITE_int(a) fprintf(fou,"%d",a)
+#define CONFWRITE_string(a) fprintf(fou,"%s",a.c_str())
+
+void confread_GLfloat(char *&s, GLfloat &v) { v=atof(s); DBG(CONFIG," value GLfloat %f (from:%s)\n" &v &s);}
+void confread_int(char *&s, int &v)         { v=atoi(s); DBG(CONFIG," value int %d (from:%s)\n" &v &s);}
+void confread_string(char *&s, string &v)   { v=string(s); DBG(CONFIG," value string '%s'\n" &v);}
+
+#define CI_DECLARE(a,b,c) a b=c;
+#define CI_PRINT(a,b,c) { fprintf(fou,""#b" = "); CONFWRITE_##a(b); fprintf(fou,"\n"); }
+#define CIA_PRINT(a,b,c,d) { int it; for (it=0; it<b.size(); it++) { fprintf(fou,""#b"[%d]"#d" = ",it); CONFWRITE_##a(b[it]c); fprintf(fou,"\n");} }
+
+#define CI_READ(a,b,c) { if (tsimatch(p,""#b)) { confread_##a(p,b); } }
+#define CIA_READ(a,b,c,d) { int idx; if (tsamatch(p,""#b,""#d,idx)) \
+	{\
+		assume(idx<1000,"Bad array index>1000"); \
+		if (idx>=b.size()) b.resize(idx+1); \
+		confread_##a(p,b[idx]c); \
+	}\
+}
+
+/*******************************************************
+ * Automatic generation of config variable declarations
+ */
+#define CONFIGITEM CI_DECLARE
+#define CONFIGARRAY(a,b,c,d)
+CONFIGLIST
+#undef CONFIGARRAY
+#undef CONFIGITEM
+
+
+struct tKeydefset
+{
+	int key[9];
+};
+
+vector<tKeydefset> keydefs;
 vstring keyconfname;
 SDL_Rect **videomodesdl;
 const SDL_VideoInfo *origmode;
@@ -45,15 +107,8 @@ void init_config();
 
 int conf_stretch=0;
 const int NECKPOS_COUNT=MAX_PLAYERS*(MAX_PLAYERS+1)/2;
-tNeckpos neckpos[NECKPOS_COUNT];
-GLfloat neckpos_extend;
-GLfloat tolerance_early=100;
-GLfloat tolerance_late=100;
-GLfloat boardlen=4;
-GLfloat boardline=3;
-GLfloat necktop=2;
-int video_glflush=0;
-int video_glfinish=0;
+vector<tNeckpos> neckpos;
+vector<string> config_unknown;
 
 tNeckpos defneckpos[10]={
 {0.000,0.000,1.000,1.000,0.000,0},
@@ -72,97 +127,130 @@ int enablehopos;
 const char *difficultynames[4]={"SuperE","Easy","Medium","Hard"};
 void findvideomodes();
 
+/***********************************************
+ * Match configuration string against pattern
+ * and increment pointer if match occurred
+ */
+int tsimatch(char *&s, const char *v);
+int tsamatch(char *&s, const char *prefix, const char *suffix, int &idx);
+
 implementation
 
 uses fileio;
 
+int tsimatch(char *&s, const char *v)
+{
+	int l=strlen(v);
+	if (0!=strncmp(s,v,l)) return 0;
+	char ch=s[l];
+	if (ch!='=' && ch!=' ' && ch!='\t') return 0;
+	s+=l;
+	while (*s==' ' || *s=='\t' || *s=='=') s++;
+	DBG(CONFIG, "Matched id: %s" &v);
+	return 1;
+}
+
+int tsamatch(char *&s, const char *prefix, const char *suffix, int &idx)
+{
+	char *ss=s;
+	int idxv;
+	int l=strlen(prefix);
+	if (0!=strncmp(s,prefix,l)) return 0;
+	ss+=l;
+	if (*ss!='[') return 0;
+	idxv=0;
+	ss++;
+	while (*ss>='0' && *ss<='9') 
+	{
+		idxv=idxv*10+*ss-'0';
+		ss++;
+	}
+	if (*ss!=']')
+	{
+		WARN(CONFIG,"Config: expecting ]");
+		return 0;
+	}
+	ss++;
+	l=strlen(suffix);
+	if (l!=0 && 0!=strncmp(ss,suffix,l)) return 0;
+	ss+=l;
+	if (*ss!='=' && *ss!=' ' && *ss!='\t') return 0;
+	while (*ss==' ' || *ss=='\t' || *ss=='=') ss++;
+	idx=idxv;	
+	s=ss;
+	DBG(CONFIG, "Matched array: %s[%d]%s" &prefix &idx &suffix);
+	return 1;
+}
+
 int defkeys[]={ SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_RETURN, SDLK_RSHIFT, SDLK_TAB, 'p'};
 int defkey2[]={ '1','2','3','4','5','k','m','l','p' };
 
-int read_config()
+int config_read()
 {
-	char a[256];
+	char line[1024];
 	int i, j, v, numkeys;
 	FILE *fc=fopen(configFile.c_str(),"r");
 	if (!fc) return 0;
-	uu=fscanf(fc,"%s\n",a);
-	//currently very dumb
-	//MESSAGE("%s" &a);
-	uu=fscanf(fc,"%d", &numkeys);
-	keydefs.resize(0);
-	keyconfname.resize(0);
-	keydefs.resize(numkeys);
-	for (i=0; i<numkeys; i++)
+	// ini namespace marked with [ ]
+	string nsp="";
+	while (!feof(fc))
 	{
-		for (j=0; j<8; j++)
+		fgets(line,999,fc);
+		char *p, *sav;
+		// eliminate CR,LF at the end of line
+		p=line+strlen(line)-1;
+		while (p>=line) 
 		{
-			uu=fscanf(fc, "%d", &v); 
-			keydefs[i].push_back(v);
+			if (*p!=10 && *p!=13) break;
+			*p=0;
 		}
-		uu=fscanf(fc,"%s",a);
-		if (a[0]>='0' && a[0]<='9')
+		p=line;
+		while (*p==' ' || *p=='\t') p++;
+		if (*p=='[')
 		{
-			// for the 5 pepole who already tried the first version
-			// of the game and have the settings file
-			sscanf(a,"%d",&v);
-			keydefs[i].push_back(v);
-			//MESSAGE("new config\n");
-			uu=fscanf(fc,"%s",a);
-		} else keydefs[i].push_back(0);
-		uu=fscanf(fc,"\n");
-		keyconfname.push_back(a);
-	}
-	for (i=0; i<8; i++) uu=fscanf(fc,"%ld",keydefselector+i);
-	uu=fscanf(fc,"\n");
-	uu=fscanf(fc,"%s\n",a);
-	uu=fscanf(fc,"%d", &i);
-	if (i==10)
-	{
-		for (i=0; i<10; i++)
-		{
-			uu=fscanf(fc,"%f %f %f %f %f %d\n",
-				&neckpos[i].xdisp,
-				&neckpos[i].ydisp,
-				&neckpos[i].scale,
-				&neckpos[i].stretch,
-				&neckpos[i].skew,
-				&neckpos[i].statpos);
-			if (neckpos[i].scale<0.5 || neckpos[i].scale>4) neckpos[i]=defneckpos[i];
+			sav=++p;
+			while (*p!=']' && *p) p++;
+			*p=0;
+			nsp=sav;
+			DBG(CONFIG,"Config namespace: %s\n" &nsp);
+			continue;
 		}
+		if (*p==';')
+			continue;
+		// anything outside [fretscpp] is ignored
+		if (nsp!="fretscpp") continue;
+		sav=p;
+		DBG(CONFIG,"CONFIG: %s %s\n" &nsp &p);
+#define CONFIGITEM CI_READ
+#define CONFIGARRAY CIA_READ
+CONFIGLIST
+#undef CONFIGARRAY
+#undef CONFIGITEM
+		if (sav==p) config_unknown.push_back(sav);
 	}
 	fclose(fc);
 	if (numkeys<2) return 0;
 	return 1;
 }
 
-void write_config()
+void config_write()
 {
 	int i,j;
 	FILE *fou=fopen(configFile.c_str(),"w");
 	if (!fou) return;
-	fprintf(fou,":keyboard\n%d\n",(int) keydefs.size());
-	for (i=0; i<keydefs.size(); i++)
-	{
-		for (j=0; j<9; j++)
-		{
-			fprintf(fou,"%d ",keydefs[i][j]);
-		}
-		fprintf(fou,"%s\n",keyconfname[i].c_str());
-	}
-	for (i=0; i<8; i++) fprintf(fou,"%ld ",keydefselector[i]);
-	fprintf(fou,"\n");
-	fprintf(fou,"viewports:\n%d\n",NECKPOS_COUNT);
-	for (i=0; i<NECKPOS_COUNT; i++)
-	{
-		fprintf(fou,"%f %f %f %f %f %d\n",
-			neckpos[i].xdisp, neckpos[i].ydisp,
-			neckpos[i].scale, neckpos[i].stretch,
-			neckpos[i].skew, neckpos[i].statpos);
-	}
+	fprintf(fou,"[fretscpp]\n");
+#define CONFIGITEM CI_PRINT
+#define CONFIGARRAY CIA_PRINT
+CONFIGLIST
+#undef CONFIGARRAY
+#undef CONFIGITEM
+	if (config_unknown.size()) fprintf(fou,"; unknown entries");
+	for (i=0; i<config_unknown.size(); i++)
+		fprintf(fou,"%s\n",config_unknown[i].c_str());
 	fclose(fou);
 }
 
-void default_config()
+void config_defaults()
 {
 	int i;
 	keydefs.resize(0); // make sure it's clear
@@ -172,12 +260,18 @@ void default_config()
 	keyconfname.push_back("Keyb#2");
 	for (i=0; i<9; i++) 
 	{
-		keydefs[0].push_back(defkeys[i]);
-		keydefs[1].push_back(defkey2[i]);
+		keydefs[0].key[i]=defkeys[i];
+		keydefs[1].key[i]=defkey2[i];
 	}
 	keydefselector[0]=1;
 	keydefselector[1]=2;
+	neckpos.resize(10);
 	for (i=0; i<10; i++) neckpos[i]=defneckpos[i];
+}
+
+void config_fix()
+{
+	keyconfname.resize(keydefs.size());
 }
 
 void trydatadir(string td)
@@ -244,7 +338,7 @@ void init_config()
 	trydatadir("/usr/share/games/fretscpp/data");
 	trydatadir("/usr/local/share/games/fretscpp/data");
 	trydatadir("/usr/share/games/fretsonfire/data");
-	default_config();
-	if (read_config()) return;
-	default_config();
+	config_defaults();
+	config_read();
+	config_fix();
 }

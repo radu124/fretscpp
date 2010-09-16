@@ -45,16 +45,7 @@ struct tSongini
 
 implementation
 
-int tsimatch(char *&s, const char *v)
-{
-	int l=strlen(v);
-	if (0!=strncmp(s,v,l)) return 0;
-	char ch=s[l];
-	if (ch!='=' && ch!=' ' && ch!='\t') return 0;
-	s+=l;
-	while (*s==' ' || *s=='\t' || *s=='=') s++;
-	return 1;
-}
+uses configuration;
 
 #define tsiMAstring(c) if (tsimatch(l,""#c)) {c=l; DBG(SONGINI,"Read: "#c"=%s\n" &c); continue; } else do {;} while (0);
 #define tsiMAint(c) if (tsimatch(l,""#c)) {c=atoi(l); DBG(SONGINI,"Read int:"#c"=%d\n" &c); continue; } else do {;} while(0);

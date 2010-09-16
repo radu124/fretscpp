@@ -54,7 +54,7 @@ void tScnKeydef::enter()
 		additem("");
 		additem("ODefine all");
 		for (j=0; j<9; j++)
-			additem(string("O")+keyname(keydefs[i][j]));
+			additem(string("O")+keyname(keydefs[i].key[j]));
 	}
 	newcol();
 	additem("OAdd New");
@@ -79,10 +79,10 @@ void tScnKeydef::handleevent(SDL_Event &a)
 	if (ch==SDLK_ESCAPE)
 	{
 		redefining=0;
-		entries[selx][sely]=string("O")+SDL_GetKeyName((SDLKey) keydefs[selx-1][sely-3]);
+		entries[selx][sely]=string("O")+SDL_GetKeyName((SDLKey) keydefs[selx-1].key[sely-3]);
 		return;
 	}
-	keydefs[selx-1][sely-3]=ch;
+	keydefs[selx-1].key[sely-3]=ch;
 	entries[selx][sely]=string("O")+keyname(ch);
 	if (redefining==1 || sely==11) redefining=0;
 	else {
@@ -114,11 +114,11 @@ void tScnKeydef::itemClicked(int i, int j)
 		entries[i][1]="";
 		entries[i][2]="ODefine All";
 		keyconfname.push_back(entries[i][0].substr(1));
-		keydefs.push_back(vint());
+		keydefs.push_back(tKeydefset());
 		for (q=0; q<9; q++)
 		{
 			entries[i][q+3]="O-";
-			keydefs.back().push_back(0);
+			keydefs.back().key[q]=0;
 		}
 		newcol();
 		additem("OAdd New");

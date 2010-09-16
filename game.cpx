@@ -126,7 +126,7 @@ int main( int argc, char* argv[] )
 	//SDL_FreeSurface(bg);
 
 	/* cleanup SDL */
-	write_config();
+	config_write();
 	done_joysticks();
 	SDL_Quit();
 	//DBG(GAME,"CBK=%d F:%d Fo:%d chn:%d buf%d\n",

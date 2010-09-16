@@ -126,7 +126,7 @@ void guitarkey(int ev, int key, int other)
 			int id=-1;
 			for (i=0; i<9; i++)
 			{
-				if (key==keydefs[q][i]) id=i;
+				if (key==keydefs[q].key[i]) id=i;
 			}
 			if (id==6) id=5;
 			if (id>=0 && ev==SDL_KEYDOWN) player[pl].presskey(id);
@@ -163,11 +163,11 @@ void menukey(SDL_Event &event, int flags)
 	for (q=0; q<keydefs.size(); q++)
 	{
 		if (!(keydefselector[pl] & (1<<q))) continue;
-		if (key==keydefs[q][0]) event.key.keysym.sym=SDLK_RETURN;
-		if (key==keydefs[q][1]) event.key.keysym.sym=SDLK_ESCAPE;
-		if (key==keydefs[q][2]) event.key.keysym.sym=SDLK_LEFT;
-		if (key==keydefs[q][3]) event.key.keysym.sym=SDLK_RIGHT;
-		if (key==keydefs[q][5]) event.key.keysym.sym=SDLK_UP;
-		if (key==keydefs[q][6]) event.key.keysym.sym=SDLK_DOWN;
+		if (key==keydefs[q].key[0]) event.key.keysym.sym=SDLK_RETURN;
+		if (key==keydefs[q].key[1]) event.key.keysym.sym=SDLK_ESCAPE;
+		if (key==keydefs[q].key[2]) event.key.keysym.sym=SDLK_LEFT;
+		if (key==keydefs[q].key[3]) event.key.keysym.sym=SDLK_RIGHT;
+		if (key==keydefs[q].key[5]) event.key.keysym.sym=SDLK_UP;
+		if (key==keydefs[q].key[6]) event.key.keysym.sym=SDLK_DOWN;
 	}
 }
