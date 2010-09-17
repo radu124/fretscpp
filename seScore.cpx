@@ -46,17 +46,17 @@ void showStars(int promille, GLfloat dx, GLfloat dy)
 	dx+=q-2.5;
 	spc.star2.bind();
 	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0, 1.0); glVertex3f(dx   , dy-0.5, 0);
-	glTexCoord2f(dv , 1.0); glVertex3f(dx+dv, dy-0.5, 0);
-	glTexCoord2f(0.0, 0.0); glVertex3f(dx   , dy+0.5, 0);
-	glTexCoord2f(dv , 0.0); glVertex3f(dx+dv, dy+0.5, 0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(dx   , dy-0.5, 0);
+	glTexCoord2f(dv , 0.0); glVertex3f(dx+dv, dy-0.5, 0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(dx   , dy+0.5, 0);
+	glTexCoord2f(dv , 1.0); glVertex3f(dx+dv, dy+0.5, 0);
 	glEnd();
 	spc.star1.bind();
 	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(dv , 1.0); glVertex3f(dx+dv, dy-0.5, 0);
-	glTexCoord2f(1.0, 1.0); glVertex3f(dx+1 , dy-0.5, 0);
-	glTexCoord2f(dv , 0.0); glVertex3f(dx+dv, dy+0.5, 0);
-	glTexCoord2f(1.0, 0.0); glVertex3f(dx+1 , dy+0.5, 0);
+	glTexCoord2f(dv , 0.0); glVertex3f(dx+dv, dy-0.5, 0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(dx+1 , dy-0.5, 0);
+	glTexCoord2f(dv , 1.0); glVertex3f(dx+dv, dy+0.5, 0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(dx+1 , dy+0.5, 0);
 	glEnd();
 	spc.unbind();
 }

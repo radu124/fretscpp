@@ -57,18 +57,13 @@ int tSceneGuitar::renderNote(int col, int ts, int flags)
 	//if (y>-2) tt=1;
 	//if (y>-1) tt=2;
 	//if (y>0) tt=3;
-	glBindTexture(GL_TEXTURE_2D,spc.note[tt][col].tex);
-
+	
 	glColor4f(c0,c1,c2,nfade);
 	glPushMatrix();
 	glTranslatef(col-2,y,0);
 	glRotatef(60,1,0,0);
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2d(0,0);  glVertex3f(-sz , -sz, 0);
-	glTexCoord2d(0,1);  glVertex3f(-sz ,  sz, 0);
-	glTexCoord2d(1,0);  glVertex3f( sz , -sz, 0);
-	glTexCoord2d(1,1);  glVertex3f( sz ,  sz, 0);
-	glEnd();
+	glScalef(sz,sz,sz);
+	spc.note[tt][col].draw3d();
 	glPopMatrix();
 	return 0;
 }

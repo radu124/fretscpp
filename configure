@@ -1,13 +1,11 @@
-#! /bin/sh
+#!/bin/bash
 
 DEPS=
-if !which g++; then DEPS="$DEPS g++"; fi
+if ! which g++; then DEPS="$DEPS g++"; fi
 if ! [ -e "/usr/include/SDL/SDL.h" ]; then DEPS="$DEPS SDL"; fi
-if ! [ -e "/usr/include/freetype2/freetype/freetype.h"]; then DEPS="$DEPS freetype2"; fi
+if ! [ -e "/usr/include/freetype2/freetype/freetype.h" ]; then DEPS="$DEPS freetype2"; fi
 if ! [ -e "/usr/include/GL/gl.h" ]; then DEPS="$DEPS openGL"; fi
-if ! [ -e "/usr/include/IL/il.h" ]; then DEPS="$DEPS libdevil"; fi
-if ! [ -e "/usr/include/IL/ilu.h" ]; then DEPS="$DEPS libdevil"; fi
-if ! [ -e "/usr/include/IL/ilut.h" ]; then DEPS="$DEPS libdevil"; fi
+if ! [ -e "/usr/include/png.h" ]; then DEPS="$DEPS libpng"; fi
 
 echo -en "\033[31m"
 
@@ -18,9 +16,9 @@ done
 echo -en "\033[32m"
 
 echo "DUMMY configure"
-echo "sorry, you'll have to resolve this manually"
+echo "sorry, you may need to resolve this manually"
 echo "for debian based distributions (ubuntu) do"
-echo "     sudo apt-get install build-essential libsdl-dev libdevil-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev"
+echo "     sudo apt-get install build-essential libsdl-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev libpng12-dev"
 echo "     optionally: sudo apt-get install fretsonfire-songs-sectoid fretsonfire-songs-muldjord"
 echo "I need to look up the package names under other distributions"
 echo

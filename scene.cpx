@@ -125,7 +125,7 @@ GLfloat sskewmatrix[16]={
 void scene_setNeck(int i, int np)
 {
 	int active=i+np*(np-1)/2;
-	assume(active>=0 && active<NECKPOS_COUNT,"trying to set wrong neckpos");
+	assume(active>=0 && active<neckpos.size(),"trying to set wrong neckpos");
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(90.0f, 1.0f * scr_width / scr_height, 1.0f, 100.0f);

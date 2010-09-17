@@ -11,6 +11,15 @@ string datadir;
 // why would you want that, just to create confusion?
 // namespace config
 
+// for selection of the neck we have the following variables
+// the filename of the neck
+string themeNeckfilename;
+// the index in the list of necks 
+int themeNeckidx;
+// the config name of the neck: themeNeckname
+vstring themeNecknames;
+vstring themeNeckfilenames;
+
 #define CONFIGLIST \
 CONFIGITEM(GLfloat,neckpos_extend,0) \
 CONFIGITEM(GLfloat,tolerance_early,100) \
@@ -20,6 +29,8 @@ CONFIGITEM(GLfloat,boardline,3) \
 CONFIGITEM(GLfloat,necktop,2) \
 CONFIGITEM(int,video_glflush,0) \
 CONFIGITEM(int,video_glfinish,0) \
+CONFIGITEM(string,themeNeckname,"Default") \
+CONFIGITEM(int,themeNecktransparency,0) \
 CONFIGARRAY(GLfloat,neckpos,.xdisp,.xdisp) \
 CONFIGARRAY(GLfloat,neckpos,.ydisp,.ydisp) \
 CONFIGARRAY(GLfloat,neckpos,.scale,.scale) \
@@ -106,11 +117,11 @@ long keydefselector[8];
 void init_config();
 
 int conf_stretch=0;
-const int NECKPOS_COUNT=MAX_PLAYERS*(MAX_PLAYERS+1)/2;
+const int NECKPOS_COUNT=MAX_PLAYERS*(MAX_PLAYERS+1)/2+1;
 vector<tNeckpos> neckpos;
 vector<string> config_unknown;
 
-tNeckpos defneckpos[10]={
+tNeckpos defneckpos[11]={
 {0.000,0.000,1.000,1.000,0.000,0},
 {-3.250,0.000,1.000,0.700,-0.220,0},
 {3.250,0.000,1.000,0.700,0.220,0},
@@ -120,7 +131,8 @@ tNeckpos defneckpos[10]={
 {-3.000,-1.250,0.700,1.000,0.020,0},
 {-2.250,2.500,0.900,0.500,-0.310,0},
 {2.250,2.500,0.900,0.500,0.310,1},
-{3.500,-1.250,0.700,1.000,-0.030,1}
+{3.500,-1.250,0.700,1.000,-0.030,1},
+{2.000,0.000,1.000,0.900,0.000,1}
 };
 
 int enablehopos;
@@ -136,7 +148,7 @@ int tsamatch(char *&s, const char *prefix, const char *suffix, int &idx);
 
 implementation
 
-uses fileio;
+uses fileio, scnSetTheme;
 
 int tsimatch(char *&s, const char *v)
 {
@@ -265,8 +277,8 @@ void config_defaults()
 	}
 	keydefselector[0]=1;
 	keydefselector[1]=2;
-	neckpos.resize(10);
-	for (i=0; i<10; i++) neckpos[i]=defneckpos[i];
+	neckpos.resize(11);
+	for (i=0; i<11; i++) neckpos[i]=defneckpos[i];
 }
 
 void config_fix()
@@ -341,4 +353,5 @@ void init_config()
 	config_defaults();
 	config_read();
 	config_fix();
+	theme_init();
 }

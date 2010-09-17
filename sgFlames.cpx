@@ -29,10 +29,12 @@ void tSceneGuitar::renderMultiplier()
 		glRotatef(60, 1, 0, 0);
 		glTranslatef(0, 1, 0);
 		glScalef(sv,sv,1);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		
 		if (pp.streak>=30) spc.m4.draw3d();
 		else if (pp.streak>=20) spc.m3.draw3d();
 		else if (pp.streak>=10) spc.m2.draw3d();
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPopMatrix();
 	}
 }

@@ -14,13 +14,13 @@ uses configuration,scene;
 
 void tScnSetVideo::init()
 {
-	additem(new tSIcheckbox("Fullscreen",&video_dofullscreen));
+	additem(new tSIcheckbox("Fullscreen (N/A)",&video_dofullscreen));
 	additem(new tSIlist("setMode",videomodenames,&video_fsmodeid));
-	additem(new tSIcheckbox("VSync",&video_vsync));
+	additem(new tSIcheckbox("VSync (N/A)",&video_vsync));
 	additem(new tSIcheckbox("glFlush",&video_glflush));
 	additem(new tSIcheckbox("glFinish",&video_glfinish));
-	additem(new tSIcheckbox("Frame Limiter",&video_limiter));
-	additem(new tSIrange("FPS",25,100,&video_fpslim,1));
+	additem(new tSIcheckbox("Frame Limiter (N/A)",&video_limiter));
+	additem(new tSIrange("FPS (N/A)",25,100,&video_fpslim,1));
 	tScnSetBase::init();
 }
 

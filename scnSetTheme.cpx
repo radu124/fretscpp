@@ -7,9 +7,74 @@ class tScnSetTheme:public tScnSetBase
 public:
 	tScnSetTheme() { scenes.add(this,SCN_SETTHEME); }
 	GLfloat fadespeed() { return 100; }
+	void init();
+	void itemAdjusted(int i);
+	void render();
 } scnSetTheme;
 
+void theme_init();
 
 implementation
 
 uses configuration,scene;
+
+void initNeckname()
+{
+	int i;
+	themeNeckfilenames=listDirContents(datadir+"/necks");
+	themeNeckidx=0;
+	themeNecknames.resize(0);
+	themeNecknames.push_back("Default");
+	for (i=0; i<themeNeckfilenames.size(); i++)
+	{
+		string s=themeNeckfilenames[i];
+		themeNeckfilenames[i]="necks/"+s;
+		s=s.substr(0,s.length()-4);
+		themeNecknames.push_back(s);
+		if (s==themeNeckname) themeNeckidx=i+1;
+	}
+	themeNeckname=themeNecknames[themeNeckidx];
+	themeNeckfilenames.insert(themeNeckfilenames.begin(),"neck.png");
+	themeNeckfilename=themeNeckfilenames[themeNeckidx];
+}
+
+void theme_init()
+{
+	initNeckname();
+}
+
+void tScnSetTheme::init()
+{
+	additem(new tSIlist("Neck",themeNecknames,&themeNeckidx));
+	additem(new tSIintrange("Neck transparency",0,90,&themeNecktransparency,10));
+	tScnSetBase::init();
+}
+
+void tScnSetTheme::itemAdjusted(int i)
+{
+	switch(i)
+	{
+	case 0:
+		themeNeckname=themeNecknames[themeNeckidx];
+		themeNeckfilename=themeNeckfilenames[themeNeckidx];
+		spc.neck.load(themeNeckfilename.c_str());
+		break;
+	}
+}
+
+void tScnSetTheme::render()
+{
+	int cplayer;
+	paintrotback();
+	
+	scene_setNeck(0,5);
+	guitarScene.renderNeck();
+	guitarScene.renderTracks();
+
+	scene_setOrtho();
+	guitarScene.activeneckpos=10;
+	guitarScene.renderMultiplierVal();
+	guitarScene.renderStats();
+	
+	rendertext();
+}

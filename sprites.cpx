@@ -30,6 +30,7 @@ public:
 	GLuint tex;
 	GLfloat scale;
 	GLfloat centerx, centery;
+	GLfloat txwi,txhe;
 };
 
 struct tsprites
@@ -54,7 +55,7 @@ struct tsprites
 
 implementation
 
-uses configuration;
+uses configuration, readpng;
 
 void sprite::bind()
 {
@@ -69,23 +70,20 @@ void tsprites::unbind()
 void sprite::load(const char *fname, int flags)
 {
 	GLfloat cx=0.5f, cy=0.5f;
-	ILuint iname;
 	string ffullname=datadir+"/"+fname;
-	ilGenImages(1,&iname);
-	ilBindImage(iname);
-	ilLoadImage(ffullname.c_str());
-	height =ilGetInteger(IL_IMAGE_HEIGHT);
-	width  =ilGetInteger(IL_IMAGE_WIDTH);
+	int imgwidth=0,imgheight=0;
+	int rwidth, rheight;
+	loadImage(ffullname.c_str(),tex,imgwidth,imgheight,txwi,txhe);
+	height=imgheight;
+	width=imgwidth;
 	if (flags & 1) { height=10; width=10; }
 	//tex= ilutGLLoadImage(ffullname.c_str());
-	tex=ilutGLBindTexImage();
 	
-	INFO(SPRITES,"Loading: %s, iname: %d tex:%d size:%dx%d\n" &fname &iname &tex &width &height);
+	INFO(SPRITES,"Loading: %s, tex:%d size:%dx%d\n" &fname &tex &width &height);
 	if (!width)
 	{
 		MESSAGE("Could not load file: %s/%s\n" &datadir &fname);
 	}
-	ilDeleteImages(1,&iname);
 	/*
 	ilutEnable(ILUT_OPENGL_CONV);
 	ILboolean ilutOglBuildMipmaps(ILvoid);
@@ -108,10 +106,10 @@ void sprite::draw(GLfloat x, GLfloat y)
 	y-=centery;
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glBegin(GL_QUADS);
-	glTexCoord2d(0,1);  glVertex2f(x         ,y);
-	glTexCoord2d(0,0);  glVertex2f(x         ,y+height);
-	glTexCoord2d(1,0);  glVertex2f(x+width   ,y+height);
-	glTexCoord2d(1,1);  glVertex2f(x+width   ,y);
+	glTexCoord2d(0   ,0   );  glVertex2f(x         ,y);
+	glTexCoord2d(0   ,txhe);  glVertex2f(x         ,y+height);
+	glTexCoord2d(txwi,txhe);  glVertex2f(x+width   ,y+height);
+	glTexCoord2d(txwi,0   );  glVertex2f(x+width   ,y);
 	glEnd();
 }
 
@@ -119,10 +117,10 @@ void sprite::draw3d()
 {
 	glBindTexture(GL_TEXTURE_2D,tex);
 	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0, 0.0); glVertex3f(-1, -1, 0);
-	glTexCoord2f(1.0, 0.0); glVertex3f( 1, -1, 0);
-	glTexCoord2f(0.0, 1.0); glVertex3f(-1, 1, 0);
-	glTexCoord2f(1.0, 1.0); glVertex3f( 1, 1, 0);
+	glTexCoord2f(0.0 , txhe); glVertex3f(-1, -1, 0);
+	glTexCoord2f(txwi, txhe); glVertex3f( 1, -1, 0);
+	glTexCoord2f(0.0 , 0   ); glVertex3f(-1,  1, 0);
+	glTexCoord2f(txwi, 0   ); glVertex3f( 1,  1, 0);
 	glEnd();
 	glBindTexture(GL_TEXTURE_2D,NULL);
 }
@@ -136,16 +134,11 @@ void sprite::setCenter(GLfloat x, GLfloat y)
 void init_sprites()
 {
 	int i,j;
-	ilInit();
-	iluInit();
-#ifndef _WINDOWS
-	ilutRenderer(ILUT_OPENGL);
-#endif
 //	ilGenImages(1,&baseiname);
 	spc.logo.load("logo.png");
 	spc.back.load("keyboard.png");
 	spc.guyk.load("pose.png");
-	spc.neck.load("neck.png");
+	spc.neck.load(themeNeckfilename.c_str());
 	spc.ball.load("ball2.png",1);
 	for (i=0; i<5; i++)
 	{

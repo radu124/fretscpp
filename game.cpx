@@ -43,6 +43,8 @@ int main( int argc, char* argv[] )
 	SDL_WM_SetCaption("Frets-on-fire-CPP", "SDL");
 	/* create window */
 	SDL_Surface* screen = SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL | SDL_RESIZABLE);
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+	INFO(SPRITES,"Maximum texture size:%d\n" &maxTexSize);
 	init_joysticks();
 	glEnable( GL_TEXTURE_2D );
 	glEnable (GL_BLEND); 

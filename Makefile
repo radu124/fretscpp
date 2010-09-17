@@ -2,7 +2,7 @@
 DIR_FREETYPE2_INC=-I/usr/include/freetype2
 DIR_FREETYPE2_LIB=
 
-LIBS:=`sdl-config --cflags --libs` -lGL -lGLU -lIL -lILU -lILUT -lfreetype -logg -lvorbis -lvorbisfile $(DIR_FREETYPE2_INC)
+LIBS:=`sdl-config --cflags --libs` -lGL -lGLU -lpng -lfreetype -logg -lvorbis -lvorbisfile $(DIR_FREETYPE2_INC)
 #Windows libs, for now, manually uncomment
 #LIBS:= -D_WINDOWS -Ic:/Dev-Cpp/include/SDL -Ic:/Dev-Cpp/include -Ic:/Dev-Cpp/include/GL -Ic:/Dev-Cpp/include/GLU -Ic:/Dev-Cpp/include/freetype2 -Dmain=SDL_main -Lc:/Dev-Cpp/lib -lmingw32 -lSDLmain -lSDL -mwindows -lfreetype -logg -lvorbisfile -lopengl32 -ldevil -lglu32 -lvorbis -lILU -lILUT
 
@@ -36,7 +36,10 @@ cpxprep: cpxprep.cpp
 	g++ $< -o $@
 
 ubudeps:
-	sudo apt-get install fretsonfire-songs-sectoid build-essential libsdl-dev libdevil-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev
+	sudo apt-get install build-essential libsdl-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev libpng12-dev
+
+ubusongs:
+	sudo apt-get install fretsonfire-songs-sectoid
 
 game64: fretscpp.cpp
 	g++ -m64 -MMD -MF $@.d $< -O0 -g3 -ggdb -o $@ $(LIBS)

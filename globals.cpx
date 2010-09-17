@@ -25,5 +25,6 @@ GLfloat scr_tblim;
 string selectedsong="";
 int numplayers=1;
 int glfontaa=GL_LINEAR;
+GLint maxTexSize;
 
 implementation

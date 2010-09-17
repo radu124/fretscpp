@@ -1,5 +1,7 @@
 interface
 
+uses scene;
+
 struct tSettingsItem
 {
 public:
@@ -74,7 +76,7 @@ public:
 
 implementation
 
-uses configuration,scene;
+uses configuration;
 
 void tSIlist::capval()
 {

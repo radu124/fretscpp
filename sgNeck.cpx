@@ -21,7 +21,7 @@ uses scnGuitar;
 void tSceneGuitar::renderNeck()
 {
 	GLfloat s0,s1,s3;
-	s0=playing.playpos*0.00001;
+	s0=timenow*0.00001;
 	s0=s0-(int) s0;
 	s0=1-s0;
 	s1=s0+0.2;
@@ -38,7 +38,7 @@ void tSceneGuitar::renderNeck()
 	glTexCoord2f(1.0f,s0);
 	glVertex3f(2.3,2.0f,0);
 	
-	glColor4f(1.0f,1.0f,1.0f,1.0f);
+	glColor4f(1.0f,1.0f,1.0f,1.0f-themeNecktransparency*0.01);
 	glTexCoord2f(0.0f,s1);
 	glVertex3f(-2.3,1.0f,0);
 	glTexCoord2f(1.0f,s1);
