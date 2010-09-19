@@ -36,7 +36,7 @@ cpxprep: cpxprep.cpp
 	g++ $< -o $@
 
 ubudeps:
-	sudo apt-get install build-essential libsdl-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev libpng12-dev
+	sudo apt-get install build-essential libsdl-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev
 
 ubusongs:
 	sudo apt-get install fretsonfire-songs-sectoid
@@ -44,18 +44,26 @@ ubusongs:
 game64: fretscpp.cpp
 	g++ -m64 -MMD -MF $@.d $< -O0 -g3 -ggdb -o $@ $(LIBS)
 
-install: fretscpp
-	install -d $(DESTDIR)/usr
-	install -d $(DESTDIR)/usr/bin
-	install -d $(DESTDIR)/usr/share
-	install -d $(DESTDIR)/usr/share/games
-	install -d $(DESTDIR)/usr/share/games/fretscpp
-	install -d $(DESTDIR)/usr/usr/share/games/fretscpp/data
-	install -d $(DESTDIR)/usr/share/games/fretscpp/data/songs
-	install -d $(DESTDIR)/usr/share/games/fretscpp/data/songs/tutorial
-	install -m 755 fretscpp $(DESTDIR)/usr/bin/fretscpp
-	install -m 644 $(filter-out data/songs,$(wildcard data/*)) $(DESTDIR)/usr/share/games/fretscpp/data
-	install -m 644 $(wildcard data/songs/tutorial/*) $(DESTDIR)/usr/share/games/fretscpp/data/songs/tutorial
-	
+spec:
+	find data -type d | while read A; do echo '%__install -m 755 -d $${RPM_BUILD_ROOT}'/usr/share/games/fretscpp/$$A; done >fretscpp.spec
+	echo '%__install -m 755 fretscpp/fretscpp $${RPM_BUILD_ROOT}/usr/bin/fretscpp' >>fretscpp.spec
+	find data -type f | while read A; do echo '%__install -m 0644 fretscpp/'$$A '$${RPM_BUILD_ROOT}'/usr/share/games/fretscpp/$$A; done >>fretscpp.spec
 
-.PHONY: run install all
+install: fretscpp
+	install -m 755 -d $(DESTDIR)/usr
+	install -m 755 -d $(DESTDIR)/usr/bin
+	install -m 755 -d $(DESTDIR)/usr/share
+	install -m 755 -d $(DESTDIR)/usr/share/games
+	install -m 755 -d $(DESTDIR)/usr/share/games/fretscpp
+	find data -type d | while read A; do install -m 755 -d "$(DESTDIR)/usr/share/games/fretscpp/$$A"; done
+	install -m 755 fretscpp $(DESTDIR)/usr/bin/fretscpp
+	find data -type f | while read A; do install -m 644 "$$A" "$(DESTDIR)/usr/share/games/fretscpp/$$A"; done
+
+versionincrement:
+	sed "s/[.]/ /" VERSION | (read A B; echo $A.$[B+1]) >VERSION.tmp
+	mv VERSION VERSION.prev
+	mv VERSION.tmp VERSION
+	git add VERSION
+
+
+.PHONY: run install all versionincrement ubudeps ubusongs spec

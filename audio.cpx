@@ -32,15 +32,17 @@ implementation
 
 uses verbosity, message;
 
-#ifdef _WINDOWS
 // this is not defined under Windows, at least in my version of libvorbis
-int ov_fopen(char *path,OggVorbis_File *vf)
+int ov_myfopen(char *path,OggVorbis_File *vf)
 {
 	FILE *fin;
+#ifdef _WINDOWS
 	fin=fopen(path,"rb");
+#else
+	fin=fopen(path,"r");	
+#endif
 	ov_open(fin,vf,NULL,0);
 }
-#endif
 
 struct tEffects
 {
@@ -275,7 +277,7 @@ int load_effects(string fn)
 	int allocd=220500;
 	
 	OggVorbis_File vf;
-	if(ov_fopen((char *) fn.c_str(), &vf) < 0) return 0;
+	if(ov_myfopen((char *) fn.c_str(), &vf) < 0) return 0;
 	int channels = ov_info(&vf,0)->channels;
 	int samplerate = ov_info(&vf,0)->rate;
 	int cnt=effects.count;
@@ -378,15 +380,15 @@ void tPlaying::open_song()
 	int l=strlen(namelocal);
 	if (!l) return;
 	if (namelocal[l-1]=='/') strcat(namelocal,"song.ogg");
-	if (ov_fopen(namelocal, &ov_song) >=0) { sisopen[0]=1; stopsat[0]=1000000000; }
+	if (ov_myfopen(namelocal, &ov_song) >=0) { sisopen[0]=1; stopsat[0]=1000000000; }
 	if (namelocal[l-1]=='/')
 	{
 		namelocal[l]=0;
 		strcat(namelocal,"rhythm.ogg");
-		if (ov_fopen(namelocal, &ov_rhythm) >=0) { sisopen[1]=1; stopsat[1]=1000000000; }
+		if (ov_myfopen(namelocal, &ov_rhythm) >=0) { sisopen[1]=1; stopsat[1]=1000000000; }
 		namelocal[l]=0;
 		strcat(namelocal,"guitar.ogg");
-		if (ov_fopen(namelocal, &ov_guitar) >=0) { sisopen[2]=1; stopsat[2]=1000000000; }
+		if (ov_myfopen(namelocal, &ov_guitar) >=0) { sisopen[2]=1; stopsat[2]=1000000000; }
 	}
 	// we do this here, otherwise the
 	// callback might clear them if stopsat[]
