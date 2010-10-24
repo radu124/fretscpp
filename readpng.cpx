@@ -93,7 +93,14 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 		png_set_palette_to_rgb(png_ptr);
 
 	if(colourType == PNG_COLOR_TYPE_GRAY && bitDepth < 8)
+	{
+#ifdef _WINDOWS
+// PNG_LIBPNG_VER < 10004
+		png_set_gray_1_2_4_to_8(png_ptr);
+#else
 		png_set_expand_gray_1_2_4_to_8(png_ptr);
+#endif
+	}
 
 	if(png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
 		png_set_tRNS_to_alpha(png_ptr);
@@ -132,7 +139,7 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 	theight=1.0;
 	if (rwidth!=imgwidth || rheight!=imgheight)
 	{
-		WARN(SPRITES,"Sprite: %s has non-power of 2 size\n");
+		WARN(SPRITES,"Sprite: %s has non-power of 2 size\n" &filename);
 		twidth=((GLfloat)imgwidth)/rwidth;
 		theight=((GLfloat)imgheight)/rheight;
 	}

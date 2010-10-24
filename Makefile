@@ -65,5 +65,7 @@ versionincrement:
 	mv VERSION.tmp VERSION
 	git add VERSION
 
-
+preproc.cpp: fretscpp.cpp
+	g++ -E $< $(LIBS)>$@
+	
 .PHONY: run install all versionincrement ubudeps ubusongs spec

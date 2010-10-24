@@ -74,7 +74,7 @@ GLfloat keycolors[5][3]={
 
 implementation
 
-uses audio,player,keyboard,globals,sgFlames,sgNeck,sgNotes,sgKeys,sgStats;
+uses audio,player,keyboard,globals,sgFlames,sgNeck,sgNotes,sgKeys,sgStats,stage;
 
 void tSceneGuitar::updatetime()
 {
@@ -107,6 +107,7 @@ void tSceneGuitar::render()
 	}
 	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
 	glClear( GL_COLOR_BUFFER_BIT );
+	stagePlay->render();
 	updatetime();
 	for (cplayer=0; cplayer<numplayers; cplayer++)
 	{
@@ -135,6 +136,7 @@ void tSceneGuitar::render()
 		renderStats();
 	}
 	globalStats();
+	stagePlay->renderForeground();
 	if (menumode)
 	{
 		glLoadIdentity();

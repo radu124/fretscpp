@@ -1,6 +1,6 @@
 interface
 
-uses includes,player;
+uses includes,player,confrw;
 
 string configFile;
 string scoresFile;
@@ -19,6 +19,7 @@ int themeNeckidx;
 // the config name of the neck: themeNeckname
 vstring themeNecknames;
 vstring themeNeckfilenames;
+vstring themeStages;
 
 #define CONFIGLIST \
 CONFIGITEM(GLfloat,neckpos_extend,0) \
@@ -29,6 +30,7 @@ CONFIGITEM(GLfloat,boardline,3) \
 CONFIGITEM(GLfloat,necktop,2) \
 CONFIGITEM(int,video_glflush,0) \
 CONFIGITEM(int,video_glfinish,0) \
+CONFIGITEM(string,themeStage,"rf-mod") \
 CONFIGITEM(string,themeNeckname,"Default") \
 CONFIGITEM(int,themeNecktransparency,0) \
 CONFIGARRAY(GLfloat,neckpos,.xdisp,.xdisp) \
@@ -47,14 +49,7 @@ CONFIGARRAY(int,keydefs,.key[6],.altpick) \
 CONFIGARRAY(int,keydefs,.key[7],.whammy) \
 CONFIGARRAY(int,keydefs,.key[8],.power) \
 CONFIGARRAY(string,keyconfname,,) \
-	
-#define CONFWRITE_GLfloat(a) fprintf(fou,"%f",a)
-#define CONFWRITE_int(a) fprintf(fou,"%d",a)
-#define CONFWRITE_string(a) fprintf(fou,"%s",a.c_str())
 
-void confread_GLfloat(char *&s, GLfloat &v) { v=atof(s); DBG(CONFIG," value GLfloat %f (from:%s)\n" &v &s);}
-void confread_int(char *&s, int &v)         { v=atoi(s); DBG(CONFIG," value int %d (from:%s)\n" &v &s);}
-void confread_string(char *&s, string &v)   { v=string(s); DBG(CONFIG," value string '%s'\n" &v);}
 
 #define CI_DECLARE(a,b,c) a b=c;
 #define CI_PRINT(a,b,c) { fprintf(fou,""#b" = "); CONFWRITE_##a(b); fprintf(fou,"\n"); }

@@ -57,5 +57,13 @@ volatile int uu;
 #include <shlobj.h>
 #endif
 
+struct mcolor{
+	GLfloat Red,Green,Blue,Alpha;
+	void set(); // in utils.cpx
+	mcolor():Red(0),Green(0),Blue(0),Alpha(0) {;}
+	mcolor(GLfloat r, GLfloat g, GLfloat b):Red(r),Green(g),Blue(b),Alpha(0) {;}
+	mcolor(GLfloat r, GLfloat g, GLfloat b, GLfloat a):Red(r),Green(g),Blue(b),Alpha(a) {;}
+};
+
 implementation
 

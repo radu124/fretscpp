@@ -90,7 +90,7 @@ void tScnMenuMain::render()
 	spc.guyk.draw();
 	glLoadIdentity();
 	glColor4f(0.8f,0.3f,0.0f,1-scn.fade);
-	deffont.displayString("Note: this is not the original Frets-on-Fire game",39,29,2,TFont::ALIGN_RIGHT);
+//	deffont.displayString("Note: this is not the original Frets-on-Fire game",39,29,2,TFont::ALIGN_RIGHT);
 	rendertext();
 }
 

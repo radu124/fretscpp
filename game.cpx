@@ -55,6 +55,8 @@ int main( int argc, char* argv[] )
 	//glBlendFunc (GL_BLEND_DST_ALPHA ,GL_SRC_ALPHA);
 	deffont.open(datadir+"/default.ttf");
 	init_sprites();
+	stagePlay=new Stage();
+	stagePlay->readDir(datadir+"/stages/"+themeStage);
 	init_audio();
 	load_effects(datadir+"/fiba1.ogg");
 	load_effects(datadir+"/fiba2.ogg");

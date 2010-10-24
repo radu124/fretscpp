@@ -18,9 +18,12 @@ void assume(int b, const char *err);
 
 double gettimenow();
 
+// defined in configuration
+int tsimatch(char *&s, const char *v);
+
 implementation
 		
-uses includes;
+uses includes,message,verbosity;
 
 double gettimefloat()
 {
@@ -65,4 +68,9 @@ T* dorealloc(T* &adr,int len)
 	T* res=(T*) realloc(adr,len*sizeof(T));
 	if (!res) exit(1);
 	adr=res;
+}
+
+void mcolor::set()
+{
+	glColor4f(Red,Green,Blue,Alpha);
 }

@@ -27,4 +27,11 @@ int numplayers=1;
 int glfontaa=GL_LINEAR;
 GLint maxTexSize;
 
+class Stage;
+extern Stage *stagePlay;
+mcolor White(1,1,1,1);
+
 implementation
+
+uses stage;
+Stage *stagePlay;

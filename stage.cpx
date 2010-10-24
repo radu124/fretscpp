@@ -1,0 +1,234 @@
+interface
+
+uses includes,globals,scene,sprites,stagefx;
+
+enum SLBLENDTYPE { SLB_DEFAULT=0, SLB_ONE };
+
+#define SLINI_LIST \
+SLPD(int, xres, 128) \
+SLPD(int, yres, 128) \
+SLPD(int, players, 255) \
+SLPD(string, texture, "") \
+SLPD(mcolor, color, White) \
+SLPD(GLfloat, xscale, 1) \
+SLPD(GLfloat, scale, 1) \
+SLPD(GLfloat, yscale, 1) \
+SLPD(GLfloat, xpos, 0) \
+SLPD(GLfloat, ypos, 0) \
+SLPD(GLfloat, xcenter, 0) \
+SLPD(GLfloat, ycenter, 0) \
+SLPD(GLfloat, angle, 0) \
+SLPD(SLBLENDTYPE, src_blending, SLB_DEFAULT) \
+SLPD(SLBLENDTYPE, dst_blending, SLB_DEFAULT) \
+SLPD(int, foreground, 0)
+
+#define SLPD_DECLARE(a,b,c) a lv_##b;
+#define SLPD_INIT(a,b,c) lv_##b = c;
+#define SLPD_READ(a,b,c) if (tsimatch(line,"" #b)) { confread_##a(line,lv_##b); return; }
+MULTIRDR(SLBLENDTYPE,"default,one")
+
+class Stage;
+
+class StageLayer
+{
+public:
+	string name;
+	Stage *parent;
+	sprite tex;
+	int duptex;
+	vector<StageLayerFx*> fx;
+	StageLayer()
+	{
+#define SLPD SLPD_INIT
+	SLINI_LIST
+#undef SLPD
+	}
+	void read(char *line)
+	{
+#define SLPD SLPD_READ
+	SLINI_LIST
+#undef SLPD
+	}
+	void render();
+#define SLPD SLPD_DECLARE
+	SLINI_LIST
+#undef SLPD
+};
+
+class Stage
+{
+public:
+	vector<StageLayer*> layer;
+	void readDir(string d);
+	void cleanup();
+	void render();
+	void renderForeground();
+	StageLayer *findLayer(string name);
+	StageLayerFx *findFX(StageLayer *base, string name);
+	~Stage() { cleanup();}
+};
+
+implementation
+
+void StageLayer::render()
+{
+	glPushMatrix();
+	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE);	
+	lv_color.set();
+	glTranslatef(40*lv_xpos,30*lv_ypos,0);
+	glScalef(10*lv_xscale,-10*lv_yscale,0);
+	if (lv_angle!=0) glRotatef(-lv_angle,0,0,1);
+	tex.draw3d();
+	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glPopMatrix();
+}
+
+StageLayer *Stage::findLayer(string name)
+{
+	int v=-1,i;
+	for (i=0; i<layer.size(); i++)
+		if (layer[i]->name==name) v=i;
+	if (v<0)
+	{
+		StageLayer *a=new StageLayer();
+		a->name=name;
+		layer.push_back(a);
+		DBG(STAGE,"Stage: new layer %s\n" &name);
+		a->parent=this;
+		return a;
+	}
+	return layer[v];
+}
+
+StageLayerFx *Stage::findFX(StageLayer *base, string name)
+{
+	int v=-1,i;
+	for (i=0; i<base->fx.size(); i++)
+		if (base->fx[i]->name==name) v=i;
+	if (v<0)
+	{
+		StageLayerFx *a=new StageLayerFx();
+		a->name=name;
+		base->fx.push_back(a);
+		DBG(STAGE,"Stage: new fx %s (layer %s)\n" &name &base->name);
+		a->parent=this;
+		return a;
+	}
+	return base->fx[v];
+}
+	
+
+void Stage::readDir(string d)
+{
+	char line[1024];
+	int mode=0;
+	int i;
+	StageLayer *crtl=NULL;
+	StageLayerFx *crtf=NULL;
+	FILE *fc=fopen((d+"/stage.ini").c_str(),"r");
+	if (!fc) return;
+	
+	while (!feof(fc))
+	{
+		fgets(line,999,fc);
+		char *p, *sav, *fxs;
+		// eliminate CR,LF at the end of line
+		p=line+strlen(line)-1;
+		while (p>=line) 
+		{
+			if (*p!=10 && *p!=13) break;
+			*p=0;
+		}
+		p=line;
+		while (*p==' ' || *p=='\t') p++;
+		if (*p=='[')
+		{
+			sav=++p;
+			while (*p!=']' && *p) p++;
+			*p=0;
+			fxs=strchr(sav,':');
+			if (fxs) {
+				*fxs=0;
+				fxs++;
+				mode=2;
+				crtl=findLayer(sav);
+				crtf=findFX(crtl,fxs);
+			} else {
+				mode=1;
+				crtl=findLayer(sav);
+			}
+			continue;
+		}
+		if (*p==';')
+			continue;
+		if (mode==1) crtl->read(p);
+		if (mode==2) crtf->read(p);
+	}
+	for (i=0; i<layer.size(); i++) if (layer[i]->lv_texture!="")
+	{
+		string txname=layer[i]->lv_texture;
+		int pos=txname.rfind(".svg");
+		if (pos!=string::npos)
+			txname.replace(pos,4,".png");
+		int sametex=-1;
+		int j;
+		for (j=0; j<i; j++)
+		{
+			if (layer[i]->lv_texture==layer[j]->lv_texture)
+			{
+				sametex=j;
+				break;
+			}
+		}
+		layer[i]->duptex=(sametex>=0);
+		if (sametex>=0)
+		{
+			layer[i]->tex=layer[sametex]->tex;
+		}
+		else
+		{	
+			memset(&layer[i]->tex,0,sizeof(sprite));
+			layer[i]->tex.loadInternal(d+"/"+txname);
+		}
+		layer[i]->lv_yscale=layer[i]->lv_yscale*layer[i]->tex.height/layer[i]->tex.width;
+		layer[i]->lv_yscale*=layer[i]->lv_scale;
+		layer[i]->lv_xscale*=layer[i]->lv_scale;
+	}
+	fclose(fc);
+}
+
+void Stage::cleanup()
+{
+	int i;
+	for (i=0; i<layer.size(); i++)
+	{
+		if (layer[i]->tex.tex && !layer[i]->duptex)
+		{
+			glDeleteTextures(1,&layer[i]->tex.tex);
+		}
+		delete layer[i];
+	}
+	layer.resize(0);
+}
+
+void Stage::render()
+{
+	int i;
+	for (i=0; i<layer.size(); i++) 
+	{
+		if (layer[i]->lv_foreground) continue;
+		if (!(layer[i]->lv_players & (1<<(numplayers-1)))) continue;
+		layer[i]->render();
+	}
+}
+
+void Stage::renderForeground()
+{
+	int i;
+	for (i=0; i<layer.size(); i++) 
+	{	
+		if (!layer[i]->lv_foreground) continue;
+		if (!(layer[i]->lv_players & (1<<(numplayers-1)))) continue;
+		layer[i]->render();
+	}
+}

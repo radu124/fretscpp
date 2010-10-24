@@ -45,7 +45,9 @@ void theme_init()
 
 void tScnSetTheme::init()
 {
+	themeStages=listDirContents(datadir+"/stages",3);
 	additem(new tSIlist("Neck",themeNecknames,&themeNeckidx));
+	additem(new tSIlist("Stage",themeStages,&themeStage));
 	additem(new tSIintrange("Neck transparency",0,90,&themeNecktransparency,10));
 	tScnSetBase::init();
 }
@@ -59,6 +61,9 @@ void tScnSetTheme::itemAdjusted(int i)
 		themeNeckfilename=themeNeckfilenames[themeNeckidx];
 		spc.neck.load(themeNeckfilename.c_str());
 		break;
+	case 1:
+		stagePlay->cleanup();
+		stagePlay->readDir(datadir+"/stages/"+themeStage);
 	}
 }
 
@@ -66,6 +71,13 @@ void tScnSetTheme::render()
 {
 	int cplayer;
 	paintrotback();
+	
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(8,0,0);
+	glScalef(0.75,1,1);
+	stagePlay->render();
+	glPopMatrix();
 	
 	scene_setNeck(0,5);
 	guitarScene.renderNeck();
@@ -75,6 +87,13 @@ void tScnSetTheme::render()
 	guitarScene.activeneckpos=10;
 	guitarScene.renderMultiplierVal();
 	guitarScene.renderStats();
+	
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(8,0,0);
+	glScalef(0.75,1,1);
+	stagePlay->renderForeground();
+	glPopMatrix();
 	
 	rendertext();
 }

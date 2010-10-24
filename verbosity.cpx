@@ -27,5 +27,6 @@ interface
 #define MSG_SONGINI      LEV_INFO
 #define MSG_SCORES       LEV_DBG
 #define MSG_CONFIG       LEV_DBG
+#define MSG_STAGE        LEV_DBG
 
 implementation

@@ -22,6 +22,7 @@ class sprite
 {
 public:
 	void load(const char *, int flags=0);
+	void loadInternal(string, int flags=0);
 	void setCenter(GLfloat, GLfloat);
 	void draw(GLfloat x=0, GLfloat y=0);
 	void draw3d();
@@ -69,8 +70,13 @@ void tsprites::unbind()
 
 void sprite::load(const char *fname, int flags)
 {
-	GLfloat cx=0.5f, cy=0.5f;
 	string ffullname=datadir+"/"+fname;
+	loadInternal(ffullname,flags);
+}
+
+void sprite::loadInternal(string ffullname, int flags)
+{
+	GLfloat cx=0.5f, cy=0.5f;
 	int imgwidth=0,imgheight=0;
 	int rwidth, rheight;
 	loadImage(ffullname.c_str(),tex,imgwidth,imgheight,txwi,txhe);
@@ -79,10 +85,10 @@ void sprite::load(const char *fname, int flags)
 	if (flags & 1) { height=10; width=10; }
 	//tex= ilutGLLoadImage(ffullname.c_str());
 	
-	INFO(SPRITES,"Loading: %s, tex:%d size:%dx%d\n" &fname &tex &width &height);
+	INFO(SPRITES,"Loading: %s, tex:%d size:%dx%d\n" &ffullname &tex &width &height);
 	if (!width)
 	{
-		MESSAGE("Could not load file: %s/%s\n" &datadir &fname);
+		MESSAGE("Could not load file: %s/%s\n" &datadir &ffullname);
 	}
 	/*
 	ilutEnable(ILUT_OPENGL_CONV);

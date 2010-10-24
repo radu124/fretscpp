@@ -1,0 +1,55 @@
+interface
+
+uses includes,globals,scene,sprites,utils,confrw;
+
+enum FXTYPE    { FX_NONE=0, FX_SCALE, FX_LIGHT, FX_WIGGLE };
+enum FXTRIGGER { FXT_NONE=0, FXT_PICK, FXT_MISS, FXT_BEAT };
+enum FXPROFILE { FXP_NONE=0, FXP_SINSTEP };
+
+#define FXINI_LIST \
+FXPD(FXTYPE,type,FX_NONE) \
+FXPD(FXTRIGGER,trigger,FXT_NONE) \
+FXPD(FXPROFILE,profile,FXP_NONE) \
+FXPD(int,light_number,0) \
+FXPD(GLfloat,xmagnitude,0) \
+FXPD(GLfloat,ymagnitude,0) \
+FXPD(GLfloat,delay,0) \
+FXPD(GLfloat,frequency,0) \
+FXPD(GLfloat,angle,0) \
+FXPD(GLfloat,period,0) \
+FXPD(GLfloat,intensity,0) 
+
+#define FXPD_DECLARE(a,b,c) a fx_##b; 
+#define FXPD_INIT(a,b,c) fx_##b = c; 
+#define FXPD_READ(a,b,c) if (tsimatch(line,"" #b)) { confread_##a(line,fx_##b); return; }
+
+MULTIRDR(FXTYPE,"none,scale,light,wiggle"); 
+MULTIRDR(FXTRIGGER,"none,pick,miss,beat");
+MULTIRDR(FXPROFILE,"none,sinstep");
+
+class Stage;
+
+class StageLayerFx
+{
+public:
+	string name;
+	Stage *parent;
+	StageLayerFx()
+	{
+#define FXPD FXPD_INIT
+	FXINI_LIST
+#undef FXPD
+	}
+	void read(char *line)
+	{
+#define FXPD FXPD_READ
+	FXINI_LIST
+#undef FXPD
+	}
+#define FXPD FXPD_DECLARE
+	FXINI_LIST
+#undef FXPD
+};
+
+implementation
+

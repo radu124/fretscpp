@@ -47,9 +47,21 @@ struct tSIintrange:public tSettingsItem
 struct tSIlist:public tSettingsItem
 {
 	tSIlist(string v, vector<string> cv,int *vv):
-		tSettingsItem(v,TYP_RANGE),choices(cv),val(vv) { if (!vv) val=&locval; capval(); }
+		tSettingsItem(v,TYP_RANGE),choices(cv),val(vv),sval(&locsval) 
+		{
+			if (!cv.size()) choices.push_back("");
+			if (!vv) val=&locval; capval(); 
+		}
+	tSIlist(string v, vector<string> cv,string *vv):
+		tSettingsItem(v,TYP_RANGE),choices(cv),val(&locval),sval(vv) 
+		{
+			if (!cv.size()) choices.push_back("");
+			if (!vv) sval=&locsval; capval(); 
+		}
 	vector<string> choices;
 	int *val;
+	string *sval;
+	string locsval;
 	int min,max,step,locval;
 	void capval();
 	int handleevent(SDL_Event &event);
@@ -178,11 +190,13 @@ int tSIlist::handleevent(SDL_Event &event)
 		if (*val<=0) return 0;
 		*val-=1;
 		capval();
+		*sval=choices[*val];
 		return 1;
 	case SDLK_RIGHT:
 		if (*val>=choices.size()-1) return 0;
 		*val+=1;
 		capval();
+		*sval=choices[*val];
 		return 1;
 	}
 	return 0;
