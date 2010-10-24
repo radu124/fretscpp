@@ -60,7 +60,7 @@ install: fretscpp
 	find data -type f | while read A; do install -m 644 "$$A" "$(DESTDIR)/usr/share/games/fretscpp/$$A"; done
 
 versionincrement:
-	sed "s/[.]/ /" VERSION | (read A B; echo $A.$[B+1]) >VERSION.tmp
+	sed "s/[.]/ /" VERSION | bash -c "read QQ B; echo $$[QQ+0].$$[B+1]" >VERSION.tmp
 	mv VERSION VERSION.prev
 	mv VERSION.tmp VERSION
 	git add VERSION

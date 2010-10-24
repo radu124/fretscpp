@@ -1,1 +1,20 @@
-CPP port of Frets-on-Fire
+Frets-on-Fire C++ is a rewrite in C++ of the Frets-on-Fire game.
+
+Songs are not included, but scripts and tools for automatically
+downloading these songs are provided under windows (dlsongs directory).
+
+The game is work-in-progress, some things are known not to work
+at this time.
+
+Things that work:
+ * playing
+ * score computation more or less compatible with FoF
+ * whammy
+ * game controller (guitar)
+ * multiplayer on the same computer
+ * basic settings
+ 
+Things that do not work:
+ * fullscreen
+ * stage decorations and lights
+ * network play
