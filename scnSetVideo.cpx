@@ -8,14 +8,15 @@ public:
 	tScnSetVideo() { scenes.add(this,SCN_SETVIDEO); }
 	void init();
 	void enter();
+	void itemAdjusted(int i);
 } scnSetVideo;
 
-uses configuration,scene;
+uses configuration,scene,video;
 
 void tScnSetVideo::init()
 {
-	additem(new tSIcheckbox("Fullscreen (N/A)",&video_dofullscreen));
-	additem(new tSIlist("setMode",videomodenames,&video_fsmodeid));
+	additem(new tSIcheckbox("Fullscreen",&video_dofullscreen));
+	additem(new tSIclist("Fullscreen Mode",videomodes,(tConfigurable **)&fsvideomode));
 	additem(new tSIcheckbox("VSync (N/A)",&video_vsync));
 	additem(new tSIcheckbox("glFlush",&video_glflush));
 	additem(new tSIcheckbox("glFinish",&video_glfinish));
@@ -26,9 +27,18 @@ void tScnSetVideo::init()
 
 void tScnSetVideo::enter()
 {
-	if (videomodenames.size()==0)
-	{
-		findvideomodes();
-	}
 	tScnSetBase::enter();
+}
+
+void tScnSetVideo::itemAdjusted(int i)
+{
+	switch (i)
+	{
+	case 0:
+		if (video_dofullscreen) videoToFullscreen();
+		else videoExitFullscreen();
+		break;
+	case 1:
+		MESSAGE("current fs res %d %d\n" &fsvideomode->width &fsvideomode->height);
+	}
 }

@@ -20,6 +20,11 @@ int themeNeckidx;
 vstring themeNecknames;
 vstring themeNeckfilenames;
 vstring themeStages;
+vstring themesMainm;
+vstring themesScore;
+vstring themesSlist;
+vstring themesSopts;
+vstring themesSettm;
 
 #define CONFIGLIST \
 CONFIGITEM(GLfloat,neckpos_extend,0) \
@@ -31,6 +36,11 @@ CONFIGITEM(GLfloat,necktop,2) \
 CONFIGITEM(int,video_glflush,0) \
 CONFIGITEM(int,video_glfinish,0) \
 CONFIGITEM(string,themeStage,"rf-mod") \
+CONFIGITEM(string,themeMainm,"default") \
+CONFIGITEM(string,themeScore,"default") \
+CONFIGITEM(string,themeSlist,"default") \
+CONFIGITEM(string,themeSopts,"default") \
+CONFIGITEM(string,themeSettm,"default") \
 CONFIGITEM(string,themeNeckname,"Default") \
 CONFIGITEM(int,themeNecktransparency,0) \
 CONFIGARRAY(GLfloat,neckpos,.xdisp,.xdisp) \
@@ -81,21 +91,11 @@ struct tKeydefset
 
 vector<tKeydefset> keydefs;
 vstring keyconfname;
-SDL_Rect **videomodesdl;
-const SDL_VideoInfo *origmode;
-vstring videomodenames;
-int video_fsmodeid;
 int video_dofullscreen;
 int video_vsync;
 int video_limiter;
 GLfloat video_fpslim;
 
-struct tVideoMode
-{
-	int height,width,bpp;
-};
-
-vector<tVideoMode> videomodes;
 
 struct tNeckpos
 {
@@ -132,7 +132,6 @@ tNeckpos defneckpos[11]={
 
 int enablehopos;
 const char *difficultynames[4]={"SuperE","Easy","Medium","Hard"};
-void findvideomodes();
 
 /***********************************************
  * Match configuration string against pattern
@@ -143,7 +142,7 @@ int tsamatch(char *&s, const char *prefix, const char *suffix, int &idx);
 
 implementation
 
-uses fileio, scnSetTheme;
+uses fileio, scnSetTheme, video;
 
 int tsimatch(char *&s, const char *v)
 {
@@ -289,33 +288,6 @@ void trydatadir(string td)
 	{
 		datadir=td;
 		MESSAGE("found!\n");
-	}
-}
-
-void findvideomodes()
-{
-	tVideoMode tmp;
-	int i;
-	origmode=SDL_GetVideoInfo();
-	tmp.bpp=origmode->vfmt->BitsPerPixel;
-	
-	videomodesdl=SDL_ListModes(NULL,SDL_FULLSCREEN|SDL_HWSURFACE);
-	videomodes.push_back(tmp);
-	videomodenames.push_back("Desktop");
-	if (videomodesdl==(void *)-1)
-	{
-		MESSAGE("ANY RESOLUTION ok\n");
-		return;
-	}
-	if (videomodesdl) for (i=0; videomodesdl[i]; i++)
-	{
-		MESSAGE("%d\n" &i);
-		char a[32];
-		tmp.width=videomodesdl[i]->w;
-		tmp.height=videomodesdl[i]->h;
-		sprintf(a,"%dx%dx%d",tmp.width,tmp.height,tmp.bpp);
-		videomodes.push_back(tmp);
-		videomodenames.push_back(a);
 	}
 }
 

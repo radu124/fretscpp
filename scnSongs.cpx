@@ -57,7 +57,7 @@ void tScnSongs::enter()
 void tScnSongs::render()
 {
 	GLfloat x,y;
-	paintrotback();
+	st_slist->render();
 	scale=3;
 	y=-24;
 	x=-37;
@@ -106,6 +106,7 @@ void tScnSongs::render()
 		song_start(sp.c_str());
 	}
 	renderStats();
+	st_slist->renderForeground();
 }
 
 void tScnSongs::renderStats()
@@ -117,7 +118,7 @@ void tScnSongs::renderStats()
 	GLfloat posx=40-wi-1; 
 	GLfloat posy=-29;
 	if (selected-viewOffset<8) posy=29-h;
-	spc.unbind();
+	texUnbind();
 	glBegin(GL_TRIANGLE_FAN);
 	glColor4f(0.0f,0.0f,0.0f,0.30f);
 	glVertex3f(posx   ,posy   ,0);

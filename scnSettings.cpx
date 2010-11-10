@@ -68,7 +68,8 @@ void tScnSettings::itemClicked(int i)
 
 void tScnSettings::render()
 {
-	paintrotback();
+	st_settm->render();
 	rendertext();
+	st_settm->renderForeground();
 }
 

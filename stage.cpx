@@ -34,8 +34,9 @@ class StageLayer
 public:
 	string name;
 	Stage *parent;
-	sprite tex;
-	int duptex;
+	int texid;
+	mcolor color;
+	int isBackground;
 	vector<StageLayerFx*> fx;
 	StageLayer()
 	{
@@ -70,15 +71,26 @@ public:
 
 implementation
 
+uses configuration,texManager;
+
 void StageLayer::render()
 {
+	int i;
+	if (isBackground)
+	{
+		glClearColor( lv_color.Red, lv_color.Green, lv_color.Blue, 0 );
+		glClear( GL_COLOR_BUFFER_BIT );	
+		return;
+	}
 	glPushMatrix();
 	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE);	
-	lv_color.set();
+	color=lv_color;
 	glTranslatef(40*lv_xpos,30*lv_ypos,0);
+	for (i=0; i<fx.size(); i++) fx[i]->apply(color);
 	glScalef(10*lv_xscale,-10*lv_yscale,0);
 	if (lv_angle!=0) glRotatef(-lv_angle,0,0,1);
-	tex.draw3d();
+	color.set();
+	texDraw(texid);
 	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPopMatrix();
 }
@@ -92,6 +104,7 @@ StageLayer *Stage::findLayer(string name)
 	{
 		StageLayer *a=new StageLayer();
 		a->name=name;
+		a->isBackground=(a->name=="background");
 		layer.push_back(a);
 		DBG(STAGE,"Stage: new layer %s\n" &name);
 		a->parent=this;
@@ -164,33 +177,17 @@ void Stage::readDir(string d)
 		if (mode==1) crtl->read(p);
 		if (mode==2) crtf->read(p);
 	}
+	for (i=0; i<layer.size(); i++) layer[i]->texid=-1;
 	for (i=0; i<layer.size(); i++) if (layer[i]->lv_texture!="")
 	{
 		string txname=layer[i]->lv_texture;
 		int pos=txname.rfind(".svg");
 		if (pos!=string::npos)
 			txname.replace(pos,4,".png");
-		int sametex=-1;
-		int j;
-		for (j=0; j<i; j++)
-		{
-			if (layer[i]->lv_texture==layer[j]->lv_texture)
-			{
-				sametex=j;
-				break;
-			}
-		}
-		layer[i]->duptex=(sametex>=0);
-		if (sametex>=0)
-		{
-			layer[i]->tex=layer[sametex]->tex;
-		}
-		else
-		{	
-			memset(&layer[i]->tex,0,sizeof(sprite));
-			layer[i]->tex.loadInternal(d+"/"+txname);
-		}
-		layer[i]->lv_yscale=layer[i]->lv_yscale*layer[i]->tex.height/layer[i]->tex.width;
+		else if (txname[0]=='/') layer[i]->texid=texLoad(txname.substr(1,999));
+		else layer[i]->texid=texLoad(d+"/"+txname,1);
+		
+		layer[i]->lv_yscale=layer[i]->lv_yscale*texAspect(layer[i]->texid);
 		layer[i]->lv_yscale*=layer[i]->lv_scale;
 		layer[i]->lv_xscale*=layer[i]->lv_scale;
 	}
@@ -202,10 +199,7 @@ void Stage::cleanup()
 	int i;
 	for (i=0; i<layer.size(); i++)
 	{
-		if (layer[i]->tex.tex && !layer[i]->duptex)
-		{
-			glDeleteTextures(1,&layer[i]->tex.tex);
-		}
+		if (layer[i]->texid>=0) texRelease(layer[i]->texid);
 		delete layer[i];
 	}
 	layer.resize(0);

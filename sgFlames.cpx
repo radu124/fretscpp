@@ -31,9 +31,9 @@ void tSceneGuitar::renderMultiplier()
 		glScalef(sv,sv,1);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		
-		if (pp.streak>=30) spc.m4.draw3d();
-		else if (pp.streak>=20) spc.m3.draw3d();
-		else if (pp.streak>=10) spc.m2.draw3d();
+		if (pp.streak>=30) texDraw(sp_m4);
+		else if (pp.streak>=20) texDraw(sp_m3);
+		else if (pp.streak>=10) texDraw(sp_m2);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPopMatrix();
 	}
@@ -98,7 +98,7 @@ void tSceneGuitar::rfFlame(int n, GLfloat sz)
 	glTranslatef(0, y, 0);
 	glScalef((0.5 + .6 * ms * ff) * ff *flameSize, (1 + .6 * ms * ff)*ff*flameSize,1);
 	glTranslatef(0, 0.5, 0);
-	spc.hitg1.draw3d();
+	texDraw(sp_hitg1);
 	glPopMatrix();
 
 	ff += .3;
@@ -113,7 +113,7 @@ void tSceneGuitar::rfFlame(int n, GLfloat sz)
 	glTranslatef(0, y, 0);
 	glScalef((.40 + .6 * ms * ff)*flameSize*ff, (1 + .6 * ms * ff) *flameSize*ff,1);
 	glTranslatef(0, 0.5, 0);
-	spc.hitg2.draw3d();
+	texDraw(sp_hitg2);
 	glPopMatrix();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -148,7 +148,7 @@ void tSceneGuitar::origGlow(int n)
 	{
 		ms = (1 - s) * f * t * .25 + .75;
 		glColor3f(keycolors[n][0] * ms, keycolors[n][1] * ms, keycolors[n][2] * ms);
-		spc.glow.draw3d();
+		texDraw(sp_glow);
 		glTranslatef(0, ms * .1, 0);
 		glScalef(.8, 1, .8);
 		glRotatef(ms * 20, 0, 0, 1);
@@ -210,7 +210,7 @@ void tSceneGuitar::rfFlames2()
 				glRotatef(sang, 1, 0, 0);
 				glScalef(.25 + .6 * ms * ff, evfc/6.0 + .6 * ms * ff, evfc / 6.0 + .6 * ms * ff);
 				glScalef(flameSize *ff, flameSize *ff, 1);
-				spc.hitf2.draw3d();
+				texDraw(sp_hitf2);
 				glPopMatrix();
 
 				glPushMatrix();
@@ -218,7 +218,7 @@ void tSceneGuitar::rfFlames2()
 				glRotatef(sang, 1, 0, 0);
 				glScalef(.30 + .6 * ms * ff, (evfc + 1) / 5.5 + .6 * ms * ff, (evfc + 1) / 5.5 + .6 * ms * ff);
 				glScalef(flameSize *ff, flameSize *ff, 1);
-				spc.hitf2.draw3d();
+				texDraw(sp_hitf2);
 				glPopMatrix();
 
 				glPushMatrix();
@@ -226,7 +226,7 @@ void tSceneGuitar::rfFlames2()
 				glRotatef(sang, 1, 0, 0);
 				glScalef(.35 + .6 * ms * ff, (evfc + 1) / 5.0 + .6 * ms * ff, (evfc + 1) / 5.0 + .6 * ms * ff);
 				glScalef(flameSize *ff, flameSize *ff, 1);
-				spc.hitf2.draw3d();
+				texDraw(sp_hitf2);
 				glPopMatrix();	  
 
 				glPushMatrix();
@@ -234,7 +234,7 @@ void tSceneGuitar::rfFlames2()
 				glRotatef(sang, 1, 0, 0);
 				glScalef(.40 + .6 * ms * ff, (evfc + 1)/ 4.7 + .6 * ms * ff, (evfc + 1) / 4.7 + .6 * ms * ff);
 				glScalef(flameSize *ff, flameSize *ff, 1);
-				spc.hitf2.draw3d();
+				texDraw(sp_hitf2);
 				glPopMatrix();
 			}
 			else
@@ -249,7 +249,7 @@ void tSceneGuitar::rfFlames2()
 				glRotatef(sang, 1, 0, 0);
 				glScalef(.25 + .6 * ms * ff, evfc / 3.0 + .6 * ms * ff, evfc / 3.0 + .6 * ms * ff);
 				glScalef(flameSize *ff, flameSize *ff, 1);
-				spc.hitf1.draw3d();
+				texDraw(sp_hitf1);
 				glPopMatrix();
 
 			
@@ -258,7 +258,7 @@ void tSceneGuitar::rfFlames2()
 				glRotatef(sang, 1, 0, 0);
 				glScalef(.30 + .6 * ms * ff, (evfc + 1)/ 2.5 + .6 * ms * ff, (evfc + 1) / 2.5 + .6 * ms * ff);
 				glScalef(flameSize *ff, flameSize *ff, 1);
-				spc.hitf1.draw3d();
+				texDraw(sp_hitf1);
 				glPopMatrix(); 
 
 
@@ -267,7 +267,7 @@ void tSceneGuitar::rfFlames2()
 				glRotatef(sang, 1, 0, 0);
 				glScalef(.35 + .6 * ms * ff, (evfc + 1) / 2.0 + .6 * ms * ff, (evfc + 1) / 2.0 + .6 * ms * ff);
 				glScalef(flameSize *ff, flameSize *ff, 1);
-				spc.hitf1.draw3d();
+				texDraw(sp_hitf1);
 				glPopMatrix(); 
 
 
@@ -276,7 +276,7 @@ void tSceneGuitar::rfFlames2()
 				glRotatef(sang, 1, 0, 0);
 				glScalef(.40 + .6 * ms * ff, (evfc + 1) / 1.7 + .6 * ms * ff, (evfc + 1) / 1.7 + .6 * ms * ff);
 				glScalef(flameSize *ff, flameSize *ff, 1);
-				spc.hitf1.draw3d();
+				texDraw(sp_hitf1);
 				glPopMatrix(); 
 			}
 		}

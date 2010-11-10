@@ -23,16 +23,13 @@ class sceneBase
 {
 public:
 	virtual void render()=0;
-	void setdim();
 	virtual void handleevent(SDL_Event &a)=0;
 	virtual GLfloat fadespeed() { return 0.6; }
 	virtual GLfloat fadeoutspeed() { return fadespeed(); }
 	virtual void init() { initialized=1; }
 	virtual void enter() { if (!initialized) { init(); initialized=1; } }
 	virtual void leave() {;}
-	GLfloat t;
 	int initialized;
-	void paintrotback();
 };
 
 struct tscene
@@ -153,26 +150,6 @@ void scene_setNeck(int i, int np)
 	//sskewmatrix[8]=0.8-1.6*i;
 	glMultMatrixf(sskewmatrix);
 
-}
-
-void sceneBase::setdim()
-{
-	//ms=w/640.0;
-	t=scn.timesc*0.33;
-}
-
-void sceneBase::paintrotback()
-{
-	setdim();
-	glClearColor( 0.3f, 0.0f, 0.0f, 0.0f );
-	glClear( GL_COLOR_BUFFER_BIT );	
-	glLoadIdentity();
-	// v*2*w+
-	glTranslatef(cos(t/2)*16, sin(t)*16, 0);
-	glRotatef(t*53.3f+30,0.0,0.0,1.0);
-	glScalef(2+sin(t/8), 2+sin(t/8),1.0);
-	glScalef(1.25,1.25,1.0);
-	spc.back.draw();
 }
 
 void pushscene(int i)

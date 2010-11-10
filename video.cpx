@@ -1,0 +1,77 @@
+interface
+
+void videoToFullscreen();
+void videoExitFullscreen();
+void doResize(int w, int h);
+void findvideomodes();
+
+implementation
+
+uses includes,globals;
+
+int windowres_x, windowres_y;
+tVideoMode origres;
+
+void videoToFullscreen()
+{
+	if (fullscreenmode) return;
+	fullscreenmode=1;
+	// =2 for the fake fullscreen mode
+	windowres_x=scr_width;
+	windowres_y=scr_height;
+	//SDL_WM_ToggleFullScreen(scrsurface);
+	doResize(fsvideomode->width,fsvideomode->height);
+}
+
+void videoExitFullscreen()
+{
+	if (!fullscreenmode) return;
+	fullscreenmode=0;
+	//SDL_WM_ToggleFullScreen(scrsurface);
+	doResize(windowres_x, windowres_y);
+}
+
+void doResize(int w, int h)
+{
+	scr_width=w;
+	scr_height=h;
+	scrsurface=SDL_SetVideoMode(scr_width, scr_height, 
+		((fullscreenmode==1)&&fsvideomode->bpp!=origres.bpp)?fsvideomode->bpp:0, 
+		SDL_HWSURFACE | SDL_OPENGL | SDL_RESIZABLE | 
+		((fullscreenmode==1)?SDL_FULLSCREEN:0));
+	if (!scrsurface->flags & SDL_HWSURFACE)
+		WARN(VIDEO,"No hardware surface resizing to %d x %d\n" &scr_width &scr_height);
+	glViewport( 0, 0, scr_width, scr_height );
+	scene_setOrtho();
+	INFO(VIDEO,"RESIZE: %d %d\n" &scr_width &scr_height);
+}
+
+void findvideomodes()
+{
+	tVideoMode tmp;
+	int i;
+	origmode=SDL_GetVideoInfo();
+	tmp.bpp    =origmode->vfmt->BitsPerPixel;
+	tmp.width  =origmode->current_w;
+	tmp.height =origmode->current_h;
+	videomodesdl=SDL_ListModes(NULL,SDL_FULLSCREEN|SDL_HWSURFACE);
+	tmp.name="Desktop";
+	origres=tmp;
+	fsvideomode=new tVideoMode(tmp);
+	videomodes.push_back(fsvideomode);
+	if (videomodesdl==(void *)-1)
+	{
+		WARN(VIDEO,"ANY RESOLUTION ok\n");
+		return;
+	}
+	if (videomodesdl) for (i=0; videomodesdl[i]; i++)
+	{
+		char a[32];
+		tmp.width=videomodesdl[i]->w;
+		tmp.height=videomodesdl[i]->h;
+		INFO(VIDEO,"Mode:%d %dx%dx%d\n" &i &tmp.width &tmp.height &tmp.bpp);
+		sprintf(a,"%dx%dx%d",tmp.width,tmp.height,tmp.bpp);
+		tmp.name=a;
+		videomodes.push_back(new tVideoMode(tmp));
+	}
+}

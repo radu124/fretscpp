@@ -140,7 +140,7 @@ void tSceneGuitar::render()
 	if (menumode)
 	{
 		glLoadIdentity();
-		spc.unbind();
+		texUnbind();
 		glBegin(GL_TRIANGLE_FAN);
 		glColor4f(0.0f,0.0f,0.0f,0.30f);
 		glVertex3f(-scr_lrlim,-scr_tblim,0);

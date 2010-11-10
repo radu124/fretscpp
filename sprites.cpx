@@ -24,48 +24,36 @@ public:
 	void load(const char *, int flags=0);
 	void loadInternal(string, int flags=0);
 	void setCenter(GLfloat, GLfloat);
-	void draw(GLfloat x=0, GLfloat y=0);
 	void draw3d();
 	void bind();
 	int width, height;
+	int refcount;
+	string name;
 	GLuint tex;
 	GLfloat scale;
-	GLfloat centerx, centery;
 	GLfloat txwi,txhe;
 };
 
-struct tsprites
-{
-	sprite logo;
-	sprite back;
-	sprite guyk;
-	sprite neck;
-	sprite ball;
-	sprite key[5];
-	sprite flame;
-	sprite hitg1, hitg2;
-	sprite hitf1, hitf2;
-	sprite glow;
-	sprite m2,m3,m4;
-	sprite note[4][5];
-	sprite noteline,thinline;
-	static void unbind();
-	sprite guitar[8];
-	sprite star1,star2;
-} spc;
+int sp_neck;
+int sp_ball;
+int sp_flame;
+int sp_glow;
+int sp_key[5];
+int sp_note[5];
+int sp_hitg1, sp_hitg2;
+int sp_hitf1, sp_hitf2;
+int sp_noteline, sp_thinline;
+int sp_guitar[8];
+int sp_star1, sp_star2;
+int sp_m2, sp_m3, sp_m4;
 
 implementation
 
-uses configuration, readpng;
+uses configuration, readpng, texManager;
 
 void sprite::bind()
 {
 	glBindTexture(GL_TEXTURE_2D,tex);
-}
-
-void tsprites::unbind()
-{
-	glBindTexture(GL_TEXTURE_2D,NULL);
 }
 
 void sprite::load(const char *fname, int flags)
@@ -90,33 +78,8 @@ void sprite::loadInternal(string ffullname, int flags)
 	{
 		MESSAGE("Could not load file: %s/%s\n" &datadir &ffullname);
 	}
-	/*
-	ilutEnable(ILUT_OPENGL_CONV);
-	ILboolean ilutOglBuildMipmaps(ILvoid);
-	GLuint ilutGLBindTexImage(ILvoid);
-	GLuint ilutOglBindTexImage(ILvoid);
-	*/
-	//height=200;
-	//width=500;
-	// original assumed to match 800x600 resolution
-	// while our coordinate system is 80x60
 	height/=10;
 	width/=10;
-	centerx=cx*width; 
-	centery=cy*height;
-}
-
-void sprite::draw(GLfloat x, GLfloat y)
-{
-	x-=centerx;
-	y-=centery;
-	glBindTexture(GL_TEXTURE_2D,tex);
-	glBegin(GL_QUADS);
-	glTexCoord2d(0   ,0   );  glVertex2f(x         ,y);
-	glTexCoord2d(0   ,txhe);  glVertex2f(x         ,y+height);
-	glTexCoord2d(txwi,txhe);  glVertex2f(x+width   ,y+height);
-	glTexCoord2d(txwi,0   );  glVertex2f(x+width   ,y);
-	glEnd();
 }
 
 void sprite::draw3d()
@@ -131,50 +94,37 @@ void sprite::draw3d()
 	glBindTexture(GL_TEXTURE_2D,NULL);
 }
 
-void sprite::setCenter(GLfloat x, GLfloat y)
-{
-	centerx=x*width;
-	centery=y*height;
-}
-
 void init_sprites()
 {
 	int i,j;
-//	ilGenImages(1,&baseiname);
-	spc.logo.load("logo.png");
-	spc.back.load("keyboard.png");
-	spc.guyk.load("pose.png");
-	spc.neck.load(themeNeckfilename.c_str());
-	spc.ball.load("ball2.png",1);
+	sp_neck      = texLoad(themeNeckfilename.c_str());
+	sp_ball      = texLoad("ball2.png");
+	sp_hitg1     = texLoad("hitglow1.png");
+	sp_hitg2     = texLoad("hitglow2.png");
+	sp_hitf1     = texLoad("hitflames1.png");
+	sp_hitf2     = texLoad("hitflames2.png");
+	sp_glow      = texLoad("glow.png");
+	sp_noteline  = texLoad("noteline.png");
+	sp_thinline  = texLoad("thinline.png");
+	sp_m2        = texLoad("2x.png");
+	sp_m3        = texLoad("3x.png");
+	sp_m4        = texLoad("4x.png");
+	sp_guitar[0] = texLoad("guitar1ok.png");
+	sp_guitar[1] = texLoad("guitar1gs.png");
+	sp_guitar[2] = texLoad("guitar2ok.png");
+	sp_guitar[3] = texLoad("guitar2gs.png");
+	sp_guitar[4] = texLoad("guitar3ok.png");
+	sp_guitar[5] = texLoad("guitar3gs.png");
+	sp_guitar[6] = texLoad("guitar4ok.png");
+	sp_guitar[7] = texLoad("guitar4gs.png");
+	sp_star1     = texLoad("star1.png");
+	sp_star2     = texLoad("star2.png");
 	for (i=0; i<5; i++)
 	{
 		char a[32];
 		sprintf(a,"key%d.png",i+1);
-		spc.key[i].load(a,1);
-		for (j=0; j<4; j++)
-		{
-			sprintf(a,"note%d%d.png",j,i+1);
-			spc.note[j][i].load(a,1);			
-		}
+		sp_key[i]  = texLoad(a);
+		sprintf(a,"note0%d.png",i+1);
+		sp_note[i] = texLoad(a);			
 	}
-	spc.hitg1.load("hitglow1.png",1);
-	spc.hitg2.load("hitglow2.png",1);
-	spc.hitf1.load("hitflames1.png",1);
-	spc.hitf2.load("hitflames2.png",1);
-	spc.glow.load("glow.png",1);
-	spc.noteline.load("noteline.png",1);
-	spc.thinline.load("thinline.png",1);
-	spc.m2.load("2x.png",1);
-	spc.m3.load("3x.png",1);
-	spc.m4.load("4x.png",1);
-	spc.guitar[0].load("guitar1ok.png");
-	spc.guitar[1].load("guitar1gs.png");
-	spc.guitar[2].load("guitar2ok.png");
-	spc.guitar[3].load("guitar2gs.png");
-	spc.guitar[4].load("guitar3ok.png");
-	spc.guitar[5].load("guitar3gs.png");
-	spc.guitar[6].load("guitar4ok.png");
-	spc.guitar[7].load("guitar4gs.png");
-	spc.star1.load("star1.png",1);
-	spc.star2.load("star2.png",1);
 }

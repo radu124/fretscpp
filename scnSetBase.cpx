@@ -11,6 +11,7 @@ public:
 	tSettingsItem(string tv="", int ty=0):title(tv),typ(ty) {;}
 	virtual int handleevent(SDL_Event &event) { return 0; }
 	virtual string toString() { return ""; }
+	int intcap(int min, int max, int &val);
 };
 
 struct tSIcheckbox:public tSettingsItem
@@ -28,7 +29,7 @@ struct tSIrange:public tSettingsItem
 		tSettingsItem(v,TYP_RANGE),min(miv),max(mav),val(vv),step(stv) { if (!vv) val=&locval; capval(); }
 	GLfloat *val;
 	GLfloat min,max,step,locval;
-	void capval() { if (*val<min) *val=min; if (*val>max) *val=max; }
+	int capval() { if (*val<min) { *val=min; return 0; } if (*val>max) { *val=max; return 0; } return 1; }
 	int handleevent(SDL_Event &event);
 	string toString();
 };
@@ -39,7 +40,7 @@ struct tSIintrange:public tSettingsItem
 		tSettingsItem(v,TYP_RANGE),min(miv),max(mav),val(vv),step(stv) { if (!vv) val=&locval; capval(); }
 	int *val;
 	int min,max,step,locval;
-	void capval() { if (*val<min) *val=min; if (*val>max) *val=max; }
+	int capval() { return intcap(min,max,*val); }
 	int handleevent(SDL_Event &event);
 	string toString();
 };
@@ -51,23 +52,46 @@ struct tSIlist:public tSettingsItem
 		{
 			if (!cv.size()) choices.push_back("");
 			if (!vv) val=&locval; capval(); 
+			*val=0;
 		}
 	tSIlist(string v, vector<string> cv,string *vv):
 		tSettingsItem(v,TYP_RANGE),choices(cv),val(&locval),sval(vv) 
 		{
+			int i;
 			if (!cv.size()) choices.push_back("");
-			if (!vv) sval=&locsval; capval(); 
+			locsval="";
+			if (!vv) sval=&locsval; 
+			*val=0;
+			for (i=0; i<cv.size(); i++) if (*sval==cv[i]) *val=i;
+			capval(); 
 		}
 	vector<string> choices;
 	int *val;
 	string *sval;
 	string locsval;
-	int min,max,step,locval;
-	void capval();
+	int locval;
+	int capval();
 	int handleevent(SDL_Event &event);
 	string toString();
 };
 
+struct tSIclist:public tSettingsItem
+{
+	tSIclist(string v, vector<tConfigurable*> cv,tConfigurable **vv):
+		tSettingsItem(v,TYP_RANGE),choices(cv),val(vv),idx(0)
+		{
+			if (!cv.size()) choices.push_back(new tConfigurable());
+			if (!vv) val=&locval; capval(); 
+		}
+	vector<tConfigurable*> choices;
+	tConfigurable **val;
+	tConfigurable *locval;
+	
+	int idx;
+	int capval();
+	int handleevent(SDL_Event &event);
+	string toString();
+};
 
 class tScnSetBase: public sceneBase
 {
@@ -90,19 +114,37 @@ implementation
 
 uses configuration;
 
-void tSIlist::capval()
+int tSIlist::capval()
 {
-	MESSAGE("cap %d %d\n" &*val &(int)choices.size());
-	if (*val<0) 
+	int res=intcap(0,choices.size()-1,*val);
+	if (res) *sval=choices[*val];
+	return res;
+}
+
+int tSIclist::capval()
+{
+	int res=intcap(0,choices.size()-1,idx);
+	if (res) *val=choices[idx];
+	return res;
+}
+
+int tSettingsItem::intcap(int min, int max, int &val)
+{
+	DBG(SETSCENE,"Setting cap %s min:%d max:%d val:%d " &title &min &max &val);
+	if (val<min) 
 	{
-		MESSAGE("capdn\n");
-		*val=0; 
+		DBG(SETSCENE,"low cap\n");
+		val=min; 
+		return 0;
 	}
-	if (*val>=choices.size())
+	if (val>max)
 	{
-		MESSAGE("capup\n");
-		*val=choices.size()-1; 
+		DBG(SETSCENE,"high cap\n");
+		val=max; 
+		return 0;
 	}
+	DBG(SETSCENE,"ok\n");
+	return 1;
 }
 
 string tSIcheckbox::toString()
@@ -136,6 +178,18 @@ string tSIlist::toString()
 	result+=title+": ";
 	result+=choices[*val];
 	if (*val<choices.size()-1) result+=" >";
+	return result;
+}
+
+string tSIclist::toString()
+{
+	char a[32];
+	string result;
+	if (idx>0) result+="< ";
+	else result+="  ";
+	result+=title+": ";
+	result+=choices[idx]->name;
+	if (idx<choices.size()-1) result+=" >";
 	return result;
 }
 
@@ -187,17 +241,28 @@ int tSIlist::handleevent(SDL_Event &event)
 	switch(event.key.keysym.sym)
 	{
 	case SDLK_LEFT:
-		if (*val<=0) return 0;
 		*val-=1;
-		capval();
-		*sval=choices[*val];
-		return 1;
+		return capval();
 	case SDLK_RIGHT:
-		if (*val>=choices.size()-1) return 0;
 		*val+=1;
-		capval();
-		*sval=choices[*val];
-		return 1;
+		return capval();
+	}
+	return 0;
+}
+
+int tSIclist::handleevent(SDL_Event &event)
+{
+	if (event.type!=SDL_KEYDOWN) return 0;
+	//MESSAGE("choices: %d %d\n" &*val &choices.size());
+	
+	switch(event.key.keysym.sym)
+	{
+	case SDLK_LEFT:
+		idx--;
+		return capval();
+	case SDLK_RIGHT:
+		idx++;
+		return capval();
 	}
 	return 0;
 }
@@ -208,15 +273,11 @@ int tSIrange::handleevent(SDL_Event &event)
 	switch(event.key.keysym.sym)
 	{
 	case SDLK_LEFT:
-		if (*val<=min) return 0;
 		*val-=step;
-		if (*val<min) *val=min;
-		return 1;
+		return capval();
 	case SDLK_RIGHT:
-		if (*val>=max) return 0;
 		*val+=step;
-		if (*val>max) *val=max;
-		return 1;
+		return capval();
 	}
 	return 0;
 }
@@ -286,8 +347,9 @@ void tScnSetBase::handleevent(SDL_Event &event)
 
 void tScnSetBase::render()
 {
-	paintrotback();
+	st_settm->render();
 	rendertext();
+	st_settm->renderForeground();
 }
 
 void tScnSetBase::rendertext()

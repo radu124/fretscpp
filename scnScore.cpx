@@ -41,7 +41,7 @@ void tScnScore::enter()
 void tScnScore::render()
 {
 	char a[128];
-	paintrotback();
+	st_score->render();
 	int percentage=100;
 	int i;
 	for (i=0; i<numplayers; i++)
@@ -72,6 +72,7 @@ void tScnScore::render()
 		sprintf(a,"name: %s",s.c_str());
 		deffont.displayString(a,scoreposx,scoreposy+7,3,0);
 	}
+	st_score->renderForeground();
 }
 
 void tScnScore::writescores()

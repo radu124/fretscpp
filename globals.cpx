@@ -26,12 +26,43 @@ string selectedsong="";
 int numplayers=1;
 int glfontaa=GL_LINEAR;
 GLint maxTexSize;
+SDL_Surface* scrsurface;
+int fullscreenmode=0;
 
 class Stage;
 extern Stage *stagePlay;
+extern Stage *st_mainm;
+extern Stage *st_sopts;
+extern Stage *st_slist;
+extern Stage *st_score;
+extern Stage *st_settm;
+
 mcolor White(1,1,1,1);
+
+SDL_Rect **videomodesdl;
+const SDL_VideoInfo *origmode;
+vstring videomodenames;
+
+struct tConfigurable
+{
+	int idx;
+	string name;
+};
+
+struct tVideoMode:public tConfigurable
+{
+	int height,width,bpp;
+};
+
+vector<tConfigurable*> videomodes;
+tVideoMode *fsvideomode;
 
 implementation
 
 uses stage;
 Stage *stagePlay;
+Stage *st_mainm;
+Stage *st_sopts;
+Stage *st_slist;
+Stage *st_score;
+Stage *st_settm;

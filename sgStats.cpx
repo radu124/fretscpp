@@ -46,7 +46,7 @@ void tSceneGuitar::renderMultiplierVal()
 	glScalef(multvalscale*5,-multvalscale*10,0);
 	
 	//deffont.displayString(".",0,1,1,0);
-	spc.guitar[mult].bind();
+	texBind(sp_guitar[mult]);
 	glColor4f(1,1,1,1);
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0, 1.0); glVertex3f(-1, -1, 0);
@@ -54,14 +54,14 @@ void tSceneGuitar::renderMultiplierVal()
 	glTexCoord2f(0.0, 1.0-mr/10.0); glVertex3f(-1, mr/5.0-1, 0);
 	glTexCoord2f(1.0, 1.0-mr/10.0); glVertex3f( 1, mr/5.0-1, 0);
 	glEnd();
-	spc.guitar[mult+1].bind();
+	texBind(sp_guitar[mult+1]);
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0, 1.0-mr/10.0); glVertex3f(-1, mr/5.0-1, 0);
 	glTexCoord2f(1.0, 1.0-mr/10.0); glVertex3f( 1, mr/5.0-1, 0);
 	glTexCoord2f(0.0, 0.0); glVertex3f(-1, 1, 0);
 	glTexCoord2f(1.0, 0.0); glVertex3f( 1, 1, 0);
 	glEnd();
-	spc.unbind();
+	texUnbind();
 	glPopMatrix();
 }
 

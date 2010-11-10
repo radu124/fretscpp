@@ -393,7 +393,8 @@ void tScnTable::handleevent(SDL_Event &event)
 
 void tScnTable::render()
 {
-	paintrotback();
+	st_sopts->render();
 	rendertext();
+	st_sopts->renderForeground();
 }
 

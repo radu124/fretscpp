@@ -27,7 +27,7 @@ void tSceneGuitar::renderNeck()
 	s1=s0+0.2;
 	s3=s0+0.4+0.2*boardlen;
 	//glScalef(5.0f,5.0f,5.0f);
-	glBindTexture(GL_TEXTURE_2D,spc.neck.tex);
+	texBind(sp_neck);
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	glBegin(GL_TRIANGLE_STRIP);
@@ -56,7 +56,7 @@ void tSceneGuitar::renderTracks()
 {
 	int i;
 	GLfloat c0=0.7,c1=0.6,c2=0.3;
-	spc.thinline.bind();
+	texBind(sp_thinline);
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	double lw=0.03;
@@ -97,6 +97,6 @@ void tSceneGuitar::renderTracks()
 		glTexCoord2f(1.0f,1); glVertex3f(2.5,tpos-lw,0);
 		glEnd();
 	}
-	spc.unbind();
+	texUnbind();
 }
 

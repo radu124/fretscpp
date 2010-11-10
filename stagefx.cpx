@@ -2,7 +2,7 @@ interface
 
 uses includes,globals,scene,sprites,utils,confrw;
 
-enum FXTYPE    { FX_NONE=0, FX_SCALE, FX_LIGHT, FX_WIGGLE };
+enum FXTYPE    { FX_NONE=0, FX_SCALE, FX_LIGHT, FX_WIGGLE, FX_ROTOBACK, FX_JUMPINLEFT, FX_WOBBLE, FX_TVFADE };
 enum FXTRIGGER { FXT_NONE=0, FXT_PICK, FXT_MISS, FXT_BEAT };
 enum FXPROFILE { FXP_NONE=0, FXP_SINSTEP };
 
@@ -23,7 +23,7 @@ FXPD(GLfloat,intensity,0)
 #define FXPD_INIT(a,b,c) fx_##b = c; 
 #define FXPD_READ(a,b,c) if (tsimatch(line,"" #b)) { confread_##a(line,fx_##b); return; }
 
-MULTIRDR(FXTYPE,"none,scale,light,wiggle"); 
+MULTIRDR(FXTYPE,"none,scale,light,wiggle,rotoback,jumpinleft,wobble,tvfade"); 
 MULTIRDR(FXTRIGGER,"none,pick,miss,beat");
 MULTIRDR(FXPROFILE,"none,sinstep");
 
@@ -34,6 +34,7 @@ class StageLayerFx
 public:
 	string name;
 	Stage *parent;
+	void apply(mcolor &color);
 	StageLayerFx()
 	{
 #define FXPD FXPD_INIT
@@ -53,3 +54,34 @@ public:
 
 implementation
 
+void StageLayerFx::apply(mcolor &color)
+{
+	GLfloat t,s,v;
+	switch (fx_type)
+	{
+	case FX_ROTOBACK:
+		t=scn.timesc*0.33;
+		glTranslatef(cos(t/2)*16, sin(t)*16, 0);
+		glRotatef(t*53.3f+30,0.0,0.0,1.0);
+		s=(2+sin(t/8))/2;
+		glScalef(s, s, 1.0);
+		break;
+	case FX_WOBBLE:
+		v=scn.fade*2;
+		v=(v>1)?1:v*v;
+		t=scn.timesc*0.33;
+		glScalef(1+0.025*sin(t*16), 1+0.025*sin(t*17),1.0);
+		break;
+	case FX_TVFADE:
+		v=scn.fade*2;
+		v=(v>1)?1:v*v;
+		glScalef(1,1-v*v*v,1.0);
+		if (v>0.95) color.Alpha=0;
+		break;
+	case FX_JUMPINLEFT:
+		v=scn.fade*2;
+		v=(v>1)?1:v*v;
+		glTranslatef(v*v*80, 0, 0);
+		break;
+	}
+}

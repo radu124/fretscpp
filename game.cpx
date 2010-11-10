@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 *******************************************************************/  
   
-uses includes, utils, font, sprites, globals, scnMainMenu, scnGuitar, scnKeydef, scene, audio, midiparser, verbosity, joystick;
+uses includes, utils, font, sprites, globals, scnMainMenu, scnGuitar, scnKeydef, scene, audio, midiparser, verbosity, joystick, video;
 
 void drawglstuff()
 {
@@ -21,28 +21,18 @@ void drawglstuff()
 	audio_yield();
 }
 
-void doResize(int w, int h)
-{
-	scr_width=w;
-	scr_height=h;
-	SDL_Surface *ns;
-	ns=SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL | SDL_RESIZABLE);
-	glViewport( 0, 0, scr_width, scr_height );
-	scene_setOrtho();
-	MESSAGE("RESIZE: %d %d\n" &scr_width &scr_height);
-}
-
 int main( int argc, char* argv[] )
 {
 	init_config();
 	assume(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO), "Unable to initialize SDL: %s\n");
+	findvideomodes();
 	// SDL_GetError());
 	init_fonts();
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	
 	SDL_WM_SetCaption("Frets-on-fire-CPP", "SDL");
 	/* create window */
-	SDL_Surface* screen = SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL | SDL_RESIZABLE);
+	scrsurface = SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL | SDL_RESIZABLE);
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
 	INFO(SPRITES,"Maximum texture size:%d\n" &maxTexSize);
 	init_joysticks();
@@ -56,7 +46,19 @@ int main( int argc, char* argv[] )
 	deffont.open(datadir+"/default.ttf");
 	init_sprites();
 	stagePlay=new Stage();
+	st_mainm =new Stage();
+	st_sopts =new Stage();
+	st_slist =new Stage();
+	st_score =new Stage();
+	st_settm =new Stage();
+
 	stagePlay->readDir(datadir+"/stages/"+themeStage);
+	st_mainm ->readDir(datadir+"/st_mainm/"+themeMainm);
+	st_sopts ->readDir(datadir+"/st_sopts/"+themeSopts);
+	st_slist ->readDir(datadir+"/st_slist/"+themeSlist);
+	st_score ->readDir(datadir+"/st_score/"+themeScore);
+	st_settm ->readDir(datadir+"/st_settm/"+themeScore);
+
 	init_audio();
 	load_effects(datadir+"/fiba1.ogg");
 	load_effects(datadir+"/fiba2.ogg");
@@ -121,6 +123,8 @@ int main( int argc, char* argv[] )
 		/* update the screen */
 		//SDL_UpdateRect(screen, 0, 0, 0, 0);
 		drawglstuff();
+		/*verify that we didn't lose the context*/
+		//glIsTexture(tex);
 		if (video_glflush) glFlush();
 		if (video_glfinish) glFinish();
 		SDL_GL_SwapBuffers();

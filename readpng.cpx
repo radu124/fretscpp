@@ -58,24 +58,35 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 	int components;
 	FILE *pngFile = fopen(filename, "rb");
 
-	if(!pngFile)
+	if(!pngFile) 
+	{
+		WARN(PNGREAD,"PNG: could not open file: %s\n" &filename);
 		return 0;
-
+	}
 	png_byte sig[8];
 
 	fread(&sig, 8, sizeof(png_byte), pngFile);
 	rewind(pngFile);//so when we init io it won't bitch
 	if(!png_check_sig(sig, 8))
+	{
+		WARN(PNGREAD,"PNG: bad file signature: %s\n" &filename);
 		return 0;
-
+	}
+	
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,NULL,NULL);
 
 	if(!png_ptr)
+	{
+		WARN(PNGREAD,"PNG: could not initialize reader: %s\n" &filename);
 		return 0;
-
+	}
+	
 	if(setjmp(png_jmpbuf(png_ptr)))
+	{
+		WARN(PNGREAD,"PNG: error during decode: %s\n" &filename);
 		return 0;
-
+	}
+	
 	info_ptr = png_create_info_struct(png_ptr);
 
 	if(!info_ptr)
@@ -94,8 +105,7 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 
 	if(colourType == PNG_COLOR_TYPE_GRAY && bitDepth < 8)
 	{
-#ifdef _WINDOWS
-// PNG_LIBPNG_VER < 10004
+#if PNG_LIBPNG_VER < 10004
 		png_set_gray_1_2_4_to_8(png_ptr);
 #else
 		png_set_expand_gray_1_2_4_to_8(png_ptr);

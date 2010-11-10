@@ -16,5 +16,5 @@ Things that work:
  
 Things that do not work:
  * fullscreen
- * stage decorations and lights
+ * stage animations and lights
  * network play

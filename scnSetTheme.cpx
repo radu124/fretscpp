@@ -46,8 +46,18 @@ void theme_init()
 void tScnSetTheme::init()
 {
 	themeStages=listDirContents(datadir+"/stages",3);
+	themesMainm=listDirContents(datadir+"/st_mainm",3);
+	themesScore=listDirContents(datadir+"/st_score",3);
+	themesSlist=listDirContents(datadir+"/st_slist",3);
+	themesSopts=listDirContents(datadir+"/st_sopts",3);
+	themesSettm=listDirContents(datadir+"/st_settm",3);
 	additem(new tSIlist("Neck",themeNecknames,&themeNeckidx));
 	additem(new tSIlist("Stage",themeStages,&themeStage));
+	additem(new tSIlist("Main Menu"    ,themesMainm,&themeMainm));
+	additem(new tSIlist("Song list"    ,themesSlist,&themeSlist));
+	additem(new tSIlist("Song Options" ,themesSopts,&themeSopts));
+	additem(new tSIlist("Score Screen" ,themesScore,&themeScore));
+	additem(new tSIlist("Settings Menu",themesSettm,&themeSettm));
 	additem(new tSIintrange("Neck transparency",0,90,&themeNecktransparency,10));
 	tScnSetBase::init();
 }
@@ -59,18 +69,39 @@ void tScnSetTheme::itemAdjusted(int i)
 	case 0:
 		themeNeckname=themeNecknames[themeNeckidx];
 		themeNeckfilename=themeNeckfilenames[themeNeckidx];
-		spc.neck.load(themeNeckfilename.c_str());
+		texRelease(sp_neck);
+		sp_neck=texLoad(themeNeckfilename);
 		break;
 	case 1:
 		stagePlay->cleanup();
 		stagePlay->readDir(datadir+"/stages/"+themeStage);
+		break;
+	case 2:
+		st_mainm->cleanup();
+		st_mainm->readDir(datadir+"/st_mainm/"+themeMainm);
+		break;
+	case 3:
+		st_slist->cleanup();
+		st_slist->readDir(datadir+"/st_slist/"+themeSlist);
+		break;
+	case 4:
+		st_sopts->cleanup();
+		st_sopts->readDir(datadir+"/st_sopts/"+themeSopts);
+		break;
+	case 5:
+		st_score->cleanup();
+		st_score->readDir(datadir+"/st_score/"+themeScore);
+		break;
+	case 6:
+		st_settm->cleanup();
+		st_settm->readDir(datadir+"/st_settm/"+themeSettm);
+		break;	
 	}
 }
 
 void tScnSetTheme::render()
 {
 	int cplayer;
-	paintrotback();
 	
 	glPushMatrix();
 	glLoadIdentity();

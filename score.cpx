@@ -87,7 +87,7 @@ void tscores::setCurrent()
 		if (0!=memcmp(crtSong.hash,data[i].midhash,20)) continue;
 		crtids.push_back(i);
 		a=data[i].instrument*4+data[i].difficulty;
-		if (best[a]<0 || data[best[a]].score<data[i].score) best[a]=i;
+		if (best[a]<0 || data[best[a]].promille()<data[i].promille()) best[a]=i;
 	}
 	history.resize(0);
 	for (i=crtids.size()-1; i>=0; i--)

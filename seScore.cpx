@@ -32,11 +32,19 @@ void showStars(int promille, GLfloat dx, GLfloat dy)
 	for (i=0; i<q; i++)
 	{
 		glColor4f(rcolor,1.0,1.0,1.0);
-		spc.star2.draw(dx+i-2,dy);
+		glPushMatrix();
+		glTranslatef(dx+i-2,dy,0);
+		glScalef(0.5,-0.5,0);
+		texDraw(sp_star2);
+		glPopMatrix();
 	}
 	for (i=q+1; i<5; i++)
 	{
-		spc.star1.draw(dx+i-2,dy);
+		glPushMatrix();
+		glTranslatef(dx+i-2,dy,0);
+		glScalef(0.5,-0.5,0);
+		texDraw(sp_star1);
+		glPopMatrix();
 	}
 	glColor4f(1.0,1.0,1.0,1.0);
 	if (q==5) return;
@@ -44,21 +52,21 @@ void showStars(int promille, GLfloat dx, GLfloat dy)
 	promille/=100;
 	GLfloat dv=promille/2.0;
 	dx+=q-2.5;
-	spc.star2.bind();
+	texBind(sp_star2);
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0, 0.0); glVertex3f(dx   , dy-0.5, 0);
 	glTexCoord2f(dv , 0.0); glVertex3f(dx+dv, dy-0.5, 0);
 	glTexCoord2f(0.0, 1.0); glVertex3f(dx   , dy+0.5, 0);
 	glTexCoord2f(dv , 1.0); glVertex3f(dx+dv, dy+0.5, 0);
 	glEnd();
-	spc.star1.bind();
+	texBind(sp_star1);
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(dv , 0.0); glVertex3f(dx+dv, dy-0.5, 0);
 	glTexCoord2f(1.0, 0.0); glVertex3f(dx+1 , dy-0.5, 0);
 	glTexCoord2f(dv , 1.0); glVertex3f(dx+dv, dy+0.5, 0);
 	glTexCoord2f(1.0, 1.0); glVertex3f(dx+1 , dy+0.5, 0);
 	glEnd();
-	spc.unbind();
+	texUnbind();
 }
 
 void scoreStarsInstrument(int instrument, GLfloat &ypos)
