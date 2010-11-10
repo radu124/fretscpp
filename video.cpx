@@ -4,10 +4,11 @@ void videoToFullscreen();
 void videoExitFullscreen();
 void doResize(int w, int h);
 void findvideomodes();
+void checkFullscreenRes();
 
 implementation
 
-uses includes,globals;
+uses includes,globals,texManager,font;
 
 int windowres_x, windowres_y;
 tVideoMode origres;
@@ -20,7 +21,15 @@ void videoToFullscreen()
 	windowres_x=scr_width;
 	windowres_y=scr_height;
 	//SDL_WM_ToggleFullScreen(scrsurface);
+#ifdef _WINDOWS
+	texReleaseAll();
+	deffont.releaseAll();
+#endif
 	doResize(fsvideomode->width,fsvideomode->height);
+#ifdef _WINDOWS
+	texReloadAll();
+	deffont.reloadAll();
+#endif
 }
 
 void videoExitFullscreen()
@@ -28,7 +37,15 @@ void videoExitFullscreen()
 	if (!fullscreenmode) return;
 	fullscreenmode=0;
 	//SDL_WM_ToggleFullScreen(scrsurface);
+#ifdef _WINDOWS
+	texReleaseAll();
+	deffont.releaseAll();
+#endif
 	doResize(windowres_x, windowres_y);
+#ifdef _WINDOWS
+	texReloadAll();
+	deffont.reloadAll();
+#endif
 }
 
 void doResize(int w, int h)
@@ -43,6 +60,10 @@ void doResize(int w, int h)
 		WARN(VIDEO,"No hardware surface resizing to %d x %d\n" &scr_width &scr_height);
 	glViewport( 0, 0, scr_width, scr_height );
 	scene_setOrtho();
+	glEnable( GL_TEXTURE_2D );
+	glEnable (GL_BLEND); 
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	INFO(VIDEO,"RESIZE: %d %d\n" &scr_width &scr_height);
 }
 
@@ -74,4 +95,17 @@ void findvideomodes()
 		tmp.name=a;
 		videomodes.push_back(new tVideoMode(tmp));
 	}
+}
+
+void checkFullscreenRes()
+{
+	if (!video_dofullscreen) return;
+	int i;
+	for (i=0; i<videomodes.size(); i++)
+	{
+		if (scr_width==((tVideoMode *)videomodes[i])->width 
+		    && scr_height==((tVideoMode *)videomodes[i])->height) 
+			return;
+	}
+	video_dofullscreen=false;
 }

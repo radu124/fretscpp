@@ -24,7 +24,6 @@ public:
 	void load(const char *, int flags=0);
 	void loadInternal(string, int flags=0);
 	void setCenter(GLfloat, GLfloat);
-	void draw3d();
 	void bind();
 	int width, height;
 	int refcount;
@@ -80,18 +79,6 @@ void sprite::loadInternal(string ffullname, int flags)
 	}
 	height/=10;
 	width/=10;
-}
-
-void sprite::draw3d()
-{
-	glBindTexture(GL_TEXTURE_2D,tex);
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0 , txhe); glVertex3f(-1, -1, 0);
-	glTexCoord2f(txwi, txhe); glVertex3f( 1, -1, 0);
-	glTexCoord2f(0.0 , 0   ); glVertex3f(-1,  1, 0);
-	glTexCoord2f(txwi, 0   ); glVertex3f( 1,  1, 0);
-	glEnd();
-	glBindTexture(GL_TEXTURE_2D,NULL);
 }
 
 void init_sprites()

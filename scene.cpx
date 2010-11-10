@@ -213,7 +213,7 @@ void scenehandleevent(SDL_Event &event)
 void renderscene()
 {
 	// ensure no leftovers
-	glBindTexture(GL_TEXTURE_2D,NULL);
+	texUnbind();
 	glLoadIdentity();
 	
 	scn.time=gettimenow();

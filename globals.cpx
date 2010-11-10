@@ -18,8 +18,6 @@ uses includes;
 
 // gave up namespaces
 
-int scr_width=800;
-int scr_height=600;
 GLfloat scr_lrlim;
 GLfloat scr_tblim;
 string selectedsong="";

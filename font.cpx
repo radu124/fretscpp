@@ -22,6 +22,8 @@ public:
 	static const int FONT_SCALE_H=64;
 	static const int NUM_CHARS=256;
 	enum {ALIGN_LEFT=0, ALIGN_CENTER=1, ALIGN_RIGHT=2, ALIGN_VONETHIRD=4, ALIGN_VHALFA=8};
+	int scale;
+	int opened;
 	int open(string fname);
 	GLuint textures[NUM_CHARS];
 	int texvalid[NUM_CHARS];
@@ -32,8 +34,12 @@ public:
 	GLfloat cxdisp[NUM_CHARS];
 	
 	FT_Face face;
+	TFont():opened(0){;}
 	void getMinMax(FT_GlyphSlot g, int &max_v, int &max_h);
 	void displayString(const char *str,GLfloat x, GLfloat y, GLfloat scale, int pos=0);
+	void initializeGlyphs();
+	void releaseAll();
+	void reloadAll();
 };
 
 TFont deffont;
@@ -93,15 +99,20 @@ void TFont::getMinMax(FT_GlyphSlot g, int &max_v, int &max_h)
 /// @return 0 in case of error
 int TFont::open(string fname)
 {
-	int i,res,j,k,ch;
-	unsigned char a[FONT_SCALE_H][FONT_SCALE_H];
 	if (FT_New_Face(font_library,fname.c_str(),0,&face)) return 0;
 	//FT_Set_Char_Size( face, h << 6, h << 6, 96, 96);
-	FT_Set_Char_Size( face, 32*64, 32*64, 96, 96);
-	
+	opened=1;
+	initializeGlyphs();
+	reloadAll();
+}
+
+void TFont::initializeGlyphs()
+{
+	int i,res,j,k,ch;
 	int max_v, max_h;
 	max_v=max_h=-1000;
 	
+	FT_Set_Char_Size( face, 32*64, 32*64, 96, 96);
 	for (ch=0; ch<256; ch++)
 	{
 		texvalid[ch]=0;
@@ -114,10 +125,32 @@ int TFont::open(string fname)
 		getMinMax(face->glyph, max_v, max_h);
 		texvalid[ch]=1;
 	}
-	int scale,scale2;
+	int scale2;
 	scale =FONT_SCALE_H*31/(max_v+1);
 	scale2=FONT_SCALE_H*31/(max_h+1);
 	if (scale2<scale) scale=scale2;
+	
+	//FT_Done_Face(face);
+}
+
+void TFont::releaseAll()
+{
+	if (!opened) return;
+	int i;
+	for (i=0; i<256; i++)
+	{
+		if (!textures[i]) continue;
+		glDeleteTextures(1,&textures[i]);
+		textures[i]=0;
+	}
+}
+
+void TFont::reloadAll()
+{
+	if (!opened) return;
+	unsigned char a[FONT_SCALE_H][FONT_SCALE_H];
+	
+	int i,res,j,k,ch;
 	FT_Set_Char_Size( face, scale*64, scale*64, 96, 96);
 	//DBG(FONT,"%d %d %d %d %d %d\n",min_v,max_v,min_h,max_h,max_v-min_v,max_h-min_h);
 	DBG(FONT,"%d\n" &scale);
@@ -165,7 +198,6 @@ int TFont::open(string fname)
     		&bmp.rows &disp_v &disp_h
 			&(face->glyph->advance.x/64.0f));
 	}
-	FT_Done_Face(face);
 }
 
 void init_fonts()

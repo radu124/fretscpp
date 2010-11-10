@@ -26,13 +26,18 @@ int main( int argc, char* argv[] )
 	init_config();
 	assume(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO), "Unable to initialize SDL: %s\n");
 	findvideomodes();
+	if (!video_overrideres) checkFullscreenRes();
 	// SDL_GetError());
 	init_fonts();
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	
 	SDL_WM_SetCaption("Frets-on-fire-CPP", "SDL");
 	/* create window */
-	scrsurface = SDL_SetVideoMode(scr_width, scr_height, 0, SDL_OPENGL | SDL_RESIZABLE);
+	scrsurface = SDL_SetVideoMode(
+		scr_width,scr_height,
+		 0, SDL_OPENGL | SDL_RESIZABLE | 
+		(video_dofullscreen?SDL_FULLSCREEN:0) );
+	fullscreenmode = video_dofullscreen;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
 	INFO(SPRITES,"Maximum texture size:%d\n" &maxTexSize);
 	init_joysticks();

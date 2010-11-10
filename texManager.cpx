@@ -13,6 +13,8 @@ void texRelease(int i);
 void texBind(int i);
 void texUnbind();
 void texDraw(int i);
+void texReleaseAll();
+void texReloadAll();
 GLfloat texAspect(int i);
 
 implementation
@@ -86,11 +88,34 @@ void texDraw(int i)
 	glTexCoord2f(0.0 , 0   ); glVertex3f(-1,  1, 0);
 	glTexCoord2f(txwi, 0   ); glVertex3f( 1,  1, 0);
 	glEnd();
-	glBindTexture(GL_TEXTURE_2D,NULL);
+	glBindTexture(GL_TEXTURE_2D,0);
 }
 
 GLfloat texAspect(int i)
 {
 	if (i<0) return 1;
 	return GLfloat(tmag[i].height)/tmag[i].width;
+}
+
+void texReleaseAll()
+{
+	int i;
+	for (i=0; i<tmag.size(); i++)
+	{
+		if (!tmag[i].tex) continue;
+		glDeleteTextures(1,&tmag[i].tex);
+		tmag[i].tex=0;
+	}
+}
+
+void texReloadAll()
+{
+	int i;
+	for (i=0; i<tmag.size(); i++)
+	{
+		tmag[i].tex=0;
+		if (!tmag[i].refcount) 
+			continue;
+		tmag[i].loadInternal(tmag[i].name);
+	}
 }

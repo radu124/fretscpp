@@ -35,6 +35,10 @@ CONFIGITEM(GLfloat,boardline,3) \
 CONFIGITEM(GLfloat,necktop,2) \
 CONFIGITEM(int,video_glflush,0) \
 CONFIGITEM(int,video_glfinish,0) \
+CONFIGITEM(int,video_dofullscreen,0) \
+CONFIGITEM(int,video_overrideres,0) \
+CONFIGITEM(int,scr_width,800) \
+CONFIGITEM(int,scr_height,600) \
 CONFIGITEM(string,themeStage,"rf-mod") \
 CONFIGITEM(string,themeMainm,"default") \
 CONFIGITEM(string,themeScore,"default") \
@@ -91,7 +95,6 @@ struct tKeydefset
 
 vector<tKeydefset> keydefs;
 vstring keyconfname;
-int video_dofullscreen;
 int video_vsync;
 int video_limiter;
 GLfloat video_fpslim;
