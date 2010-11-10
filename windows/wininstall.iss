@@ -10,8 +10,8 @@ OutputDir=c:\fretscpp-inst
 Name: "main"; Description: "Main Files"; Types: full compact custom; Flags: fixed
 Name: "down"; Description: "Downloadable songs"; Types: full
 ;Name: "down\foforig"; Description: "Original Frets-on-Fire Songs";  Types: full; ExtraDiskSpaceRequired: 24747653
-Name: "down\muldjord"; Description: "Muldjord (Ubuntu Repository)"; Types: full; ExtraDiskSpaceRequired: 29735916
-Name: "down\sectoid"; Description: "Sectoid (Ubuntu repository)";   Types: full; ExtraDiskSpaceRequired: 30339643
+Name: "down\muldjord"; Description: "Muldjord";                      Types: full; ExtraDiskSpaceRequired: 29735916
+Name: "down\sectoid";  Description: "Sectoid";                       Types: full; ExtraDiskSpaceRequired: 30339643
 ;Name: "down\100ftsnow"; Description: "100ft Snowman";               Types: full; ExtraDiskSpaceRequired: 18999042
 ;Name: "down\hoshi"; Description: "hOSHI";                           Types: full; ExtraDiskSpaceRequired: 14686877
 ;Name: "down\mhalo"; Description: "M-Halo";                          Types: full; ExtraDiskSpaceRequired: 10976409
@@ -27,7 +27,7 @@ Name: startmicon; Description: "Create a &Start Menu icon"; GroupDescription: "A
 [Files]
 Source: "fretscpp.exe"; DestDir: "{app}"
 Source: "data\*"; DestDir: "{app}\data"; Flags: recursesubdirs
-Source: "*.dll"; DestDir: "{app}";
+;Source: "*.dll"; DestDir: "{app}";
 Source: "dlsongs\*"; DestDir: "{app}\dlsongs";
 Source: "README"; DestDir: "{app}"; DestName: "README.TXT"; Flags: isreadme
 
