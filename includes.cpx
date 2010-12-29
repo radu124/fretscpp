@@ -60,6 +60,7 @@ volatile int uu;
 struct mcolor{
 	GLfloat Red,Green,Blue,Alpha;
 	void set(); // in utils.cpx
+	void weight(mcolor a, mcolor b, GLfloat wg);
 	mcolor():Red(0),Green(0),Blue(0),Alpha(0) {;}
 	mcolor(GLfloat r, GLfloat g, GLfloat b):Red(r),Green(g),Blue(b),Alpha(0) {;}
 	mcolor(GLfloat r, GLfloat g, GLfloat b, GLfloat a):Red(r),Green(g),Blue(b),Alpha(a) {;}
@@ -67,3 +68,10 @@ struct mcolor{
 
 implementation
 
+void mcolor::weight(mcolor a, mcolor b, GLfloat wg)
+{
+	Red   = a.Red   *(1-wg) + b.Red   * wg;
+	Green = a.Green *(1-wg) + b.Green * wg;
+	Blue  = a.Blue  *(1-wg) + b.Blue  * wg;
+	Alpha = a.Alpha *(1-wg) + b.Alpha * wg;
+}

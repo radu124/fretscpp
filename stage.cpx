@@ -5,11 +5,11 @@ uses includes,globals,scene,sprites,stagefx;
 enum SLBLENDTYPE { SLB_DEFAULT=0, SLB_ONE };
 
 #define SLINI_LIST \
-SLPD(int, xres, 128) \
-SLPD(int, yres, 128) \
+SLPD(int, xres, 256) \
+SLPD(int, yres, 256) \
 SLPD(int, players, 255) \
 SLPD(string, texture, "") \
-SLPD(mcolor, color, White) \
+SLPD(mcolor, color, C_WHITE) \
 SLPD(GLfloat, xscale, 1) \
 SLPD(GLfloat, scale, 1) \
 SLPD(GLfloat, yscale, 1) \
@@ -124,7 +124,7 @@ StageLayerFx *Stage::findFX(StageLayer *base, string name)
 		a->name=name;
 		base->fx.push_back(a);
 		DBG(STAGE,"Stage: new fx %s (layer %s)\n" &name &base->name);
-		a->parent=this;
+		a->parent=base;
 		return a;
 	}
 	return base->fx[v];

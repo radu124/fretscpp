@@ -27,6 +27,8 @@ public:
 	GLfloat fadeoutspeed() { return 1000; }
 	int activeneckpos;
 	int timenow;
+	int timelasthit;
+	int timelastmiss;
 	int cplayer;
 	int cinstrument;
 	int cdifficulty;
@@ -181,6 +183,7 @@ void tSceneGuitar::init()
 	posx=-24;
 	posy=-6;
 	scale=3;
+	timelasthit=timelastmiss=-1000000;
 	tScnMenuBase::init();
 	viewOffset=0;
 	viewSize=6;

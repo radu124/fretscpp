@@ -47,7 +47,7 @@ void confread_mcolor(char *&s, mcolor &v)
 	if (p[0]=='#') p++;
 	if (strlen(s)<6) 
 	{
-		v=White; 
+		v=C_WHITE; 
 		return;
 	}
 	v.Red   = hexbyte(p+0)/255.0;

@@ -230,6 +230,7 @@ void tPlayer::handlehit()
 		for (i=0; i<5; i++)
 			if (lastkeys[i]) lasthit[i]=timenow;
 		lasthit[5]=timenow;
+		guitarScene.timelasthit=timenow;
 		streak++;
 		if (streak>longeststreak) longeststreak=streak;
 		playing.gp[id]=1;
@@ -243,6 +244,7 @@ void tPlayer::handlehit()
 		if (streak==10 || streak==20 || streak==30) timemultiplier=timenow;
 	}
 	else {
+		guitarScene.timelastmiss=timenow;
 		effect_start(1+rand()%4,0);
 		streak=0;
 		playing.gp[id]=0;

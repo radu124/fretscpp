@@ -35,7 +35,9 @@ extern Stage *st_slist;
 extern Stage *st_score;
 extern Stage *st_settm;
 
-mcolor White(1,1,1,1);
+mcolor C_WHITE(1,1,1,1);
+mcolor C_BLACK(0,0,0,1);
+mcolor C_TRANSPARENT(0,0,0,1);
 
 SDL_Rect **videomodesdl;
 const SDL_VideoInfo *origmode;
