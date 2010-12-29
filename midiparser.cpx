@@ -25,7 +25,8 @@ struct notestatus
 	int hasline(int difficulty);
 };
 
-typedef vector<vector<notestatus> > vvnotestatus;
+typedef vector<notestatus> vnotestatus;
+typedef vector<vnotestatus> vvnotestatus;
 
 class MidiParser
 {
@@ -62,11 +63,35 @@ public:
 	vector<string> trk_instrument;
 
 	int openfile(const char *name);
+	void debug_dump_track(int track);
 };
 
 implementation
 
 uses message,verbosity,sha1;
+
+void MidiParser::debug_dump_track(int track)
+{
+	if (!MSG_MIDIDUMP(REQDBG)) return;
+	if (track<0 || track>=trk_notes.size()) return;
+	vnotestatus &ctrk=trk_notes[track];
+	int i,j;
+	for (i=0; i<ctrk.size(); i++)
+	{
+		DBG(MIDIDUMP,"%9d " & ctrk[i].timestamp);
+		for (j=0; j<64; j++) switch (ctrk[i].stat[j])
+		{
+			case ' ': DBG(MIDIDUMP," "); break;
+			case 'O': DBG(MIDIDUMP,"O"); break;
+			case 'X': DBG(MIDIDUMP,"X"); break;
+			case 'B': DBG(MIDIDUMP,"B"); break;
+			case '-': DBG(MIDIDUMP,"|"); break;
+			default:
+				DBG(MIDIDUMP,"?");
+		}
+		DBG(MIDIDUMP,"\n");
+	}
+}
 
 void MidiParser::applydelay(int delay)
 {
@@ -407,21 +432,22 @@ int MidiParser::doparse()
 				
 			switch (evhi)
 			{
-			case 8:
-			case 9:
-			case 10:
-			case 11:
-			case 14:
+			case 0x8:
+			case 0x9:
+			case 0xA:
+			case 0xB:
+			case 0xE:
 				notenum=readbyte();
 				velo=readbyte();
 				ournote=48;
 				if (notenum>=60 && notenum<=100) ournote=notenum-60;
 				break;
-			case 12:
-			case 13:
-				readbyte();
+			case 0xC:
+			case 0xD:
+				notenum=readbyte();
 				break;
 			}
+			if ((event & 0xf0)==0x90 && velo==0) event &= 0x8f;
 			if ((event & 0xf0)==0x90)
 			{
 				a.stat[ournote]='O';
@@ -444,14 +470,12 @@ int MidiParser::doparse()
 			}
 			if (evhi==0xc || evhi==0xd)
 			{
-				readbyte(); 
-				DBG(READMID,"MIDI event: %x !!!\n" & event);
+				DBG(READMID,"MIDI event: %x par %x!!!\n" & event &notenum);
 				continue;
 			}
 			if (evhi==0xb || evhi==0xa || evhi==0xe)
 			{
-				readbyte(); readbyte();
-				DBG(READMID,"MIDI event: %x !!!\n" & event);
+				DBG(READMID,"MIDI event: %x par %x:%x !!!\n" & event &notenum &velo);
 				continue;
 			}
 			INFO(READMID,"Event %d 0x%02x, delta %d\n" &event &event &delta);
@@ -464,6 +488,7 @@ int MidiParser::doparse()
 			timeincrement(1);
 			timeincrement(100000000);
 			trk_notes.push_back(score);
+			debug_dump_track(trk_notes.size()-1);
 			trk_difficulties.push_back(difficulties);
 			trk_instrument.push_back(instrument);
 		}

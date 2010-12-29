@@ -15,6 +15,9 @@ include $(wildcard *.d)
 run: game
 	./game
 
+runopt: fretscpp
+	./fretscpp
+	
 clean: 
 	-rm game game-r game.cpp *.d cpxprep *.tags
 

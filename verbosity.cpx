@@ -15,13 +15,14 @@ GNU General Public License for more details.
 interface
 
 #define MSG_TEXMAN       LEV_INFO
-#define MSG_READMID      LEV_INFO
 #define MSG_SETSCENE     LEV_INFO
 #define MSG_VIDEO        LEV_INFO
 #define MSG_AUDIO        LEV_QUIET
 #define MSG_SONGDB       LEV_DBG
 #define MSG_FONT         LEV_DBG
-#define MSG_MIDI         LEV_DBG
+#define MSG_READMID      LEV_QUIET
+#define MSG_MIDI         LEV_INFO
+#define MSG_MIDIDUMP     LEV_INFO
 #define MSG_SPRITES      LEV_INFO
 #define MSG_SCNGUITAR    LEV_DBG
 #define MSG_SCNSONGOPT   LEV_INFO
