@@ -82,7 +82,7 @@ int main( int argc, char* argv[] )
 			&playing.buffer[5][q]
 					      );
 	}
-	MainMenu.init();
+	MainMenu.enter(); // also does init
 	scores.init();
 	glViewport( 0, 0, scr_width, scr_height );
 	glClear( GL_COLOR_BUFFER_BIT );

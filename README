@@ -11,10 +11,10 @@ Things that work:
  * score computation more or less compatible with FoF
  * whammy
  * game controller (guitar)
- * multiplayer on the same computer
+ * split screen multiplayer
  * basic settings
- 
-Things that do not work:
  * fullscreen
  * stage animations and lights
+ 
+Things that do not work:
  * network play

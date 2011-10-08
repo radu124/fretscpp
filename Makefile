@@ -23,8 +23,8 @@ clean:
 
 release: fretscpp
 
-fretscpp.cpp: game.cpx cpxprep
-	./cpxprep $< >$@
+fretscpp.cpp: $(wildcard *.cpx) cpxprep
+	./cpxprep game.cpx >$@
 	echo -n "$@: ">fretscpp.cpp.d
 	grep -E "^#line" $@ | sed -e 's/.* "//' -e 's/"//' | sort -u | while read A; do echo -n "$$A "; done >>fretscpp.cpp.d
 	#geany -g game.cpp.tags `readlink -f $@`

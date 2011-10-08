@@ -141,6 +141,7 @@ void tPlayer::init(int iid)
 	id=iid;
 	whammy=0;
 	longeststreak=0;
+	score=0;
 	scorefrac=0;
 	scorenomult=0;
 	scorehits=0;

@@ -20,7 +20,6 @@ class tScnKeydef:public tScnTable
 {
 public:
 	tScnKeydef() { scenes.add(this,SCN_KEYDEF); }
-	int redefining;
 	void enter();
 	void handleevent(SDL_Event &a);
 	void itemClicked(int i, int j);
@@ -107,8 +106,8 @@ void tScnKeydef::itemClicked(int i, int j)
 	}
 	if (j==0 && i==entries.size()-1)
 	{
-		opt[i].resize(11);
-		entries[i].resize(11);
+		opt[i].resize(12);
+		entries[i].resize(12);
 		opt[i][0]=opt[i][1]=opt[i][2]=0;
 		entries[i][0]="OAdded";
 		entries[i][1]="";

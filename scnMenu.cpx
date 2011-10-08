@@ -26,6 +26,7 @@ public:
 	GLfloat scale,posx,posy,faderot;
 	void init();
 	virtual void itemClicked(int i) {;}
+	void enter();
 	void additem(const char *v);
 	void render();
 	void rendertext();
@@ -36,6 +37,12 @@ public:
 implementation
 
 uses utils;
+
+void tScnMenuBase::enter()
+{
+	sceneBase::enter();
+	SDL_EnableKeyRepeat(133,33);
+}
 
 void tScnMenuBase::init()
 {

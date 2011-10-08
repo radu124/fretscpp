@@ -160,7 +160,7 @@ void menukey(SDL_Event &event, int flags)
 	
 	int i,pl,q,key=event.key.keysym.sym;
 	pl=0; // by default only player controller is remapped
-	for (q=0; q<keydefs.size(); q++)
+	if (!redefining) for (q=0; q<keydefs.size(); q++)
 	{
 		if (!(keydefselector[pl] & (1<<q))) continue;
 		if (key==keydefs[q].key[0]) event.key.keysym.sym=SDLK_RETURN;

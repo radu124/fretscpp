@@ -42,6 +42,7 @@ mcolor C_TRANSPARENT(0,0,0,1);
 SDL_Rect **videomodesdl;
 const SDL_VideoInfo *origmode;
 vstring videomodenames;
+int redefining;
 
 struct tConfigurable
 {
