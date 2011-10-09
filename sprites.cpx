@@ -72,10 +72,10 @@ void sprite::loadInternal(string ffullname, int flags)
 	if (flags & 1) { height=10; width=10; }
 	//tex= ilutGLLoadImage(ffullname.c_str());
 	
-	INFO(SPRITES,"Loading: %s, tex:%d size:%dx%d\n" &ffullname &tex &width &height);
+	INFO(SPRITES,"Loading: %s, tex:%d size:%dx%d\n", ffullname, tex, width, height);
 	if (!width)
 	{
-		MESSAGE("Could not load file: %s/%s\n" &datadir &ffullname);
+		MESSAGE("Could not load file: %s/%s\n", datadir, ffullname);
 	}
 	height/=10;
 	width/=10;

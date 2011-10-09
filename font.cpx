@@ -153,7 +153,7 @@ void TFont::reloadAll()
 	int i,res,j,k,ch;
 	FT_Set_Char_Size( face, scale*64, scale*64, 96, 96);
 	//DBG(FONT,"%d %d %d %d %d %d\n",min_v,max_v,min_h,max_h,max_v-min_v,max_h-min_h);
-	DBG(FONT,"%d\n" &scale);
+	DBG(FONT,"%d\n", scale);
 	for (ch=0; ch<256; ch++)
 	{
 		if (!texvalid[ch]) continue;
@@ -193,10 +193,10 @@ void TFont::reloadAll()
 		//glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE8, 64, 64, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, a );
 		texvalid[ch]=1;
 		DBG(FONT,"Bitmap size char %c, W:%3d, h:%3d, v%3d, ->%d, adv:%f\n"
-			&((ch<32)?'?':ch) 
-			&bmp.width 
-    		&bmp.rows &disp_v &disp_h
-			&(face->glyph->advance.x/64.0f));
+			,((ch<32)?'?':ch) 
+			,bmp.width 
+    		,bmp.rows &disp_v &disp_h
+			,(face->glyph->advance.x/64.0f));
 	}
 }
 

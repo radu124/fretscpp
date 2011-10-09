@@ -34,7 +34,7 @@ int texLoad(string s, int flags)
 		if (tmag[i].name==s) 
 		{ 
 			found=i; 
-			INFO(TEXMAN,"Texture %s already in database, entry #%d\n" &s &found);
+			INFO(TEXMAN,"Texture %s already in database, entry #%d\n" ,s ,found);
 			break; 
 		}
 	if (found<0) 
@@ -48,7 +48,7 @@ int texLoad(string s, int flags)
 	tmag[found].refcount++;
 	if (!tmag[found].tex) 
 	{
-		INFO(TEXMAN,"Loading %s as #%d\n" &s &found);
+		INFO(TEXMAN,"Loading %s as #%d\n" ,s ,found);
 		tmag[found].loadInternal(s);
 	}
 	return found;
@@ -61,7 +61,7 @@ void texRelease(int i)
 	if (tmag[i].refcount<0)
 	{
 		tmag[i].refcount=0;
-		WARN(TEXMAN,"Texture refcount<0: %s\n" &tmag[i].name);
+		WARN(TEXMAN,"Texture refcount<0: %s\n" ,tmag[i].name);
 	}
 }
 

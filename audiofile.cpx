@@ -88,7 +88,7 @@ void tAudioFile::decode(int target)
 		int samples=ret/2/locchn;
 		int chn2=locchn>1?1:0;
 		
-		DBG(AUDIO,"Read %d chn:%d sr:%d\n" &samples &locchn &locrate);
+		DBG(AUDIO,"Read %d chn:%d sr:%d\n", samples, locchn, locrate);
 		
 		// TODO: for now we assume the ogg rate is the same with our playback rate
 		for (i=0; i<samples; i++)

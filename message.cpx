@@ -20,12 +20,12 @@ class MESSAGEWRITER
 {
 public:
 	MESSAGEWRITER(FILE *f):fou(f),contents(""),pos(0){;}
-	MESSAGEWRITER & operator &(const string b);
-	MESSAGEWRITER & operator &(const char * b);
-	MESSAGEWRITER & operator &(unsigned int b);
-	MESSAGEWRITER & operator &(int b);
-	MESSAGEWRITER & operator &(float b);
-	MESSAGEWRITER & operator &(double b);
+	MESSAGEWRITER & operator ,(const string b);
+	MESSAGEWRITER & operator ,(const char * b);
+	MESSAGEWRITER & operator ,(unsigned int b);
+	MESSAGEWRITER & operator ,(int b);
+	MESSAGEWRITER & operator ,(float b);
+	MESSAGEWRITER & operator ,(double b);
 	~MESSAGEWRITER();
 	int skiptochar(string);
 	FILE *fou;
@@ -36,72 +36,28 @@ public:
 	string modifier;
 };
 
-#define __COND_DBG_OUT(cond,msg) do { if (!cond) break; { MESSAGEWRITER __MW(stderr); __MW & msg; }} while(0)
+#define __COND_DBG_OUT(cond,...) do { if (!(cond)) break; { MESSAGEWRITER __MW(stderr); __MW , __VA_ARGS__; }} while(0)
 
-#define __FILE_OUT(fou,msg) do { {MESSAGEWRITER __MW(fou); __MW & msg;} } while(0)
+#define __FILE_OUT(fou,...) do { {MESSAGEWRITER __MW(fou); __MW , __VA_ARGS__;} } while(0)
 
-#define assume(cond,msg) \
+#define assume(cond,...) \
 	do { if (cond) break; \
-	{ MESSAGEWRITER __MW(stderr); __MW & "\n!!! ERROR !!! in " &__func__ &"() at " & __FILE__ &":"&__LINE__ & "\n" & msg & "\n\n"; \
+	{ MESSAGEWRITER __MW(stderr); __MW , "\n!!! ERROR !!! in " ,__func__ ,"() at " , __FILE__ ,":",__LINE__ , "\n" , __VA_ARGS__ , "\n\n"; \
 	} assert(0); } while(0)
 
-#define assret(cond,msg) \
+#define assret(cond,...) \
 	do { if (cond) break; \
-	{ MESSAGEWRITER __MW(stderr); __MW & "\n!!! FAIL !!! in " &__func__ &"() at " & __FILE__ &":"&__LINE__ & "\n" & msg & "\n\n"; \
+	{ MESSAGEWRITER __MW(stderr); __MW , "\n!!! FAIL !!! in " ,__func__ ,"() at " , __FILE__ ,":",__LINE__ , "\n" , __VA_ARGS__ , "\n\n"; \
 	} return 0; } while(0)
 	
-#define warnif(cond,msg) \
+#define warnif(cond,...) \
 	do { if (!cond) break; \
-	{ MESSAGEWRITER __MW(stderr); __MW & "\n!!! WARNING !!! in " &__func__ &"() at " & __FILE__ &":"&__LINE__ & "\n" & msg & "\n\n"; \
+	{ MESSAGEWRITER __MW(stderr); __MW , "\n!!! WARNING !!! in " ,__func__ ,"() at " , __FILE__ ,":",__LINE__ , "\n" , __VA_ARGS__ , "\n\n"; \
 	} } while(0)
 
-#define assume_paranoid(cond,msg) assume(cond,msg)
+#define assume_paranoid(cond,...) assume(cond,__VA_ARGS__)
 
-#ifdef DISABLEMESSAGES
-int MSG_DISABLE_ALL=1;
-#else
-int MSG_DISABLE_ALL=0;
-#endif
-
-/// required-produced matrix
-const int ML_QUIET_REQWARN=0;
-const int ML_QUIET_REQINFO=0;
-const int ML_QUIET_REQDBG=0;
-
-const int ML_WARN_REQWARN=1 && !MSG_DISABLE_ALL;
-const int ML_WARN_REQINFO=0;
-const int ML_WARN_REQDBG=0;
-
-const int ML_INFO_REQWARN=1 && !MSG_DISABLE_ALL;
-const int ML_INFO_REQINFO=1 && !MSG_DISABLE_ALL;
-const int ML_INFO_REQDBG=0;
-
-const int ML_DBG_REQWARN=1 && !MSG_DISABLE_ALL;
-const int ML_DBG_REQINFO=1 && !MSG_DISABLE_ALL;
-const int ML_DBG_REQDBG=1 && !MSG_DISABLE_ALL;
-
-
-#define LEV_QUIET(a) ML_QUIET_##a
-
-#ifndef ALLQUIET
-
-#define LEV_INFO(a) ML_INFO_##a
-#define LEV_WARN(a) ML_WARN_##a
-#define LEV_DBG(a) ML_DBG_##a
-
-#else
-
-#define LEV_INFO(a) ML_QUIET_##a
-#define LEV_WARN(a) ML_QUIET_##a
-#define LEV_DBG(a) ML_QUIET_##a
-
-#endif
-
-
-#define INFO(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQINFO),msg)
-#define WARN(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQWARN),msg)
-#define DBG(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQDBG), msg)
-#define MESSAGE(msg) __FILE_OUT(stdout,msg)
+#define MESSAGE(...) __FILE_OUT(stdout,__VA_ARGS__)
 
 
 implementation
@@ -133,42 +89,42 @@ int MESSAGEWRITER::skiptochar(string c)
 	return 0;
 }
 
-MESSAGEWRITER & MESSAGEWRITER::operator &(const string b)
+MESSAGEWRITER & MESSAGEWRITER::operator ,(const string b)
 {
 	if (skiptochar("s")) fprintf(fou,modifier.c_str(),b.c_str());
 	else contents+=b;
 	return *this;
 }
 
-MESSAGEWRITER & MESSAGEWRITER::operator &(const char * b)
+MESSAGEWRITER & MESSAGEWRITER::operator ,(const char * b)
 {
 	if (skiptochar("s")) fprintf(fou,modifier.c_str(),b);
 	else contents+=b;
 	return *this;
 }
 
-MESSAGEWRITER & MESSAGEWRITER::operator &(unsigned int b)
+MESSAGEWRITER & MESSAGEWRITER::operator ,(unsigned int b)
 {
 	skiptochar("cxd");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }
 
-MESSAGEWRITER & MESSAGEWRITER::operator &(int b)
+MESSAGEWRITER & MESSAGEWRITER::operator ,(int b)
 {
 	skiptochar("cxd");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }
 
-MESSAGEWRITER & MESSAGEWRITER::operator &(float b)
+MESSAGEWRITER & MESSAGEWRITER::operator ,(float b)
 {
 	skiptochar("f");
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }
 
-MESSAGEWRITER & MESSAGEWRITER::operator &(double b)
+MESSAGEWRITER & MESSAGEWRITER::operator ,(double b)
 {
 	skiptochar("f");
 	fprintf(fou,modifier.c_str(),b);

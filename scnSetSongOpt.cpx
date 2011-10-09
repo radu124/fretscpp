@@ -102,7 +102,7 @@ void tScnSetSongOpt::selInstrument(int i, int j)
 	} else 
 		player[i].lastInstr=crtSong.trk_instrument[j];
 	base=groupStart(i,1);
-	DBG(SCNSONGOPT,"col: %d base:%d\n" &i &base);
+	DBG(SCNSONGOPT,"col: %d base:%d\n", i, base);
 	for (q=0; q<crtSong.trk_instrument.size(); q++)
 		opt[i][base+q]=(j==q);
 	player[i].instrument=j;
@@ -138,7 +138,7 @@ void tScnSetSongOpt::selDifficulty(int i, int j)
 	int q,base, instr, dff;
 	instr=getInstrument(i);
 	base=groupStart(i,2);
-	DBG(SCNSONGOPT,"col: %d instr:%d base:%d\n" &i &instr &base);
+	DBG(SCNSONGOPT,"col: %d instr:%d base:%d\n", i, instr, base);
 	dff=1;
 	for (q=0; q<4; q++) 
 	{
@@ -168,7 +168,7 @@ void tScnSetSongOpt::enter()
 	ires=crtIni.load(selectedsong+"/song.ini");
 	if (crtIni.delay!=0) 
 	{
-		INFO(SONGINI,"Applying delay as read from song.ini (%d)\n" &crtIni.delay);
+		INFO(SONGINI,"Applying delay as read from song.ini (%d)\n", crtIni.delay);
 		crtSong.applydelay(crtIni.delay);
 	}
 	
@@ -223,7 +223,7 @@ void tScnSetSongOpt::setKeySels(int i)
 
 void tScnSetSongOpt::itemClickedSep(int i, int k, int j, int &o)
 {
-	DBG(SCNSONGOPT,"SEPclick %d %d %d\n" &i &k &j);
+	DBG(SCNSONGOPT,"SEPclick %d %d %d\n", i, k, j);
 	
 	if (i==-1)
 	{
@@ -253,7 +253,7 @@ void tScnSetSongOpt::itemClickedSep(int i, int k, int j, int &o)
 	}
 	if (k==3)
 	{
-		MESSAGE("%d \n"&o);
+		MESSAGE("%d \n", o);
 		if (o) keydefselector[i] |= (1<<(j-1));
 		else keydefselector[1] &= ~(1<<(j-1));
 	}

@@ -60,7 +60,7 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 
 	if(!pngFile) 
 	{
-		WARN(PNGREAD,"PNG: could not open file: %s\n" &filename);
+		WARN(PNGREAD,"PNG: could not open file: %s\n", filename);
 		return 0;
 	}
 	png_byte sig[8];
@@ -69,7 +69,7 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 	rewind(pngFile);//so when we init io it won't bitch
 	if(!png_check_sig(sig, 8))
 	{
-		WARN(PNGREAD,"PNG: bad file signature: %s\n" &filename);
+		WARN(PNGREAD,"PNG: bad file signature: %s\n", filename);
 		return 0;
 	}
 	
@@ -77,13 +77,13 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 
 	if(!png_ptr)
 	{
-		WARN(PNGREAD,"PNG: could not initialize reader: %s\n" &filename);
+		WARN(PNGREAD,"PNG: could not initialize reader: %s\n", filename);
 		return 0;
 	}
 	
 	if(setjmp(png_jmpbuf(png_ptr)))
 	{
-		WARN(PNGREAD,"PNG: error during decode: %s\n" &filename);
+		WARN(PNGREAD,"PNG: error during decode: %s\n", filename);
 		return 0;
 	}
 	
@@ -149,7 +149,7 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 	theight=1.0;
 	if (rwidth!=imgwidth || rheight!=imgheight)
 	{
-		WARN(SPRITES,"Sprite: %s has non-power of 2 size\n" &filename);
+		WARN(SPRITES,"Sprite: %s has non-power of 2 size\n", filename);
 		twidth=((GLfloat)imgwidth)/rwidth;
 		theight=((GLfloat)imgheight)/rheight;
 	}

@@ -56,7 +56,7 @@ void translateandhandleevent(SDL_Event &event)
 		int axis=e.jaxis.axis;
 		int value=e.jaxis.value;
 		int oldval=joysticks[joy].axes[axis];
-		DBG(JOYSTICK, "Joy axis %d %d %d\n" &(int) e.jaxis.which &(int) e.jaxis.axis &(int) e.jaxis.value);
+		DBG(JOYSTICK, "Joy axis %d %d %d\n", (int) e.jaxis.which, (int) e.jaxis.axis, (int) e.jaxis.value);
 		joysticks[joy].axes[axis]=value;
 		scenehandleevent(e);
 		if (joydetect_enable && oldval!=-1000000 && abs(oldval-value)>JOY_AXIS_DETECT_SENSITIVITY)
@@ -70,7 +70,7 @@ void translateandhandleevent(SDL_Event &event)
 	}
 	if (e.type==SDL_JOYBALLMOTION)
 	{
-		DBG(JOYSTICK, "Ball motion %d %d %d %d\n" &(int) e.jball.which &(int) e.jball.ball &(int) e.jball.xrel &(int) e.jball.yrel);
+		DBG(JOYSTICK, "Ball motion %d %d %d %d\n", (int) e.jball.which, (int) e.jball.ball, (int) e.jball.xrel, (int) e.jball.yrel);
 		// motion detect for the power-up
 		if (e.jball.xrel<-JOY_BALL_SENSITIVITY || e.jball.xrel>JOY_BALL_SENSITIVITY)
 		{

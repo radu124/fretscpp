@@ -156,7 +156,7 @@ int tsimatch(char *&s, const char *v)
 	if (ch!='=' && ch!=' ' && ch!='\t') return 0;
 	s+=l;
 	while (*s==' ' || *s=='\t' || *s=='=') s++;
-	DBG(CONFIG, "Matched id: %s" &v);
+	DBG(CONFIG, "Matched id: %s" ,v);
 	return 1;
 }
 
@@ -188,7 +188,7 @@ int tsamatch(char *&s, const char *prefix, const char *suffix, int &idx)
 	while (*ss==' ' || *ss=='\t' || *ss=='=') ss++;
 	idx=idxv;	
 	s=ss;
-	DBG(CONFIG, "Matched array: %s[%d]%s" &prefix &idx &suffix);
+	DBG(CONFIG, "Matched array: %s[%d]%s" ,prefix ,idx ,suffix);
 	return 1;
 }
 
@@ -222,7 +222,7 @@ int config_read()
 			while (*p!=']' && *p) p++;
 			*p=0;
 			nsp=sav;
-			DBG(CONFIG,"Config namespace: %s\n" &nsp);
+			DBG(CONFIG,"Config namespace: %s\n" ,nsp);
 			continue;
 		}
 		if (*p==';')
@@ -230,7 +230,7 @@ int config_read()
 		// anything outside [fretscpp] is ignored
 		if (nsp!="fretscpp") continue;
 		sav=p;
-		DBG(CONFIG,"CONFIG: %s %s\n" &nsp &p);
+		DBG(CONFIG,"CONFIG: %s %s\n" ,nsp ,p);
 #define CONFIGITEM CI_READ
 #define CONFIGARRAY CIA_READ
 CONFIGLIST
@@ -287,7 +287,7 @@ void config_fix()
 void trydatadir(string td)
 {
 	if (datadir!="") return;
-	MESSAGE("Looking for game data in: %s\n" &td);
+	MESSAGE("Looking for game data in: %s\n", td);
 	if (fileExists(td+"/default.ttf"))
 	{
 		datadir=td;

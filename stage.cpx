@@ -106,7 +106,7 @@ StageLayer *Stage::findLayer(string name)
 		a->name=name;
 		a->isBackground=(a->name=="background");
 		layer.push_back(a);
-		DBG(STAGE,"Stage: new layer %s\n" &name);
+		DBG(STAGE,"Stage: new layer %s\n", name);
 		a->parent=this;
 		return a;
 	}
@@ -123,7 +123,7 @@ StageLayerFx *Stage::findFX(StageLayer *base, string name)
 		StageLayerFx *a=new StageLayerFx();
 		a->name=name;
 		base->fx.push_back(a);
-		DBG(STAGE,"Stage: new fx %s (layer %s)\n" &name &base->name);
+		DBG(STAGE,"Stage: new fx %s (layer %s)\n", name, base->name);
 		a->parent=base;
 		return a;
 	}

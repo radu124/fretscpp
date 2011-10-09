@@ -36,7 +36,7 @@ void readsongsdir(string songsroot)
 {
 	vector<string> dirs=listDirContents(songsroot);
 	int i;
-	INFO(SONGDB,"Updating songs database, songs root is %s\n" &songsroot);
+	INFO(SONGDB,"Updating songs database, songs root is %s\n", songsroot);
 	sort(dirs.begin(),dirs.end());
 	for (i=0; i<dirs.size(); i++)
 	{
@@ -50,14 +50,14 @@ void readsongsdir(string songsroot)
 			continue;
 		}
 		
-		DBG(SONGDB,"Song %s hasini:%d hasmid:%d\n" &dirs[i] &hasini &hasmid);
+		DBG(SONGDB,"Song %s hasini:%d hasmid:%d\n", dirs[i], hasini, hasmid);
 		songentry a;
 		a.name=dirs[i];
 		a.dir=songsroot+"/"+dirs[i];
 		a.issong=1;
 		if (hasini && hasmid) songsdb.push_back(a);
 	}
-	INFO(SONGDB,"Song database contains %d entries\n"  & (int)songsdb.size());
+	INFO(SONGDB,"Song database contains %d entries\n", (int)songsdb.size());
 }
 
 void updatesongdb()

@@ -180,7 +180,7 @@ int readhash(const char *c, uint8_t *hash)
 		b=gethex(c[i*2+1]);
 		if (a<0 || b<0) 
 		{
-			DBG(SCORES,"Error reading hash at %d\n" &i);
+			DBG(SCORES,"Error reading hash at %d\n", i);
 			return 0;
 		}
 		hash[i]=a*16+b;
@@ -260,8 +260,8 @@ int scoreline::read(FILE *f, int ver)
 	p+=rr;
 	if (res<8) 
 	{
-		DBG(SCORES,"Scores: too few items (%d) on line, chars:%d\n" &res &rr);
-		DBG(SCORES,"Line was:%s\n" &(s+41));
+		DBG(SCORES,"Scores: too few items (%d) on line, chars:%d\n", res, rr);
+		DBG(SCORES,"Line was:%s\n", (s+41));
 		return 0;
 	}
 	if (*p==' ') p++;
@@ -276,7 +276,7 @@ int scoreline::read(FILE *f, int ver)
 	playername[32]=0;
 	sha_buffer((char *) midhash,scorehash-midhash,check);
 
-	INFO(SCORES,"Read score: %d %d %s " &score &notesgood &(char *)playername);
+	INFO(SCORES,"Read score: %d %d %s ", score, notesgood, (char *)playername);
 	if (0!=memcmp((char *)check,(char *)scorehash,20)) 
 	{
 		WARN(SCORES,"-- wrong score hash\n");

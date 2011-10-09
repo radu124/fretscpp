@@ -6,7 +6,7 @@ uses includes,globals;
 void confread_##a(char *&s, a &v) \
 { \
 	 v=(a)multiplechoice(s,b); \
-	 DBG(CONFIG," value " #a " %d (from:%s)\n" &(int)v &s); \
+	 DBG(CONFIG," value " #a " %d (from:%s)\n" ,(int)v ,s); \
 } 
 
 #define CONFWRITE_GLfloat(a) fprintf(fou,"%f",a)
@@ -24,9 +24,9 @@ int multiplechoice(const char *s, const char *choices);
 
 implementation
 
-void confread_GLfloat(char *&s, GLfloat &v) { v=atof(s); DBG(CONFIG," value GLfloat %f (from:%s)\n" &v &s);}
-void confread_int(char *&s, int &v)         { v=atoi(s); DBG(CONFIG," value int %d (from:%s)\n" &v &s);}
-void confread_string(char *&s, string &v)   { v=string(s); DBG(CONFIG," value string '%s'\n" &v);}
+void confread_GLfloat(char *&s, GLfloat &v) { v=atof(s); DBG(CONFIG," value GLfloat %f (from:%s)\n", v, s);}
+void confread_int(char *&s, int &v)         { v=atoi(s); DBG(CONFIG," value int %d (from:%s)\n", v, s);}
+void confread_string(char *&s, string &v)   { v=string(s); DBG(CONFIG," value string '%s'\n", v);}
 
 int hexdigit(char c)
 {
@@ -55,7 +55,7 @@ void confread_mcolor(char *&s, mcolor &v)
 	v.Blue  = hexbyte(p+4)/255.0;
 	v.Alpha = 1;
 	if (strlen(s)>7) v.Alpha = hexbyte(p+6)/255.0;
-	DBG(CONFIG," color(%f,%f,%f,%f) from:%s\n" &v.Red &v.Green &v.Blue &v.Alpha &s);
+	DBG(CONFIG," color(%f,%f,%f,%f) from:%s\n", v.Red, v.Green, v.Blue, v.Alpha, s);
 }
 
 int multiplechoice(const char *s, const char *choices)

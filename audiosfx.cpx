@@ -104,7 +104,7 @@ int sfx_load(string fn, int eid)
 		eid=++effectdata.count;
 	}
 	
-	INFO(AUDIO,"OGG load effect %d: chn:%d, rate=%d\n" &eid &channels &samplerate);
+	INFO(AUDIO,"OGG load effect %d: chn:%d, rate=%d\n", eid, channels, samplerate);
 	buf[0]=buf[1]=0;
 	dorealloc(effectbuf,allocd);
 	readpos=256;
@@ -116,7 +116,7 @@ int sfx_load(string fn, int eid)
 		int locrate=ov_info(&vf,-1)->rate;
 		int samples=ret/2/locchn;
 		int step=locrate*256/obtained.freq;
-		DBG(AUDIO,"Read %d chn:%d sr:%d\n" &samples &locchn &locrate);
+		DBG(AUDIO,"Read %d chn:%d sr:%d\n", samples, locchn, locrate);
 		for (i=0; i<samples; i++)
 		{
 			v=0;
@@ -140,7 +140,7 @@ int sfx_load(string fn, int eid)
 	}
 	dorealloc(effectbuf,pos+padding);
 	for (i=0; i<padding; i++) effectbuf[i+pos]=0;
-	INFO(AUDIO,"Loaded effect, len=%d\n" &pos);
+	INFO(AUDIO,"Loaded effect, len=%d\n", pos);
 	effectdata.len[eid]=pos;
 	effectdata.data[eid]=effectbuf;
 	ov_clear(&vf);
@@ -151,7 +151,7 @@ void sfx_start(int effnum, int channel, int volume)
 {
 	int vol_le,vol_rt,eipos;
 	if (!effnum) return;
-	DBG(SFX,"Starting effect %d, chn=%d, vol=%d\n" & effnum & channel & volume);
+	DBG(SFX,"Starting effect %d, chn=%d, vol=%d\n", effnum, channel, volume);
 	int i=effectsQueue.head;
 	if (i>=effectsQueue.tail+EFFECTRQUEUESIZE) 
 	{
@@ -186,8 +186,8 @@ int sfx_playbackready()
 	for (i=0; i<EFFECTSPLAY; i++)
 	{
 		int eid=playingeffects[i].id;
-		DBG(SFX,"%d(%d/%d V:%d:%d) " & eid & playingeffects[i].pos & effectdata.len[eid] 
-			&playingeffects[i].vol_le &playingeffects[i].vol_rt);
+		VDBG(SFX,"%d(%d/%d V:%d:%d) ", eid, playingeffects[i].pos, effectdata.len[eid],
+			playingeffects[i].vol_le, playingeffects[i].vol_rt);
 	}
 	DBG(SFX,"\n");
 	for (i=0; i<EFFECTSPLAY; i++)
@@ -198,7 +198,7 @@ int sfx_playbackready()
 		if (epos>effectdata.len[eid]) 
 		{	
 			playingeffects[i].id=0;
-			DBG(SFX,"SFX: Effect %d (in pos: %d) ended\n" & eid & i);
+			DBG(SFX,"SFX: Effect %d (in pos: %d) ended\n", eid, i);
 		}
 	}	
 	lasteffect=EFFECTSPLAY-1;
@@ -212,7 +212,7 @@ int sfx_playbackready()
 		if (!playingeffects[i].id)
 		{
 			playingeffects[i]=playingeffects[lasteffect];
-			DBG(SFX,"Effect moved from pos %d to pos %d" & lasteffect & i);
+			DBG(SFX,"Effect moved from pos %d to pos %d", lasteffect, i);
 			i--;
 		}
 	}
@@ -236,7 +236,7 @@ int sfx_playbackready()
 		playingeffects[seteff]=effectsQueue.queue[qid];
 		playingeffects[seteff].pos=0;
 		playingeffects[seteff].age=sfx_agecounter++;
-		DBG(SFX,"Read effect %d from queue (pos %d) into effect %d" &eid &qid &lasteffect);
+		DBG(SFX,"Read effect %d from queue (pos %d) into effect %d", eid, qid, lasteffect);
 	}
 	effectsQueue.tail=eqtail;
 	for (i=0; i<lasteffect; i++)

@@ -48,7 +48,7 @@ int song_start(string path, int paused)
 	if (len>2047) len=2047;
 	songctrl.refreshsong=0;
 	songctrl.startpaused=paused;
-	INFO(AUDIO,"Song start: >%s<\n" &path);
+	INFO(AUDIO,"Song start: >%s<\n", path);
 	strncpy(songctrl.songname,path.c_str(),len);
 	songctrl.songname[len]=0;
 	songctrl.songname[2048]=0;
@@ -80,7 +80,7 @@ void tSongCtrl::close_song()
 void tSongCtrl::open_song()
 {
 	// use char arrays here for thread safety reasons
-	DBG(AUDIO,"opening song: >%s<\n" &songname);
+	DBG(AUDIO,"opening song: >%s<\n", songname);
 	char namelocal[2052];
 	int i;
 	strncpy(namelocal,songname,2048);
@@ -113,7 +113,7 @@ void tSongCtrl::some_predecode()
 	int target2=decode_ticks*obtained.freq/250;
 	if (target2>target) target=target2; 
 	// decode at least 4 times as much as it took to render one frame
-	DBG(AUDIO,"Filling buffer, targets are: %d %d\n" &target &target2);
+	DBG(AUDIO,"Filling buffer, targets are: %d %d\n", target, target2);
 
 	songfiles[0].decode(target);
 	songfiles[1].decode(target);

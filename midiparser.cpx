@@ -72,13 +72,13 @@ uses message,verbosity,sha1;
 
 void MidiParser::debug_dump_track(int track)
 {
-	if (!MSG_MIDIDUMP(REQDBG)) return;
+	if (MSG_MIDIDUMP<LEV_VDBG+MSG_BIAS) return;
 	if (track<0 || track>=trk_notes.size()) return;
 	vnotestatus &ctrk=trk_notes[track];
 	int i,j;
 	for (i=0; i<ctrk.size(); i++)
 	{
-		DBG(MIDIDUMP,"%9d " & ctrk[i].timestamp);
+		DBG(MIDIDUMP,"%9d ", ctrk[i].timestamp);
 		for (j=0; j<64; j++) switch (ctrk[i].stat[j])
 		{
 			case ' ': DBG(MIDIDUMP," "); break;
@@ -137,7 +137,7 @@ int MidiParser::expect(const char *str)
 {
 	if (!isthere(str))
 	{
-		WARN(MIDI,"Midi did not contain expected string:%s\n" &str);
+		WARN(MIDI,"Midi did not contain expected string:%s\n", str);
 		FAIL=1;
 		return 0;
 	}
@@ -206,7 +206,7 @@ int MidiParser::openfile(const char *name)
 	}
 	buffer=new unsigned char[size];
 	size=read(fd,buffer,size);
-	INFO(READMID,"Read midi file of size %d\n" & size);
+	INFO(READMID,"Read midi file of size %d\n", size);
 	sha_buffer((char *) buffer,size,hash);
 	pos=0;
 	FAIL=0;
@@ -268,8 +268,8 @@ void MidiParser::timeincrement(int delta)
 {
 	int newtimestamp=a.timestamp+(int) (44100*tickduration*delta);
 	if (newtimestamp>lastevent) lastevent=newtimestamp;
-	DBG(READMID,"Time increment %5d,  1000ticks=%3.3fs, time is now %7.3fs    " 
-		&delta &(tickduration*1000) &(newtimestamp/44100.0));
+	DBG(READMID,"Time increment %5d,  1000ticks=%3.3fs, time is now %7.3fs    ", 
+		delta, (tickduration*1000), (newtimestamp/44100.0));
 	score.push_back(a);
 	a.timestamp=newtimestamp;
 	int i,j;
@@ -308,7 +308,7 @@ int MidiParser::doparse()
 	expect("MThd");
 	assret(!FAIL,"bad header marker, MThd expected");
 	chunklen=readlong();
-	warnif(chunklen!=6, "Expecting header chunk of size 6, but was %d instead" & chunklen);
+	warnif(chunklen!=6, "Expecting header chunk of size 6, but was %d instead", chunklen);
 	savedpos=pos;
 	format=readshort();
 	tracks=readshort();
@@ -322,19 +322,19 @@ int MidiParser::doparse()
 		tickduration=bp0;
 		if ((bp0 & 0x7f)==29) tickduration=30/1001.0;
 		tickduration=1/tickduration/bp1;
-		INFO(READMID,"Midi Tick fps:%d ticks/frame %d 1000ticks=%2.3fs\n" &bp0 &bp1 &(tickduration*1000));
+		INFO(READMID,"Midi Tick fps:%d ticks/frame %d 1000ticks=%2.3fs\n", bp0, bp1, (tickduration*1000));
 	}
 	else
 	{
 		ticksperbeat=bp0*256+bp1;
 		tickduration=0.5f/ticksperbeat;
 		// 120 bpm is standard if we get no other info
-		INFO(READMID,"Midi ticks/beat %d  1000ticks=%2.3fs\n" &ticksperbeat &(tickduration*1000));
+		INFO(READMID,"Midi ticks/beat %d  1000ticks=%2.3fs\n", ticksperbeat, (tickduration*1000));
 	}
 	pos=savedpos+chunklen;
 	assret(!FAIL,"Could not read entire header, probably end-of-file");
 	assret(pos<size,"Header size sent us past end-of-file");
-	INFO(READMID,"Midi file has %d tracks, format is %d\n" &tracks &format);
+	INFO(READMID,"Midi file has %d tracks, format is %d\n", tracks, format);
 	savedpos=pos;
 	trk_notes.resize(0);
 	trk_difficulties.resize(0);
@@ -344,7 +344,7 @@ int MidiParser::doparse()
 		assret(expect("MTrk"),"Expecting track header");
 		int tracksize=readlong();
 		int lastcmd=0;
-		INFO(READMID,"Track size is %d\n" &tracksize);
+		INFO(READMID,"Track size is %d\n", tracksize);
 		assret(tracksize+savedpos+8<=size,"Track size exceeds end-of-file");
 		chunkend=pos+tracksize;
 		int anynotes=0;
@@ -380,21 +380,21 @@ int MidiParser::doparse()
 				case 5:
 				case 7:
 					message=string((const char *) buffer+pos,len);
-					INFO(READMID,"MIDI Text: %s\n" &message);
+					INFO(READMID,"MIDI Text: %s\n", message);
 					break;
 				case 2:
 					message=string((const char *) buffer+pos,len);
-					INFO(READMID,"MIDI Copyright: %s\n" &message);
+					INFO(READMID,"MIDI Copyright: %s\n", message);
 					break;
 				case 3:
 					message=string((const char *) buffer+pos,len);
 					instrument=processInstrumentName(message);
-					INFO(READMID,"MIDI Track name: %s instrument %s\n" &message &instrument);
+					INFO(READMID,"MIDI Track name: %s instrument %s\n", message, instrument);
 					break;
 				case 4:
 					message=string((const char *) buffer+pos,len);
 					instrument=processInstrumentName(message);
-					INFO(READMID,"MIDI Instrument name: %s instrument %s\n" &message &instrument);
+					INFO(READMID,"MIDI Instrument name: %s instrument %s\n", message, instrument);
 					break;
 				case 47:
 					INFO(READMID,"MIDI End of track\n");
@@ -406,8 +406,8 @@ int MidiParser::doparse()
 					uspqn+=256*readbyte();
 					uspqn+=readbyte();
 					tickduration=uspqn/1000000.0/ticksperbeat;
-					INFO(READMID,"MIDI Set tempo us/qnote %d, ticks/beat %d  1000ticks=%2.3fs\n" 
-						&uspqn &ticksperbeat &(tickduration*1000));
+					INFO(READMID,"MIDI Set tempo us/qnote %d, ticks/beat %d  1000ticks=%2.3fs\n", 
+						uspqn, ticksperbeat, (tickduration*1000));
 					break;
 				case 84:
 					INFO(READMID,"MIDI End of track\n");
@@ -417,10 +417,10 @@ int MidiParser::doparse()
 					ts_denom=readbyte();
 					ts_metro=readbyte();
 					ts_32nds=readbyte();
-					INFO(READMID,"MIDI time signature %d/%d-%d-%d\n" & ts_numer & ts_denom & ts_metro & ts_32nds);
+					INFO(READMID,"MIDI time signature %d/%d-%d-%d\n", ts_numer, ts_denom, ts_metro, ts_32nds);
 					break;
 				default:
-					INFO(READMID,"MIDI Unknown meta event %d\n" &sub);
+					INFO(READMID,"MIDI Unknown meta event %d\n", sub);
 				}
 				pos=aftermeta;
 				//INFO(READMID,"MIDI skipping meta %x" &pos);
@@ -451,7 +451,7 @@ int MidiParser::doparse()
 			if ((event & 0xf0)==0x90)
 			{
 				a.stat[ournote]='O';
-				DBG(READMID,"MIDI note-on:  %4d %4d %s\n" & notenum & velo & a.stat);
+				DBG(READMID,"MIDI note-on:  %4d %4d %s\n", notenum, velo, a.stat);
 				anynotes=1;
 				if (a.timestamp>40000 && 
 					ournote%12<5)
@@ -465,26 +465,26 @@ int MidiParser::doparse()
 			{
 				if (a.stat[ournote]=='-' || a.stat[ournote]==' ') a.stat[ournote]='X';
 				else a.stat[ournote]='B';
-				DBG(READMID,"MIDI note-off: %4d %4d %s\n" & notenum & velo & a.stat);
+				DBG(READMID,"MIDI note-off: %4d %4d %s\n", notenum, velo, a.stat);
 				continue;
 			}
 			if (evhi==0xc || evhi==0xd)
 			{
-				DBG(READMID,"MIDI event: %x par %x!!!\n" & event &notenum);
+				DBG(READMID,"MIDI event: %x par %x!!!\n", event, notenum);
 				continue;
 			}
 			if (evhi==0xb || evhi==0xa || evhi==0xe)
 			{
-				DBG(READMID,"MIDI event: %x par %x:%x !!!\n" & event &notenum &velo);
+				DBG(READMID,"MIDI event: %x par %x:%x !!!\n", event, notenum, velo);
 				continue;
 			}
-			INFO(READMID,"Event %d 0x%02x, delta %d\n" &event &event &delta);
+			INFO(READMID,"Event %d 0x%02x, delta %d\n", event, event, delta);
 			
 			break;
 		}
 		if (anynotes)
 		{
-			INFO(READMID,"MIDI Track had note events, time=%d\n" & (a.timestamp/44100));
+			INFO(READMID,"MIDI Track had note events, time=%d\n", (a.timestamp/44100));
 			timeincrement(1);
 			timeincrement(100000000);
 			trk_notes.push_back(score);

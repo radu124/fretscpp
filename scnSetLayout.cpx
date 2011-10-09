@@ -35,7 +35,7 @@ void tScnSetLayout::setTarget()
 	sicrtpl->max=np;
 	active=np*(np-1)/2+crtplayer-1;
 	assume(active>=0 && active<NECKPOS_COUNT,"trying to set wrong neckpos");
-	MESSAGE("Setting target %d\n" &active);
+	MESSAGE("Setting target %d\n", active);
 	replaceSI(item[3],new tSIrange("XPos",-20,20,&neckpos[active].xdisp,0.25));
 	replaceSI(item[4],new tSIrange("YPos",-20,20,&neckpos[active].ydisp,0.25));
 	replaceSI(item[5],new tSIrange("Scale",0.1,4,&neckpos[active].scale,0.1));

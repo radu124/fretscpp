@@ -181,7 +181,7 @@ void tSceneGuitar::rfFlames2()
 		{
 			char ch=cnotes[0][i].stat[cdifficulty*12+j];
 			if (ch!='O' && ch!='B') continue;
-			MESSAGE("%d" &j);
+			MESSAGE("%d", j);
 			//int tev=player[cplayer].timelastgood[i];
 			int mult;
 			GLfloat mx,x,y,ff;

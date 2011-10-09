@@ -47,8 +47,8 @@ implementation
 
 uses configuration;
 
-#define tsiMAstring(c) if (tsimatch(l,""#c)) {c=l; DBG(SONGINI,"Read: "#c"=%s\n" &c); continue; } else do {;} while (0);
-#define tsiMAint(c) if (tsimatch(l,""#c)) {c=atoi(l); DBG(SONGINI,"Read int:"#c"=%d\n" &c); continue; } else do {;} while(0);
+#define tsiMAstring(c) if (tsimatch(l,""#c)) {c=l; DBG(SONGINI,"Read: "#c"=%s\n", c); continue; } else do {;} while (0);
+#define tsiMAint(c) if (tsimatch(l,""#c)) {c=atoi(l); DBG(SONGINI,"Read int:"#c"=%d\n", c); continue; } else do {;} while(0);
 
 int tSongini::load(string filename)
 {

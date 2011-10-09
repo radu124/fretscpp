@@ -183,7 +183,7 @@ void jumptoscene(int i)
 
 sceneBase * tscenelist::operator [] (int i)
 {
-	assume(i>=0 && i<get().size(),"bad scene %d" &i);
+	assume(i>=0 && i<get().size(),"bad scene %d", i);
 	return get()[i];
 }
 

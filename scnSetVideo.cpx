@@ -39,6 +39,6 @@ void tScnSetVideo::itemAdjusted(int i)
 		else videoExitFullscreen();
 		break;
 	case 1:
-		MESSAGE("current fs res %d %d\n" &fsvideomode->width &fsvideomode->height);
+		MESSAGE("current fs res %d %d\n", fsvideomode->width, fsvideomode->height);
 	}
 }

@@ -130,7 +130,7 @@ int tSIclist::capval()
 
 int tSettingsItem::intcap(int min, int max, int &val)
 {
-	DBG(SETSCENE,"Setting cap %s min:%d max:%d val:%d " &title &min &max &val);
+	DBG(SETSCENE,"Setting cap %s min:%d max:%d val:%d ", title, min, max, val);
 	if (val<min) 
 	{
 		DBG(SETSCENE,"low cap\n");

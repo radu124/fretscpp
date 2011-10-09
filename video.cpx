@@ -57,14 +57,14 @@ void doResize(int w, int h)
 		SDL_HWSURFACE | SDL_OPENGL | SDL_RESIZABLE | 
 		((fullscreenmode==1)?SDL_FULLSCREEN:0));
 	if (!scrsurface->flags & SDL_HWSURFACE)
-		WARN(VIDEO,"No hardware surface resizing to %d x %d\n" &scr_width &scr_height);
+		WARN(VIDEO,"No hardware surface resizing to %d x %d\n", scr_width, scr_height);
 	glViewport( 0, 0, scr_width, scr_height );
 	scene_setOrtho();
 	glEnable( GL_TEXTURE_2D );
 	glEnable (GL_BLEND); 
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	INFO(VIDEO,"RESIZE: %d %d\n" &scr_width &scr_height);
+	INFO(VIDEO,"RESIZE: %d %d\n", scr_width, scr_height);
 }
 
 void findvideomodes()
@@ -90,7 +90,7 @@ void findvideomodes()
 		char a[32];
 		tmp.width=videomodesdl[i]->w;
 		tmp.height=videomodesdl[i]->h;
-		INFO(VIDEO,"Mode:%d %dx%dx%d\n" &i &tmp.width &tmp.height &tmp.bpp);
+		INFO(VIDEO,"Mode:%d %dx%dx%d\n", i, tmp.width, tmp.height, tmp.bpp);
 		sprintf(a,"%dx%dx%d",tmp.width,tmp.height,tmp.bpp);
 		tmp.name=a;
 		videomodes.push_back(new tVideoMode(tmp));

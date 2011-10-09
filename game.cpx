@@ -39,7 +39,7 @@ int main( int argc, char* argv[] )
 		(video_dofullscreen?SDL_FULLSCREEN:0) );
 	fullscreenmode = video_dofullscreen;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
-	INFO(SPRITES,"Maximum texture size:%d\n" &maxTexSize);
+	INFO(SPRITES,"Maximum texture size:%d\n", maxTexSize);
 	init_joysticks();
 	glEnable( GL_TEXTURE_2D );
 	glEnable (GL_BLEND); 
@@ -70,13 +70,13 @@ int main( int argc, char* argv[] )
 	audio_yield();
 	if (0) {
 		int q;
-		for (q=0; q<90000; q++) DBG(AUDIO,"%09d %d %d %d %d %d %d\n" &q
-			&songfiles[0].buffer[0][q]
-			&songfiles[0].buffer[1][q]
-			&songfiles[1].buffer[0][q]
-			&songfiles[1].buffer[1][q]
-			&songfiles[2].buffer[0][q]
-			&songfiles[2].buffer[1][q]
+		for (q=0; q<90000; q++) DBG(AUDIO,"%09d %d %d %d %d %d %d\n", q
+			,songfiles[0].buffer[0][q]
+			,songfiles[0].buffer[1][q]
+			,songfiles[1].buffer[0][q]
+			,songfiles[1].buffer[1][q]
+			,songfiles[2].buffer[0][q]
+			,songfiles[2].buffer[1][q]
 					      );
 	}
 	MainMenu.enter(); // also does init
