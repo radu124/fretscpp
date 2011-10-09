@@ -30,6 +30,7 @@ vstring themesSettm;
 CONFIGITEM(GLfloat,neckpos_extend,0) \
 CONFIGITEM(GLfloat,tolerance_early,100) \
 CONFIGITEM(GLfloat,tolerance_late,100) \
+CONFIGITEM(GLfloat,miss_loudness,200) \
 CONFIGITEM(GLfloat,boardlen,4) \
 CONFIGITEM(GLfloat,boardline,3) \
 CONFIGITEM(GLfloat,necktop,2) \

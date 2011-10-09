@@ -270,7 +270,7 @@ void tPlayer::handlehit()
 	}
 	else {
 		guitarScene.timelastmiss=timenow;
-		sfx_start(esfx_randombadnote(),player_channel(id));
+		sfx_start(esfx_randombadnote(),player_channel(id),miss_loudness);
 		streak=0;
 		lastwasgood=0;
 		hitactive=0;

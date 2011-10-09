@@ -63,11 +63,10 @@ install: fretscpp
 	find data -type f | while read A; do install -m 644 "$$A" "$(DESTDIR)/usr/share/games/fretscpp/$$A"; done
 
 versionincrement:
-	sed "s/[.]/ /" VERSION | ( read QQ B; ((B=B+1)); echo $$QQ.$$B ) >VERSION.tmp
-	@echo; echo -n "New version is: "; cat VERSION.tmp; echo
 	@mv VERSION VERSION.prev
-	@mv VERSION.tmp VERSION
-	@git add VERSION
+	date -u "+%Y.%m.%d.%H" >VERSION
+	git add VERSION
+	@echo; echo -n "New version is: "; cat VERSION; echo
 
 preproc.cpp: fretscpp.cpp
 	g++ -E $< $(LIBS)>$@

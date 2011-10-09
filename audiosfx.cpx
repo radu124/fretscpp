@@ -58,6 +58,7 @@ struct tEffectPlay
 
 tEffectPlay playingeffects[EFFECTSPLAY];
 tEffectList effectdata;
+int sfx_agecounter=0;
 
 implementation
 
@@ -221,14 +222,21 @@ int sfx_playbackready()
 	{
 		int qid=eqtail%EFFECTRQUEUESIZE;
 		int eid=effectsQueue.queue[qid].id;
+		int seteff=lasteffect;
 		eqtail++;
 		if (!eid) continue;
 		if (!effectdata.data[eid]) continue;
-		if (lasteffect>=EFFECTSPLAY) continue;
-		playingeffects[lasteffect]=effectsQueue.queue[qid];
-		playingeffects[lasteffect].pos=0;
+		if (lasteffect>=EFFECTSPLAY) 
+		{
+			seteff=0;
+			for (i=1; i<EFFECTSPLAY; i++) 
+				if (playingeffects[i].age<playingeffects[seteff].age) seteff=i;
+		}
+		else lasteffect++;
+		playingeffects[seteff]=effectsQueue.queue[qid];
+		playingeffects[seteff].pos=0;
+		playingeffects[seteff].age=sfx_agecounter++;
 		DBG(SFX,"Read effect %d from queue (pos %d) into effect %d" &eid &qid &lasteffect);
-		lasteffect++;
 	}
 	effectsQueue.tail=eqtail;
 	for (i=0; i<lasteffect; i++)
