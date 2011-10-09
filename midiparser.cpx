@@ -189,7 +189,7 @@ unsigned int MidiParser::readvarlen()
 
 int MidiParser::openfile(const char *name)
 {
-	int lastevent=0;
+	lastevent=0;
 	int oflags=O_RDONLY;
 #ifdef _WINDOWS
 	oflags |= O_BINARY;

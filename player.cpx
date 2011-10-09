@@ -80,8 +80,16 @@ public:
 	void addwhammy(int i);
 	void whammyaxis(int v);
 	int notematch(int i);
+	
+	/**
+	 * initializes tracktap with an array of booleans representing
+	 * tappable notes
+	 */
+	void tappable_init_track(int mode);
+	
 	vector<notestatus> *cnotes;
-	vector<int> history;
+	vint history;
+	vint tracktap;
 };
 
 const int MAX_PLAYERS=4;
@@ -92,6 +100,8 @@ implementation
 
 uses audio,scnGuitar,scnSetSongOpt;
 uses sfxfof;
+uses playerInit;
+uses tappable;
 
 void tPlayer::whammyaxis(int v)
 {
@@ -146,37 +156,6 @@ void tPlayer::unhitactive(int ts)
 	hitactive=0;
 }
 
-void tPlayer::init(int iid)
-{
-	int i;
-	id=iid;
-	whammy=0;
-	longeststreak=0;
-	score=0;
-	scorefrac=0;
-	scorenomult=0;
-	scorehits=0;
-	scorehold=0;
-	scorewham=0;
-	crtnote=0;
-	hittnote=-1;
-	nextnote=0;
-	cnotes=&crtSong.trk_notes[instrument];
-	notetotal=0;
-	notegood=0;
-	notexmiss=0;
-	notehopo=0;
-	streak=0;
-	lastwasgood=1;
-	lasttime=0;
-	for (i=0; i<cnotes->size(); i++) if (cnotes[0][i].hashit(difficulty)) notetotal++;
-	history.resize(cnotes->size());
-	for (i=0; i<history.size(); i++) history[i]=0;
-	// for visual effects
-	timemultiplier=-1000000;
-	for (i=0; i<5; i++) lasthit[i]=-1000000;
-}
-
 void tPlayer::passtime()
 {
 	int timenow=guitarScene.timenow;
@@ -208,11 +187,25 @@ void tPlayer::passtime()
 int tPlayer::notematch(int i)
 {
 	int j;
+	int notesmatched=0;
+	int notesunmatched=0;
 	for (j=0; j<5; j++)
 	{
 		char c=cnotes[0][i].stat[j+12*difficulty];
-		if ((c=='O' || c=='B') ^ (lastkeys[j])) return 0;
-		if (lastkeys[j]) c++;
+		int noteon=(c=='O' || c=='B');
+		if (noteon & !lastkeys[j]) return 0;
+		if (!noteon & lastkeys[j])
+		{
+			if (strictkeys) return 0;
+			if (notesmatched) return 0;
+			notesunmatched++;
+		}
+		if (noteon & lastkeys[j])
+		{
+			notesmatched++;
+		}
+		if (notesmatched>1 && notesunmatched) return 0;
+		//if (lastkeys[j]) c++;
 	}
 	return 1;
 }
@@ -289,24 +282,24 @@ void player_get_music_volume(int &gtar_le, int &gtar_rt, int &rhyt_le, int &rhyt
 	switch (numplayers)
 	{
 	case 1:
-		gtar_rt = gtar_le = player[0].lastwasgood?120:20;
+		gtar_rt = gtar_le = player[0].lastwasgood?guitar_volume:guitar_off_volume;
 		wham_le = wham_rt = player[0].whammyon;
 		return;
 	case 2:
-		gtar_le = player[0].lastwasgood?120:20;
-		gtar_rt = player[1].lastwasgood?120:20;
+		gtar_le = player[0].lastwasgood?guitar_volume:guitar_off_volume;
+		gtar_rt = player[1].lastwasgood?guitar_volume:guitar_off_volume;
 		wham_le = player[0].whammyon;
 		wham_rt = player[1].whammyon;
 		return;
 	case 3:
-		gtar_le = player[0].lastwasgood?120:player[1].lastwasgood?80:20;
-		gtar_rt = player[2].lastwasgood?120:player[1].lastwasgood?80:20;
+		gtar_le = player[0].lastwasgood?guitar_volume:player[1].lastwasgood?(guitar_volume*2/3):guitar_off_volume;
+		gtar_rt = player[2].lastwasgood?guitar_volume:player[1].lastwasgood?(guitar_volume*2/3):guitar_off_volume;
 		wham_le = player[0].whammyon || player[1].whammyon ;
 		wham_rt = player[2].whammyon || player[1].whammyon ;
 		return;
 	default:
-		gtar_le = (player[0].lastwasgood?50:10)+(player[1].lastwasgood?50:10);
-		gtar_rt = (player[2].lastwasgood?50:10)+(player[1].lastwasgood?50:10);
+		gtar_le = (player[0].lastwasgood?(guitar_volume/2):(guitar_off_volume/2))+(player[1].lastwasgood?(guitar_volume/2):(guitar_off_volume/2));
+		gtar_rt = (player[2].lastwasgood?(guitar_volume/2):(guitar_off_volume/2))+(player[1].lastwasgood?(guitar_volume/2):(guitar_off_volume/2));
 		wham_le = player[0].whammyon || player[1].whammyon ;
 		wham_rt = player[2].whammyon || player[2].whammyon ;
 	}

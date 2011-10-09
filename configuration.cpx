@@ -1,3 +1,17 @@
+/*******************************************************************
+(C) 2011 by Radu Stefan
+radu124@gmail.com
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+*******************************************************************/  
+
 interface
 
 uses includes,player,confrw;
@@ -28,9 +42,13 @@ vstring themesSettm;
 
 #define CONFIGLIST \
 CONFIGITEM(GLfloat,neckpos_extend,0) \
-CONFIGITEM(GLfloat,tolerance_early,100) \
-CONFIGITEM(GLfloat,tolerance_late,100) \
-CONFIGITEM(GLfloat,miss_loudness,200) \
+CONFIGITEM(GLfloat,tolerance_early,120) \
+CONFIGITEM(GLfloat,tolerance_late,120) \
+CONFIGITEM(int,tappablemode,0) \
+CONFIGITEM(int,strictkeys,0) \
+CONFIGITEM(int,miss_loudness,200) \
+CONFIGITEM(int,guitar_volume,100) \
+CONFIGITEM(int,guitar_off_volume,20) \
 CONFIGITEM(GLfloat,boardlen,4) \
 CONFIGITEM(GLfloat,boardline,3) \
 CONFIGITEM(GLfloat,necktop,2) \

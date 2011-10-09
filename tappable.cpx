@@ -14,28 +14,43 @@ GNU General Public License for more details.
 
 interface
 
-/**
- * Load sound effects specific to frets-on-fire
- */
-void load_all_sfx();
+enum eTappableMode
+{
+	ET_NONE=0,
+	ET_RFMOD,
+	ET_GH2STRICT,
+	ET_GH2,
+	ET_GH2SLOPPY,
+	ET_ANY
+};
 
-int esfx_randombadnote();
+class tPlayer;
 
 implementation
 
-vint badnoteeffects;
+uses player;
 
-int esfx_randombadnote()
+void tPlayer::tappable_init_track(int mode)
 {
-	int q=badnoteeffects.size();
-	if (!q) return 0;
-	return badnoteeffects[random()%q];
-}
-
-void load_all_sfx()
-{
-	badnoteeffects.push_back(sfx_load(datadir+"/fiba1.ogg"));
-	badnoteeffects.push_back(sfx_load(datadir+"/fiba2.ogg"));
-	badnoteeffects.push_back(sfx_load(datadir+"/fiba5.ogg"));
-	badnoteeffects.push_back(sfx_load(datadir+"/fiba6.ogg"));
+	int n=cnotes->size();
+	int i;
+	tracktap.resize(0);
+	tracktap.resize(n);
+	for (i=0; i<n; i++)
+	{
+		switch (mode)
+		{
+			case ET_RFMOD:
+				// TODO
+				break;
+			case ET_GH2STRICT:
+				break;
+			case ET_GH2:
+				break;
+			case ET_GH2SLOPPY:
+				break;
+			case ET_ANY:
+				break;
+		}
+	}
 }
