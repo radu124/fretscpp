@@ -14,13 +14,10 @@ GNU General Public License for more details.
   
 interface
 
+const int AUDIOBUF_SIZE=1024;
+const int AUDIO_PLAYBACKRATE=44100;
+
 void init_audio();
-int load_effects(string fn);
-int song_start(string path, int paused=0);
-void song_stop();
-void audio_yield();
-double song_time();
-void effect_start(int effnum, int channel=0, int volume=256);
 
 int callbacklen;
 SDL_AudioSpec desired, obtained;
@@ -28,77 +25,56 @@ SDL_AudioSpec desired, obtained;
 int whammytable[16384];
 int whammypos;
 
-implementation
-
-uses verbosity, message;
-
-// this is not defined under Windows, at least in my version of libvorbis
-int ov_myfopen(char *path,OggVorbis_File *vf)
-{
-	FILE *fin;
-#ifdef _WINDOWS
-	fin=fopen(path,"rb");
-#else
-	fin=fopen(path,"r");	
-#endif
-	ov_open(fin,vf,NULL,0);
-}
-
-struct tEffects
-{
-	int count;
-	int16_t *data[256];
-	int len[256];
-	tEffects():count(0) { int i; for (i=0; i<256; i++) {data[i]=NULL; len[i]=0; } }
-};
-
-const int SONG_BUFFER_SIZE=262144;
-const int SONG_MARGIN=16384;
-const int SONG_STARTAFTER=44100;
+struct tEffectPlay;
+struct tAudioFile;
 
 struct tPlaying
 {
-	int effectid[8];
-	int effectvol[8];
-	int effectchn[8];
-	int effectpos[8];
-	int we[2]; // whammy effective on left and right channels
-	volatile int startpaused;
-	volatile int gp[8]; // per player guitar on
-	volatile int wh[8]; // per player whammy on
-	volatile int playpos;
-	volatile int decodepos[3];
-	volatile int stopsat[3];
-	volatile int sisopen[3];
-	volatile int refreshsong;
-	volatile int loopsong;
-	volatile int playing;
+	tPlaying();
+	tEffectPlay *effect; // initialized to point to playingeffects
+	tAudioFile  *afile;  // initialized to point to songfiles
+	
+	int wham_le, wham_rt; // whammy requested
+	int weff_le, weff_rt; // whammy effective on left and right channels
+	/**
+	 * song pause flag
+	 */
 	volatile int pause;
-	volatile int songstarted;
+	/**
+	 * Flag that indicates a song buffer underrun
+	 */
 	volatile int stalled;
+	/**
+	 * Flag that indicates whether a song has ended
+	 * set to 0 by decoder thread in a critical section
+	 * set to 1 by audio thread when song finishes
+	 */
 	volatile int songended;
-	int ogg_bs[3];
-	int decode_lasttime;
-	int decode_ticks;
+	/**
+	 * Flag that indicates whether a song is ready to start playing
+	 * (meaning that all components of the song have been initialized)
+	 * set by decoder thread - set to 0 in the critical section where
+	 * the song playpos and decodepos are also reset 
+	 */
+	volatile int songstarted;
 	
-	OggVorbis_File ov_song;
-	OggVorbis_File ov_rhythm;
-	OggVorbis_File ov_guitar;
+	int playpos;
+	int playing;
 	
-	int16_t buffer[6][SONG_BUFFER_SIZE];
-	char songname[2048];
-	void close_song();
-	void open_song();
-	void some_predecode();
-	void close_ovfile(int mask, OggVorbis_File *ovf);
-	int decode(int idx, OggVorbis_File *ovf);
-};
+	void callback(uint16_t *stream, int len);
+} playing;
 
-tEffects effects;
-tPlaying playing;
-const int BUF_SIZE=1024;
-int mixbuffer_l[BUF_SIZE];
-int mixbuffer_r[BUF_SIZE];
+implementation
+
+uses verbosity, message;
+uses audiosfx;
+uses audiosong;
+
+tPlaying::tPlaying()
+{
+	effect=playingeffects;
+	afile=songfiles;
+}
 
 int pbpos=0;
 
@@ -118,137 +94,122 @@ int rangelimit(int a)
 
 void my_audio_callback(void *userdata, Uint8 *stream, int len)
 {
-	int i,da,db,dc;
-	int16_t *streamS=(int16_t *) stream;
-	int poslong=playing.playpos;
-	int pos=poslong%SONG_BUFFER_SIZE;
+	playing.callback((uint16_t *) stream, len/4);
+}
+
+void tPlaying::callback(uint16_t *stream, int len)
+{
+	int i,q;
+	int wrappos;
+	int en_play;
+	int vol_base, vol_rhyt_le, vol_rhyt_rt, vol_gtar_le, vol_gtar_rt;
+	int sfxcount;
+	
+	playpos=afile[0].playpos;
+	wrappos=playpos%AUDIOFILE_BUFFER_SIZE;
+	
 	callbacklen=len;
-	//if (effects.len[0])
-	da=playing.decodepos[0]; 
-	db=playing.decodepos[1]; 
-	dc=playing.decodepos[2]; 
-	int decodebtm=min3(da,db,dc);
-	if (playing.stalled && decodebtm>playing.playpos+SONG_STARTAFTER) 
+	int decodebtm=min3(afile[0].decodepos, afile[1].decodepos, afile[2].decodepos);
+	
+	// if enough data was decoded after a stall, unstall
+	if (stalled && decodebtm>playpos+AUDIOFILE_STARTAFTER) 
 	{
-		playing.playing=1;
-		playing.stalled=0;
+		playing=1;
+		stalled=0;
 		DBG(AUDIO,"unstalled\n");
 	}
-	if (poslong>playing.stopsat[0] && poslong>playing.stopsat[2])
+	
+	// if we reached the end of the song, stop playing
+	if (playpos>afile[0].stopsat && playpos>afile[2].stopsat && songstarted)
 	{
-		playing.playing=0;
-		playing.songended=1;
+		playing=0;
+		songended=1;
+		DBG(AUDIO,"end of song\n");
 	}
-	//MESSAGE("A:%d %d %d\n" &pos &playing.stopsat[0] &playing.songended);
-	if (playing.playing && decodebtm<playing.playpos+len/4)
+	
+	// when we don't have enough music data, we stall
+	if (playing && decodebtm<playpos+len)
 	{
-		playing.stalled=1;
-		playing.playing=0;
+		stalled=1;
+		playing=0;
 		DBG(AUDIO,"stalled\n");
 	}
-	int en_play=(playing.playing);
-	int vol1, vol2, vol3a, vol3b;
 	
-	int16_t *effs[8];
-	int16_t *eff0=NULL;
-	int16_t *eff1=NULL;
-	int vole0=85;
-	int vole1=85;
-	vol1=vol2=85;
-	if (numplayers==1)
-	{
-		vol3a=vol3b=playing.gp[0]*100+20;
-	} else {
-		vol3a=playing.gp[0]*120;
-		vol3b=playing.gp[1]*120;
-		if (!vol3a && !vol3b) vol3a=vol3b=16;
-	}
+	en_play=playing && !pause;
 	
-	for (i=0; i<8; i++)
-	{
-		effs[i]=NULL;
-		if (playing.effectid[i]>0)
-		{
-			int eid=playing.effectid[i];
-			int epos=playing.effectpos[i];
-			if (effects.len[eid]<epos+len/4) 
-			{	
-				playing.effectid[i]=0;
-			} else effs[i]=effects.data[eid]+epos;
-			playing.effectpos[i]+=len/4;
-		}
-	}
-	eff0=effs[0];
-	eff1=effs[1];
-	/*
-	DBG(AUDIO,"%8x %8x %8x %8x\n" &playing.playpos
-		&(-playing.playpos+playing.decodepos[0])
-		&(-playing.playpos+playing.decodepos[1])
-		&(-playing.playpos+playing.decodepos[2])
-		);
-	*/
-	//MESSAGE("%d\n" &en_play);
-	if (playing.pause) en_play=0;
-	for (i=0; i<len/4; i++)
+	vol_base=vol_rhyt_le=vol_rhyt_rt=vol_gtar_le=vol_gtar_rt=85;
+	DBG(AUDIO,"getting volume\n");
+	player_get_music_volume(vol_gtar_le, vol_gtar_rt, vol_rhyt_le, vol_rhyt_rt, wham_le, wham_rt);
+	DBG(AUDIO,"getting effects\n");
+	sfxcount=sfx_playbackready();
+	DBG(AUDIO,"playing\n");
+	
+	for (i=0; i<len; i++)
 	{
 		int s=0;
-		int posw1=pos, posw2=pos;
-		if (playing.we[0]) posw1+=whammytable[whammypos];
-		if (playing.we[1]) posw2+=whammytable[whammypos];
+		
+		int whampos; // index of sample to be played if whammy is active
+		int wpos_rt,wpos_le; // index of sample to be played on left and right channel guitar
+		
+		whampos=(wrappos+whammytable[whammypos])%AUDIOFILE_BUFFER_SIZE;
+		wpos_le=weff_le ? whampos : wrappos;
+		wpos_rt=weff_rt ? whampos : wrappos;
+		
 		whammypos++;
 		if (whammypos==8192)
 		{
-			whammypos%=8192;
-			if (numplayers==1) playing.we[0]=playing.we[1]=playing.wh[0];
-			else { playing.we[0]=playing.wh[0]; playing.we[1]=playing.wh[1]; }
+			whammypos=0;
+			weff_le=wham_le;
+			weff_rt=wham_rt;
 		}
 		
 		if (en_play)
 		{
-			s+=vol1*playing.buffer[0][pos];
-			s+=vol2*playing.buffer[2][pos];
-			s+=vol3a*playing.buffer[4][posw1];
+			s+=vol_base    * afile[0].buffer[0][wrappos];
+			s+=vol_rhyt_le * afile[1].buffer[0][wrappos];
+			s+=vol_gtar_le * afile[2].buffer[0][wpos_le];
 		}
-		if (eff0) s+=vole0* *eff0;
-		if (eff1) s+=vole0* *eff1;
-		streamS[i*2]=rangelimit(s/256);
+		for (q=0; q<sfxcount; q++)
+		{
+			int addv=effect[q].vol_le * effect[q].ptr[0];
+			s+=addv;
+		}
+		stream[i*2]=rangelimit(s/256);
 		
 		s=0;
 	
 		if (en_play)
 		{
-			s+=vol1*playing.buffer[1][pos];
-			s+=vol2*playing.buffer[3][pos];
-			s+=vol3b*playing.buffer[5][posw2];
+			s+=vol_base    * afile[0].buffer[0][wrappos];
+			s+=vol_rhyt_rt * afile[1].buffer[0][wrappos];
+			s+=vol_gtar_rt * afile[2].buffer[0][wpos_rt];
 		}
-		if (eff0) s+=vole0* *eff0++;
-		if (eff1) s+=vole0* *eff1++;
-		streamS[i*2+1]=rangelimit(s/256);
+		for (q=0; q<sfxcount; q++)
+		{
+			int addv=effect[q].vol_rt * effect[q].ptr++[0];
+			s+=addv;
+		}
+		stream[i*2+1]=rangelimit(s/256);
 		
-		pos=(pos+1)%SONG_BUFFER_SIZE;
+		wrappos=(wrappos+1)%AUDIOFILE_BUFFER_SIZE;
 		//effects.data[0][pbpos];
 		//pbpos=pbpos+1;
 		//if (pbpos>=effects.len[0]) pbpos=0;
 	}
+	for (q=0; q<sfxcount; q++) effect[q].pos+=len;
 	if (en_play)
-		playing.playpos+=len/4;
-	// warning, thread sync problem
-}
-
-void effect_start(int effnum, int channel, int volume)
-{
-	static int alternate=0;
-	if (!effnum) return;
-	playing.effectpos[alternate]=0;
-	playing.effectid[alternate]=effnum;
-	alternate^=1;
+	{
+		afile[0].playpos+=len;
+		afile[1].playpos+=len;
+		afile[2].playpos+=len;
+	}
 }
 
 void init_audio()
 {
-	desired.freq=44100;
+	desired.freq=AUDIO_PLAYBACKRATE;
 	desired.format=AUDIO_S16SYS;
-	desired.samples=BUF_SIZE;
+	desired.samples=AUDIOBUF_SIZE;
 	desired.channels=2;
 	desired.userdata=(void *) &playing;
 	desired.callback=my_audio_callback;
@@ -260,238 +221,4 @@ void init_audio()
 	{
 		whammytable[i]=(int) (0.03*(4096-abs(4096-i)));
 	}
-}
-
-int16_t interpolate(int16_t *buf, int pos, int chn=1)
-{
-	return buf[pos/256];
-}
-
-int load_effects(string fn)
-{
-	int padding=BUF_SIZE;
-	int16_t buf[4112];
-	int bs=0;
-	int i,j,v;
-	int pos=0,readpos;
-	int allocd=220500;
-	
-	OggVorbis_File vf;
-	if(ov_myfopen((char *) fn.c_str(), &vf) < 0) return 0;
-	int channels = ov_info(&vf,0)->channels;
-	int samplerate = ov_info(&vf,0)->rate;
-	int cnt=effects.count;
-	INFO(AUDIO,"OGG load effect %d: chn:%d, rate=%d\n" &cnt &channels &samplerate);
-	buf[0]=buf[1]=0;
-	dorealloc(effects.data[cnt],allocd);
-	readpos=256;
-	while (1)
-	{
-		int ret=ov_read(&vf,(char *)(buf+2),8192,0,2,1,&bs);
-		if (!ret) break;
-		int locchn=ov_info(&vf,-1)->channels;
-		int locrate=ov_info(&vf,-1)->rate;
-		int samples=ret/2/locchn;
-		int step=locrate*256/obtained.freq;
-		DBG(AUDIO,"Read %d chn:%d sr:%d\n" &samples &locchn &locrate);
-		for (i=0; i<samples; i++)
-		{
-			v=0;
-			for (j=0; j<locchn; j++) v+=buf[2+i*locchn+j];
-			v=v/locchn;
-			buf[2+i]=(int16_t) v;
-		}
-		while (readpos<(samples+1)*256)
-		{
-			readpos+=step;
-			if (pos>=allocd)
-			{
-				allocd=allocd*2;
-				dorealloc(effects.data[cnt],allocd);
-			}
-			effects.data[cnt][pos++]=interpolate(buf,readpos);
-		}
-		readpos-=samples*256;
-		buf[0]=buf[samples];
-		buf[1]=buf[samples+1];
-	}
-	dorealloc(effects.data[cnt],pos+padding);
-	for (i=0; i<padding; i++) effects.data[i+pos]=0;
-	INFO(AUDIO,"Loaded effect, len=%d\n" &pos);
-	effects.len[cnt]=pos+padding;
-	ov_clear(&vf);
-	return ++effects.count;
-}
-
-int song_start(string path, int paused)
-{
-	int len=path.length();
-	if (len>2047) len=2047;
-	playing.startpaused=paused;
-	playing.gp[0]=1;
-	playing.gp[1]=1;
-	playing.we[0]=0;
-	playing.we[1]=0;
-	INFO(AUDIO,"Song start: >%s<\n" &path);
-	strncpy(playing.songname,path.c_str(),len);
-	playing.songname[len]=0;
-	playing.songname[2048]=0;
-	playing.refreshsong=1;
-	// need some thread protection here, in case we read this string at the same time
-	// (unlikely, but just to be thorough)
-}
-
-void song_stop()
-{
-	playing.songname[0]=0;
-	playing.refreshsong=1;
-}
-
-void tPlaying::close_song()
-{
-	decodepos[0]=decodepos[1]=decodepos[2]=0;
-	playing=0;
-	close_ovfile(0,&ov_song);
-	close_ovfile(1,&ov_rhythm);
-	close_ovfile(2,&ov_guitar);
-}
-
-void tPlaying::open_song()
-{
-	// use char arrays here for thread safety reasons
-	DBG(AUDIO,"opening song: >%s<\n" &songname);
-	char namelocal[2148];
-	int i;
-	strncpy(namelocal,songname,2048);
-	namelocal[2048]=0;
-	for (i=0; i<3; i++)
-	{
-		decodepos[i]=0;
-		ogg_bs[i]=0;
-		sisopen[i]=0;
-		// zero length by default
-		stopsat[i]=0;
-	}
-	SDL_LockAudio();
-	playpos=0;
-	pause=startpaused;
-	SDL_UnlockAudio();
-	songstarted=0;
-	int l=strlen(namelocal);
-	if (!l) return;
-	if (namelocal[l-1]=='/') strcat(namelocal,"song.ogg");
-	if (ov_myfopen(namelocal, &ov_song) >=0) { sisopen[0]=1; stopsat[0]=1000000000; }
-	if (namelocal[l-1]=='/')
-	{
-		namelocal[l]=0;
-		strcat(namelocal,"rhythm.ogg");
-		if (ov_myfopen(namelocal, &ov_rhythm) >=0) { sisopen[1]=1; stopsat[1]=1000000000; }
-		namelocal[l]=0;
-		strcat(namelocal,"guitar.ogg");
-		if (ov_myfopen(namelocal, &ov_guitar) >=0) { sisopen[2]=1; stopsat[2]=1000000000; }
-	}
-	// we do this here, otherwise the
-	// callback might clear them if stopsat[]
-	// is not yet initialized
-	songended=0;	
-	stalled=1;
-}
-
-int tPlaying::decode(int idx, OggVorbis_File *ovf)
-{
-	int i;
-	int16_t buf[4112];
-	int target=4096;
-	int target2=decode_ticks*obtained.freq/250;
-	if (target2>target) target=target2; 
-	// decode at least 4 times as much as it took to render one frame
-	int target3=SONG_BUFFER_SIZE-SONG_MARGIN-(decodepos[idx]-playpos);
-	if (target3<target) target=target3; 
-	DBG(AUDIO,"Filling buffer %d, targets are: %d %d %d\n" &idx &target &target2 &target3);
-	int pos=decodepos[idx];
-	while (target>0)
-	{
-		if (!sisopen[idx])
-		{
-			// when song is not open, just fill with zeros
-			// this may be wasteful, but it's not going to be
-			// any slower than actually decoding the song
-			for (i=0; i<target; i++)
-			{
-				buffer[idx*2  ][pos%SONG_BUFFER_SIZE]=0;
-				buffer[idx*2+1][pos%SONG_BUFFER_SIZE]=0;
-				pos++;
-			}
-			decodepos[idx]=pos;
-			target=0;
-			break;
-		}
-		int ret=ov_read(ovf,(char *)buf,8192,0,2,1,&ogg_bs[idx]);
-		if (ret<=0) 
-		{
-			stopsat[idx]=pos;
-			sisopen[idx]=0;
-			close_ovfile(1,ovf);
-			continue;
-		}
-		int locchn=ov_info(ovf,-1)->channels;
-		int locrate=ov_info(ovf,-1)->rate;
-		int samples=ret/2/locchn;
-		int chn2=locchn>1?1:0;
-		
-		DBG(AUDIO,"Read (idx %d) %d chn:%d sr:%d\n" &idx &samples &locchn &locrate);
-		for (i=0; i<samples; i++)
-		{
-			int qa=buf[i*locchn];
-			int qb=buf[i*locchn+chn2];
-			if (numplayers==2)
-			{
-				int t=(qa*5+qb*3)/8;
-				qb=(qa*3+qb*5)/8;
-				qa=t;
-				// reduce the stereo effect since
-				// each player has his own track to play
-			}
-			buffer[idx*2  ][pos%SONG_BUFFER_SIZE]=qa;
-			buffer[idx*2+1][pos%SONG_BUFFER_SIZE]=qb;				
-			pos++;
-		}
-		decodepos[idx]=pos;
-		target-=samples;
-	}
-	return 0;
-}
-
-void tPlaying::close_ovfile(int id, OggVorbis_File *ovf)
-{
-	if (!sisopen[id]) return;
-	sisopen[id]=0;
-	ov_clear(ovf);
-}
-
-void tPlaying::some_predecode()
-{
-	int thistime=SDL_GetTicks();
-	decode_ticks=thistime-decode_lasttime;
-	if (decode_ticks>500) decode_ticks=500;
-	decode_lasttime=thistime;
-	decode(0,&ov_song);
-	decode(1,&ov_rhythm);
-	decode(2,&ov_guitar);
-}
-
-void audio_yield()
-{
-	if (playing.refreshsong)
-	{
-		playing.close_song();
-		if (playing.songname[0]) playing.open_song();
-		playing.refreshsong=0;
-	}
-	playing.some_predecode();
-}
-
-double song_time()
-{
-	return 0;
 }

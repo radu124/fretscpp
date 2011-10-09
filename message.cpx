@@ -100,7 +100,7 @@ const int ML_DBG_REQDBG=1 && !MSG_DISABLE_ALL;
 
 #define INFO(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQINFO),msg)
 #define WARN(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQWARN),msg)
-#define DBG(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQDBG),msg)
+#define DBG(tgt,msg) __COND_DBG_OUT(MSG_##tgt(REQDBG), msg)
 #define MESSAGE(msg) __FILE_OUT(stdout,msg)
 
 

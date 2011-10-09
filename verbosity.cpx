@@ -17,7 +17,12 @@ interface
 #define MSG_TEXMAN       LEV_INFO
 #define MSG_SETSCENE     LEV_INFO
 #define MSG_VIDEO        LEV_INFO
+
 #define MSG_AUDIO        LEV_QUIET
+#define MSG_SFX          LEV_DBG
+#define MSG_SONG         LEV_DBG
+#define MSG_AUDIOFILE    LEV_DBG
+
 #define MSG_SONGDB       LEV_DBG
 #define MSG_FONT         LEV_DBG
 #define MSG_READMID      LEV_QUIET

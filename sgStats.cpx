@@ -92,11 +92,11 @@ void tSceneGuitar::globalStats()
 		deffont.displayString(a,-38,-28,2,0);
 		break;
 	case 1:
-		sprintf(a,"playing: %d",playing.playpos);
+		sprintf(a,"playing: %d",songfiles[0].playpos);
 		deffont.displayString(a,-38,-28,2,0);
-		sprintf(a,"decode: %d-%d-%d",playing.decodepos[0],playing.decodepos[1],playing.decodepos[2]);
+		sprintf(a,"decode: %d-%d-%d",songfiles[0].decodepos,songfiles[1].decodepos,songfiles[2].decodepos);
 		deffont.displayString(a,-38,-26,2,0);
-		sprintf(a,"stop: %d-%d-%d",playing.stopsat[0],playing.stopsat[1],playing.stopsat[2]);
+		sprintf(a,"stop: %d-%d-%d",songfiles[0].stopsat,songfiles[1].stopsat,songfiles[2].stopsat);
 		deffont.displayString(a,-38,-24,2,0);
 		break;
 	case 2:
