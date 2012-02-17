@@ -29,7 +29,7 @@ int esfx_randombadnote()
 {
 	int q=badnoteeffects.size();
 	if (!q) return 0;
-	return badnoteeffects[random()%q];
+	return badnoteeffects[rand()%q];
 }
 
 void load_all_sfx()

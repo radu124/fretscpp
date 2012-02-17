@@ -146,7 +146,7 @@ int tAudioFile::open(const char *filename)
 	reset();
 	// zero length by default
 	stopsat=0;
-	if (ov_fopen(filename, &oggfile) >=0) 
+	if (ov_fopen((char *) filename, &oggfile) >=0) 
 	{ 
 		isopen=1; 
 		stopsat=1000000000; 
