@@ -43,7 +43,7 @@ void tScnKeydef::enter()
 	for (i=0; i<keydefs.size(); i++)
 	{
 		newcol();
-		additem(string("O")+keyconfname[i]);
+		additem(string("O")+keydefs[i].name);
 		additem("");
 		additem("ODefine all");
 		for (j=0; j<9; j++)
@@ -106,13 +106,13 @@ void tScnKeydef::itemClicked(int i, int j)
 		entries[i][0]="OAdded";
 		entries[i][1]="";
 		entries[i][2]="ODefine All";
-		keyconfname.push_back(entries[i][0].substr(1));
 		keydefs.push_back(tKeydefset());
 		for (q=0; q<9; q++)
 		{
 			entries[i][q+3]="O-";
 			keydefs.back().key[q]=0;
 		}
+		keydefs.back().name=entries[i][0].substr(1);
 		newcol();
 		additem("OAdd New");
 	}

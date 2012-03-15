@@ -32,7 +32,7 @@ FXPD(GLfloat,intensity,1)
 
 #define FXPD_DECLARE(a,b,c) a fx_##b;
 #define FXPD_INIT(a,b,c) fx_##b = c;
-#define FXPD_READ(a,b,c) if (tsimatch(line,"" #b)) { confread_##a(line,fx_##b); return; }
+#define FXPD_READ(a,b,c) if (tsimatch(line,"" #b)) { CONFREAD_##a(line,fx_##b); return; }
 
 class StageLayer;
 

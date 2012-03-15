@@ -162,7 +162,7 @@ void tScnSetSongOpt::enter()
 	additem("|Controller:");
 	for (i=0; i<keydefs.size(); i++)
 	{
-		additem(string("C")+keyconfname[i]);
+		additem(string("C")+keydefs[i].name);
 	}
 	dupcol();
 	dupcol();

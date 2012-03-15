@@ -30,7 +30,7 @@ SLPD(int, foreground, 0)
 
 #define SLPD_DECLARE(a,b,c) a lv_##b;
 #define SLPD_INIT(a,b,c) lv_##b = c;
-#define SLPD_READ(a,b,c) if (tsimatch(line,"" #b)) { confread_##a(line,lv_##b); return; }
+#define SLPD_READ(a,b,c) if (tsimatch(line,"" #b)) { CONFREAD_##a(line,lv_##b); return; }
 
 class Stage;
 

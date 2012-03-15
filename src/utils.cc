@@ -37,28 +37,16 @@ double gettimenow()
 	return v-origtime;
 }
 
-/*
-void assume(int b, const char *err)
-{
-	if (b) return;
-	printf("Error: %s\n",err);
-	int v=errno;
-	printf("Errno: %d: %s\n",v, strerror(v));
-	printf("SDL err: %s\n", SDL_GetError());
-	exit(1);
-}
-
-void warnif(int b, const char *err)
-{
-	if (b) return;
-	fprintf(stderr,"Warning: %s\n",err);
-}
-*/
-
 void mcolor::set()
 {
 	glColor4f(Red,Green,Blue,Alpha);
 }
 
+string toString_int(int v)
+{
+	char a[32];
+	sprintf(a,"%d",v);
+	return a;
+}
 
 
