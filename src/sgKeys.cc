@@ -12,7 +12,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 *******************************************************************/
 
-#include "sgKeys.h"
+// this file implements the key rendering functions
+// for the tSceneGuitar class declared in scnGuitar.h
 
 #include "scnGuitar.h"
 #include "sprites.h"

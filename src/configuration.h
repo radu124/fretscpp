@@ -66,6 +66,7 @@ CONFIGITEM(int,video_glfinish,0)                /* video use glFinish()   */  \
 CONFIGITEM(int,video_vsync,0)                   /* video vsync            */  \
 CONFIGITEM(int,video_limiter,0)                 /* video fps limit enable */  \
 CONFIGITEM(GLfloat,video_fpslim,60)             /* video fps limit        */  \
+CONFIGITEM(GLfloat,default_neck_velocity,1)     /* default neck velocity  */  \
 CONFIGITEM(int,video_dofullscreen,0)            /* video full screen      */  \
 CONFIGITEM(int,video_overrideres,0)             /* video not desktop res  */  \
 CONFIGITEM(int,scr_width,800)                   /* screen/window horiz res*/  \

@@ -18,7 +18,6 @@ GNU General Public License for more details.
 #include "scnGuitar.h"
 #include "scnSetSongOpt.h"
 #include "sfxfof.h"
-#include "playerInit.h"
 #include "tappable.h"
 #include "configuration.h"
 #include "audiosfx.h"

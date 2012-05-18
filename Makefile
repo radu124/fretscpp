@@ -19,6 +19,9 @@ OBJECTS_RELEASE:=$(subst src/,.build/release/,$(subst .cc,.o,$(SOURCES)))
 
 DESTDIR?=
 
+# default rule to allow building when header files disappear
+%.h: ;
+
 run: game
 	./game
 

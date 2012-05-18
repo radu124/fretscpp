@@ -1,6 +1,7 @@
 #ifndef __HDR_player_h
 #define __HDR_player_h
 
+#include "includes.h"
 #include "midiparser.h"
 
 /**
@@ -56,6 +57,8 @@ public:
 	int scorehits;
 	int scorehold;
 	int scorewham;
+
+	GLfloat neckvelocity;
 
 	void handlehit();
 	void passtime();

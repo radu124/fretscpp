@@ -12,7 +12,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 *******************************************************************/
 
-#include "sgNeck.h"
+// this file implements the neck rendering functions
+// for the tSceneGuitar class declared in scnGuitar.h
 
 #include "scnGuitar.h"
 #include "configuration.h"
@@ -22,11 +23,13 @@ GNU General Public License for more details.
 void tSceneGuitar::renderNeck()
 {
 	GLfloat s0,s1,s3;
-	s0=timenow*0.00001;
+	GLfloat velo=player[cplayer].neckvelocity;
+	GLfloat stretch=1;
+	s0=timenow*0.00001*velo;
 	s0=s0-(int) s0;
 	s0=1-s0;
-	s1=s0+0.2;
-	s3=s0+0.4+0.2*boardlen;
+	s1=s0+0.2*stretch;
+	s3=s0+(0.4+0.2*boardlen)*stretch;
 	//glScalef(5.0f,5.0f,5.0f);
 	texBind(sp_neck);
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );

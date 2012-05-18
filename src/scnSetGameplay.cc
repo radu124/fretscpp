@@ -26,6 +26,7 @@ void tScnSetGameplay::init()
 	MESSAGE("Initialized scene: SetGameplay\n");
 	additem(new tSIrange("Early tolerance",20,500,&tolerance_early,10));
 	additem(new tSIrange("Late tolerance",20,500,&tolerance_late,10));
+	additem(new tSIrange("Neck velocity",0.2,10,&default_neck_velocity,0.1));
 	tappablemodes.push_back("None");
 	tappablemodes.push_back("RF-Mod");
 	tappablemodes.push_back("GH2-Strict");

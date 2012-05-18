@@ -12,7 +12,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 *******************************************************************/
 
-#include "sgFlames.h"
+// this file implements the flame rendering functions for the
+// tSceneGuitar class declared in scnGuitar.h
 
 #include "scnGuitar.h"
 #include "includes.h"

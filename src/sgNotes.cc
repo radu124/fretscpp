@@ -12,7 +12,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 *******************************************************************/
 
-#include "sgNotes.h"
+// this file implements the note rendering functions
+// for the tSceneGuitar class declared in scnGuitar.h
 
 #include "scnGuitar.h"
 #include "midiparser.h"
@@ -23,8 +24,9 @@ GNU General Public License for more details.
 
 GLfloat tSceneGuitar::notePos(int timestamp)
 {
+	GLfloat velo=player[cplayer].neckvelocity;
 	if (timestamp<0) return -boardline;
-	return (timestamp-timenow)/44100.0*2.2-boardline;
+	return (timestamp-timenow)/44100.0*2.2*velo-boardline;
 }
 
 void tSceneGuitar::noteRegion()

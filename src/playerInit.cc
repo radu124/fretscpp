@@ -12,7 +12,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 *******************************************************************/
 
-#include "playerInit.h"
+// This file implements the tPlayer::init() function of
+// the tPlayer class declared in player.h
 
 #include "player.h"
 #include "scnSetSongOpt.h"
@@ -22,6 +23,7 @@ void tPlayer::init(int iid)
 {
 	int i;
 	id=iid;
+	neckvelocity=default_neck_velocity;
 	whammy=0;
 	longeststreak=0;
 	score=0;
