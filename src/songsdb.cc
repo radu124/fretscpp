@@ -40,11 +40,7 @@ void readsongsdir(string songsroot)
 		}
 
 		DBG(SONGDB,"Song %s hasini:%d hasmid:%d\n", dirs[i], hasini, hasmid);
-		songentry a;
-		a.name=dirs[i];
-		a.dir=songsroot+"/"+dirs[i];
-		a.issong=1;
-		if (hasini && hasmid) songsdb.push_back(a);
+		if (hasini && hasmid) songsdb.push_back(songentry(dirs[i],songsroot+"/"+dirs[i],1));
 	}
 	INFO(SONGDB,"Song database contains %d entries\n", (int)songsdb.size());
 }
@@ -53,8 +49,9 @@ void updatesongdb()
 {
 	readsongsdir(homeconfdir+"/data/songs");
 	readsongsdir("/usr/share/games/fretsonfire/data/songs");
+	readsongsdir("/usr/share/games/fretscpp/data/songs");
 	readsongsdir("data/songs");
+	if (!songsdb.size()) songsdb.push_back(songentry("- library is empty -"));
 }
-
 
 

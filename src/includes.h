@@ -43,6 +43,8 @@ extern volatile int uu;
 #ifdef _WINDOWS
 #include <windows.h>
 #include <shlobj.h>
+#else
+#include <unistd.h>
 #endif
 
 struct mcolor{

@@ -22,8 +22,10 @@ echo "     sudo apt-get install build-essential libsdl-dev libvorbis-dev libfree
 echo "     optionally: sudo apt-get install fretsonfire-songs-sectoid fretsonfire-songs-muldjord"
 echo "for openSuse"
 echo "     sudo zypper install gcc-c++ SDL-devel freetype2-devel libvorbis-devel libogg-devel libpng-devel"
+echo "for ArchLinux"
+echo "     pacman -S make gcc libgl mesa sdl sdl_sound freetype2 libpng"
 echo
 echo -en "\033[0m"
 echo "other problems:"
-echo upon install it might happen that the program does not find its data files
-echo one solution is to just run it in the current directory
+echo "upon install it might happen that the program does not find its data files"
+echo "one solution is to just run it in the current directory"

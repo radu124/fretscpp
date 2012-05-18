@@ -55,8 +55,17 @@ game64: $(OBJECTS_64)
 fretscpp: $(OBJECTS_RELEASE)
 	g++ -o $@ $^ $(LIBS)
 
+oneshot: $(SOURCES) $(HEADERS)
+	for i in $(SOURCES); do echo "#include \"$$i\""; done | g++ -g3 -ggdb -O0 -x c++ -o oneshot $(CFLAGS) - $(LIBS)
+
+oneshot-opt: $(SOURCES) $(HEADERS)
+	for i in $(SOURCES); do echo "#include \"$$i\""; done | g++ -O3 -DDISABLEMESSAGES -x c++ -o oneshot $(CFLAGS) - $(LIBS)
+
 ubudeps:
 	sudo apt-get install build-essential libsdl-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev
+
+archdeps:
+	pacman -S gcc libgl mesa sdl sdl_sound freetype2 libpng
 
 ubusongs:
 	sudo apt-get install fretsonfire-songs-sectoid
@@ -85,5 +94,6 @@ versionincrement:
 
 preproc.cpp: fretscpp.cpp
 	g++ -E $< $(LIBS)>$@
+
 
 .PHONY: run install all versionincrement ubudeps ubusongs spec
