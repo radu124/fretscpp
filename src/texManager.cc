@@ -16,8 +16,10 @@ GNU General Public License for more details.
 #include "message.h"
 #include "verbosity.h"
 #include "configuration.h"
+#include "vpxplayer.h"
+#include "scene.h"
 
-vector<sprite> tmag;
+vector<sprite *> tmag;
 
 int texLoad(const char *c)
 {
@@ -29,7 +31,7 @@ int texLoad(string s, int flags)
 	int i,found=-1;
 	if (!(flags&1)) s=datadir+"/"+s;
 	for (i=0; i<tmag.size(); i++)
-		if (tmag[i].name==s)
+		if (tmag[i]->name==s)
 		{
 			found=i;
 			INFO(TEXMAN,"Texture %s already in database, entry #%d\n" ,s ,found);
@@ -38,16 +40,16 @@ int texLoad(string s, int flags)
 	if (found<0)
 	{
 		found=tmag.size();
-		tmag.push_back(sprite());
-		tmag[found].name=s;
-		tmag[found].tex=0;
-		tmag[found].refcount=0;
+		tmag.push_back(new sprite());
+		tmag[found]->name=s;
+		tmag[found]->tex=0;
+		tmag[found]->refcount=0;
 	}
-	tmag[found].refcount++;
-	if (!tmag[found].tex)
+	tmag[found]->refcount++;
+	if (!tmag[found]->tex)
 	{
 		INFO(TEXMAN,"Loading %s as #%d\n" ,s ,found);
-		tmag[found].loadInternal(s);
+		tmag[found]->loadInternal(s);
 	}
 	return found;
 }
@@ -55,18 +57,19 @@ int texLoad(string s, int flags)
 void texRelease(int i)
 {
 	if (i<0) return;
-	tmag[i].refcount--;
-	if (tmag[i].refcount<0)
+	tmag[i]->refcount--;
+	if (tmag[i]->refcount<0)
 	{
-		tmag[i].refcount=0;
-		WARN(TEXMAN,"Texture refcount<0: %s\n" ,tmag[i].name);
+		tmag[i]->refcount=0;
+		WARN(TEXMAN,"Texture refcount<0: %s\n" ,tmag[i]->name);
 	}
 }
 
 void texBind(int i)
 {
 	if (i<0) return;
-	glBindTexture(GL_TEXTURE_2D,tmag[i].tex);
+	glBindTexture(GL_TEXTURE_2D,tmag[i]->tex);
+	tmag[i]->boundframesago=0;
 }
 
 void texUnbind()
@@ -77,9 +80,9 @@ void texUnbind()
 void texDraw(int i)
 {
 	if (i<0) return;
-	GLfloat txhe=tmag[i].txhe;
-	GLfloat txwi=tmag[i].txwi;
-	glBindTexture(GL_TEXTURE_2D,tmag[i].tex);
+	GLfloat txhe=tmag[i]->txhe;
+	GLfloat txwi=tmag[i]->txwi;
+	texBind(i);
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0 , txhe); glVertex3f(-1, -1, 0);
 	glTexCoord2f(txwi, txhe); glVertex3f( 1, -1, 0);
@@ -92,18 +95,14 @@ void texDraw(int i)
 GLfloat texAspect(int i)
 {
 	if (i<0) return 1;
-	return GLfloat(tmag[i].height)/tmag[i].width;
+	return GLfloat(tmag[i]->height)/tmag[i]->width;
 }
 
 void texReleaseAll()
 {
 	int i;
 	for (i=0; i<tmag.size(); i++)
-	{
-		if (!tmag[i].tex) continue;
-		glDeleteTextures(1,&tmag[i].tex);
-		tmag[i].tex=0;
-	}
+		tmag[i]->release();
 }
 
 void texReloadAll()
@@ -111,12 +110,22 @@ void texReloadAll()
 	int i;
 	for (i=0; i<tmag.size(); i++)
 	{
-		tmag[i].tex=0;
-		if (!tmag[i].refcount)
+		tmag[i]->tex=0;
+		if (!tmag[i]->refcount)
 			continue;
-		tmag[i].loadInternal(tmag[i].name);
+		tmag[i]->loadInternal(tmag[i]->name);
 	}
 }
 
-
+void texStepAVIs()
+{
+	int i;
+	for (i=0; i<tmag.size(); i++)
+		if (tmag[i]->isavi && tmag[i]->boundframesago<5)
+		{
+			tmag[i]->vp->load_next_frame(tmag[i]->tex,(uint64_t) (scn.timesc*1000000));
+		}
+	for (i=0; i<tmag.size(); i++)
+		tmag[i]->boundframesago++;
+}
 

@@ -25,7 +25,7 @@ int MESSAGEWRITER::skiptochar(string c)
 		if (contents[pos++]!='%') continue;
 		lpos=pos-1;
 		if (contents[pos]=='%') { pos++; continue; }
-		while (isdigit(contents[pos]) || contents[pos]=='.') pos++;
+		while (isdigit(contents[pos]) || contents[pos]=='.' || contents[pos]=='-') pos++;
 		if (c.find(contents[pos])==string::npos)
 		{
 			fprintf(fou,"!!! bad output qualifier %c, expecting \"%s\"!!!",contents[pos],c.c_str());
@@ -66,6 +66,27 @@ MESSAGEWRITER & MESSAGEWRITER::operator ,(unsigned int b)
 MESSAGEWRITER & MESSAGEWRITER::operator ,(int b)
 {
 	skiptochar("cxd");
+	fprintf(fou,modifier.c_str(),b);
+	return *this;
+}
+
+MESSAGEWRITER & MESSAGEWRITER::operator ,(uint64_t b)
+{
+	skiptochar("cxd");
+	int ml=modifier.length();
+	char mll=modifier[ml-1];
+	if (mll=='d') mll='u';
+	modifier=modifier.substr(0,ml-1)+"ll"+mll;
+	fprintf(fou,modifier.c_str(),b);
+	return *this;
+}
+
+MESSAGEWRITER & MESSAGEWRITER::operator ,(int64_t b)
+{
+	skiptochar("cxd");
+	int ml=modifier.length();
+	char mll=modifier[ml-1];
+	modifier=modifier.substr(0,ml-1)+"ll"+mll;
 	fprintf(fou,modifier.c_str(),b);
 	return *this;
 }

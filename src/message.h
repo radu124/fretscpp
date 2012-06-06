@@ -1,8 +1,8 @@
 #ifndef __HDR_message_h
 #define __HDR_message_h
 
-#include <string>
-using namespace std;
+
+#include "includes.h"
 
 class MESSAGEWRITER
 {
@@ -11,6 +11,8 @@ public:
 	MESSAGEWRITER & operator ,(const string b);
 	MESSAGEWRITER & operator ,(const char * b);
 	MESSAGEWRITER & operator ,(unsigned int b);
+	MESSAGEWRITER & operator ,(uint64_t b);
+	MESSAGEWRITER & operator ,(int64_t b);
 	MESSAGEWRITER & operator ,(int b);
 	MESSAGEWRITER & operator ,(float b);
 	MESSAGEWRITER & operator ,(double b);

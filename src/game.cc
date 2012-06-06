@@ -16,6 +16,7 @@ GNU General Public License for more details.
 #include "utils.h"
 #include "font.h"
 #include "sprites.h"
+#include "texManager.h"
 #include "globals.h"
 #include "scnMainMenu.h"
 #include "scnGuitar.h"
@@ -150,6 +151,7 @@ int main( int argc, char* argv[] )
 		if (video_glflush) glFlush();
 		if (video_glfinish) glFinish();
 		SDL_GL_SwapBuffers();
+		texStepAVIs();
 	}
 
 	/* free the background surface */

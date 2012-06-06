@@ -5,7 +5,7 @@ include $(wildcard .build/deps/*.d)
 DIR_FREETYPE2_INC=-I/usr/include/freetype2
 DIR_FREETYPE2_LIB=
 
-LIBS:=`sdl-config --libs` -lGL -lGLU -lpng -lfreetype -logg -lvorbis -lvorbisfile
+LIBS:=`sdl-config --libs` -lGL -lGLU -lpng -lfreetype -logg -lvorbis -lvorbisfile -lvpx
 CFLAGS:=$(CFLAGS) `sdl-config --cflags` $(DIR_FREETYPE2_INC)
 
 #Windows libs, for now, manually uncomment
@@ -36,7 +36,7 @@ release: fretscpp
 .build/debug/%.o: src/%.cc
 	@mkdir -p $(@D)
 	@mkdir -p .build/deps
-	g++ -MF $(addprefix .build/deps/,$(subst .o,.debug.d,$(subst /,_,$(subst .build/debug/,,$@)))) -MMD -c $< -Isrc -o $@ $(CFLAGS)
+	g++ -g3 -ggdb -MF $(addprefix .build/deps/,$(subst .o,.debug.d,$(subst /,_,$(subst .build/debug/,,$@)))) -MMD -c $< -Isrc -o $@ $(CFLAGS)
 
 .build/release/%.o: src/%.cc
 	@mkdir -p $(@D)
@@ -50,7 +50,7 @@ release: fretscpp
 
 
 game: $(OBJECTS)
-	g++ -o $@ $(OBJECTS) $(LIBS)
+	g++ -o $@ -g3 -ggdb $(OBJECTS) $(LIBS)
 
 game64: $(OBJECTS_64)
 	g++ -m64 -MMD -MF $@.d $< -O0 -g3 -ggdb -o $@ $(LIBS)

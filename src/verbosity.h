@@ -15,9 +15,9 @@ const int MSG_BIAS        = 9;
 const int MSG_BIAS        = 0;
 #endif
 
-const int MSG_TEXMAN      = LEV_INFO   ;
-const int MSG_SETSCENE    = LEV_INFO   ;
+const int MSG_VPXDEC      = LEV_DBG    ;
 const int MSG_VIDEO       = LEV_INFO   ;
+const int MSG_AVIFILE     = LEV_DBG    ;
 
 const int MSG_AUDIO       = LEV_QUIET  ;
 const int MSG_SFX         = LEV_QUIET  ;
@@ -30,6 +30,7 @@ const int MSG_READMID     = LEV_QUIET  ;
 const int MSG_MIDI        = LEV_INFO   ;
 const int MSG_MIDIDUMP    = LEV_INFO   ;
 const int MSG_SPRITES     = LEV_INFO   ;
+const int MSG_SETSCENE   = LEV_DBG    ;
 const int MSG_SCNGUITAR   = LEV_DBG    ;
 const int MSG_SCNSONGOPT  = LEV_INFO   ;
 const int MSG_GL          = LEV_INFO   ;
@@ -39,6 +40,7 @@ const int MSG_SCORES      = LEV_DBG    ;
 const int MSG_CONFIG      = LEV_DBG    ;
 const int MSG_STAGE       = LEV_DBG    ;
 const int MSG_PNGREAD     = LEV_DBG    ;
+const int MSG_TEXMAN     = LEV_INFO   ;
 
 #define INFO(tgt,...)    __COND_DBG_OUT(MSG_##tgt >= MSG_BIAS+LEV_INFO,__VA_ARGS__)
 #define WARN(tgt,...)    __COND_DBG_OUT(MSG_##tgt >= MSG_BIAS+LEV_WARN,__VA_ARGS__)

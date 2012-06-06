@@ -19,6 +19,7 @@ GNU General Public License for more details.
 #include "texManager.h"
 #include "message.h"
 #include "verbosity.h"
+#include "vpxplayer.h"
 
 int sp_neck;
 int sp_ball;
@@ -36,6 +37,7 @@ int sp_m2, sp_m3, sp_m4;
 void sprite::bind()
 {
 	glBindTexture(GL_TEXTURE_2D,tex);
+	boundframesago=0;
 }
 
 void sprite::load(const char *fname, int flags)
@@ -49,12 +51,45 @@ void sprite::loadInternal(string ffullname, int flags)
 	GLfloat cx=0.5f, cy=0.5f;
 	int imgwidth=0,imgheight=0;
 	int rwidth, rheight;
-	loadImage(ffullname.c_str(),tex,imgwidth,imgheight,txwi,txhe);
-	height=imgheight;
-	width=imgwidth;
+	int fnl=ffullname.length();
+	isavi=(fnl>3
+		&& ffullname[fnl-4]=='.'
+		&& tolower(ffullname[fnl-3])=='a'
+		&& tolower(ffullname[fnl-2])=='v'
+		&& tolower(ffullname[fnl-1])=='i'
+		);
+	// get a texture id if we don't have one already
+	if (isavi)
+	{
+		// load an AVI
+		vp=new vpxplayer();
+		isavi=vp->open(ffullname) && vp->decoder_init();
+		if (!isavi)
+		{
+			INFO(SPRITES,"Failed loading AVI\n");
+			delete vp;
+		}
+		else
+		{
+			//if (!tex)
+				glGenTextures(1, &tex);
+			vp->load_next_frame(tex,0,1);
+			width=vp->width;
+			height=vp->height;
+			txwi=(float) vp->width/vp->glbufwidth;
+			txhe=(float) vp->height/vp->glbufheight;
+			INFO(SPRITES,"AVI texture: %d, size: %dx%d\n",tex,width,height);
+		}
+	}
+	else
+	{
+		// load a PNG image
+		loadImage(ffullname.c_str(),tex,imgwidth,imgheight,txwi,txhe);
+		height=imgheight;
+		width=imgwidth;
+	}
 	if (flags & 1) { height=10; width=10; }
 	//tex= ilutGLLoadImage(ffullname.c_str());
-
 	INFO(SPRITES,"Loading: %s, tex:%d size:%dx%d\n", ffullname, tex, width, height);
 	if (!width)
 	{
@@ -99,5 +134,11 @@ void init_sprites()
 	}
 }
 
+void sprite::release()
+{
+	if (tex)
+		glDeleteTextures(1,&tex);
+	tex=0;
+}
 
 
