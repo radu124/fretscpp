@@ -60,6 +60,9 @@ public:
 
 	GLfloat neckvelocity;
 
+	tPlayer():neckvelocity(1) // initialization for layout and theme scenes
+		{;}
+
 	void handlehit();
 	void passtime();
 	void init(int iid);
