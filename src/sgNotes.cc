@@ -33,15 +33,15 @@ void tSceneGuitar::noteRegion()
 {
 	tPlayer &pp=player[cplayer];
 	pp.nextnote=pp.crtnote;
-	while (pp.nextnote<crtSong.trk_notes[cinstrument].size())
+	while (pp.nextnote<lane->size())
 	{
-		if (crtSong.trk_notes[cinstrument][pp.nextnote].timestamp>timenow) break;
+		if (lane[0][pp.nextnote].timestamp>timenow) break;
 		pp.nextnote++;
 	}
 	//INFO(SCNGUITAR,"note %d\n" &crtnote);
-	for (pp.farrnote=pp.nextnote; pp.farrnote<crtSong.trk_notes[cinstrument].size(); pp.farrnote++)
+	for (pp.farrnote=pp.nextnote; pp.farrnote<lane->size(); pp.farrnote++)
 	{
-		if (crtSong.trk_notes[cinstrument][pp.farrnote].timestamp>timenow+120000) break;
+		if (lane[0][pp.farrnote].timestamp>timenow+120000) break;
 	}
 }
 
@@ -134,12 +134,12 @@ void tSceneGuitar::renderNoteLines()
 	int activecount=0;
 	int i,j;
 	startNote[0]=notePos(-1);
-	notestatus v;
+	notestatusst v;
 	if (pp.nextnote>0)
-		v=cnotes[0][pp.nextnote-1];
+		v=lane[0][pp.nextnote-1];
 	for (i=0; i<5; i++)
 	{
-		char ch=v.stat[12*cdifficulty+i];
+		char ch=v.val[i];
 		active[i]=2*(ch=='O' || ch=='-');
 		if (active[i]) activecount++;
 		startNote[i]=startNote[0];
@@ -147,12 +147,12 @@ void tSceneGuitar::renderNoteLines()
 	if (!activecount) pp.hitactive=0;
 	for (j=pp.nextnote; j<pp.farrnote; j++)
 	{
-		v=cnotes[0][j];
+		v=lane[0][j];
 		GLfloat lend=notePos(v.timestamp);
 		if (lend>necktop) break;
 		for (i=0; i<5; i++)
 		{
-			char ch=v.stat[12*cdifficulty+i];
+			char ch=v.val[i];
 			if (active[i] && ch!='-')
 			{
 				renderNoteLine(i,startNote[i],lend,active[i]);
@@ -177,11 +177,11 @@ void tSceneGuitar::renderNotes()
 	//MESSAGE("notes: %d %d" &pp.nextnote &pp.farrnote);
 	for (i=pp.farrnote-1; i>=pp.nextnote; i--)
 	{
-		notestatus v=crtSong.trk_notes[cinstrument][i];
+		notestatusst v=lane[0][i];
 		int res;
 		for (j=0; j<5; j++)
 		{
-			char ch=v.stat[j+12*pp.difficulty];
+			char ch=v.val[j];
 			res=2;
 			if (ch=='O' || ch=='B')
 			{

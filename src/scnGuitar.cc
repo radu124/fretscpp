@@ -68,7 +68,7 @@ void tSceneGuitar::render()
 	{
 		cinstrument=player[cplayer].instrument;
 		cdifficulty=player[cplayer].difficulty;
-		cnotes=&crtSong.trk_notes[cinstrument];
+		lane=&player[cplayer].lane;
 		scene_setNeck(cplayer,numplayers);
 		noteRegion();
 		player[cplayer].passtime();
@@ -86,7 +86,7 @@ void tSceneGuitar::render()
 		activeneckpos=cplayer+numplayers*(numplayers-1)/2;
 		cinstrument=player[cplayer].instrument;
 		cdifficulty=player[cplayer].difficulty;
-		cnotes=&crtSong.trk_notes[cinstrument];
+		lane=&player[cplayer].lane;
 		renderMultiplierVal();
 		renderStats();
 	}

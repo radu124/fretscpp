@@ -10,8 +10,8 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-*******************************************************************/  
-  
+*******************************************************************/
+
 #include "midiparser.h"
 
 #include "message.h"
@@ -27,7 +27,7 @@ void MidiParser::debug_dump_track(int track)
 	for (i=0; i<ctrk.size(); i++)
 	{
 		DBG(MIDIDUMP,"%9d ", ctrk[i].timestamp);
-		for (j=0; j<64; j++) switch (ctrk[i].stat[j])
+		for (j=0; j<64; j++) switch (ctrk[i].val[j])
 		{
 			case ' ': DBG(MIDIDUMP," "); break;
 			case 'O': DBG(MIDIDUMP,"O"); break;
@@ -57,29 +57,6 @@ void MidiParser::applydelay(int delay)
 	}
 	lastevent+=delay;
 }
-
-int notestatus::hashit(int difficulty)
-{ 
-	int i,cnt=0;
-	for (i=0; i<5; i++) 
-	{
-		char ch=stat[i+12*difficulty];
-		if (ch=='O' || ch=='B') cnt++;
-	}
-	return cnt;
-}
-
-int notestatus::hasline(int difficulty)
-{ 
-	int i;
-	for (i=0; i<5; i++) 
-	{
-		char ch=stat[i+12*difficulty];
-		if (ch=='-') return 1;
-	}
-	return 0;
-}
-
 
 int MidiParser::expect(const char *str)
 {
@@ -137,6 +114,7 @@ unsigned int MidiParser::readvarlen()
 
 int MidiParser::openfile(const char *name)
 {
+	int fd;
 	lastevent=0;
 	int oflags=O_RDONLY;
 #ifdef _WINDOWS
@@ -146,7 +124,7 @@ int MidiParser::openfile(const char *name)
 	if (fd<0) return 0;
 	size=lseek(fd,0,SEEK_END);
 	lseek(fd,0,SEEK_SET);
-	if (size>10000000) 
+	if (size>10000000)
 	{
 		WARN(MIDI,"Problem, midi file unreasonably big!!\n");
 		close(fd);
@@ -181,12 +159,12 @@ string titleCase(string m)
 	while (i<m.length() && isspace(m[i])) i++;
 	for (;i<m.length(); i++)
 	{
-		if (noupcase && m[i]>='A' && m[i]<='Z') 
+		if (noupcase && m[i]>='A' && m[i]<='Z')
 		{
 			res+=m[i]-'A'+'a';
 			continue;
 		}
-		if ((!noupcase) && m[i]>='a' && m[i]<='z') 
+		if ((!noupcase) && m[i]>='a' && m[i]<='z')
 		{
 			res+=m[i]-'a'+'A';
 			continue;
@@ -214,34 +192,24 @@ string processInstrumentName(string m)
 
 void MidiParser::timeincrement(int delta)
 {
+	// FIX: this loss of precision can potentially accumulate
 	int newtimestamp=a.timestamp+(int) (44100*tickduration*delta);
 	if (newtimestamp>lastevent) lastevent=newtimestamp;
-	DBG(READMID,"Time increment %5d,  1000ticks=%3.3fs, time is now %7.3fs    ", 
+	DBG(READMID,"Time increment %5d,  1000ticks=%3.3fs, time is now %7.3fs    ",
 		delta, (tickduration*1000), (newtimestamp/44100.0));
 	score.push_back(a);
 	a.timestamp=newtimestamp;
 	int i,j;
-	for (j=0; j<4; j++) 
-	{
-		char ce=' ';
-		for (i=0; i<5; i++)
-		{
-			char cv=a.stat[j*12+i];
-			if (cv=='O' || cv=='B') ce='@';
-		}
-		a.stat[j*12+5]=ce;
-	}
-	for (i=0; i<48; i++) switch (a.stat[i])
+	for (i=0; i<48; i++) switch (a.val[i])
 	{
 		case 'O':
 		case '-':
-			a.stat[i]='-';
+			a.val[i]='-';
 			break;
-		
+
 		default:
-			a.stat[i]=' ';
+			a.val[i]=' ';
 	}
-	a.otherstat="";
 }
 
 int MidiParser::doparse()
@@ -250,7 +218,7 @@ int MidiParser::doparse()
 	{
 		pos+=20;
 		// this takes care of the most common RMI format
-		// a proper parse of RIFF would be necessary only 
+		// a proper parse of RIFF would be necessary only
 		// if such MIDs are encoutered
 	}
 	expect("MThd");
@@ -264,7 +232,7 @@ int MidiParser::doparse()
 	bp0=readbyte();
 	bp1=readbyte();
 	ticksperbeat=0;
-	if (bp0 & 0x80) 
+	if (bp0 & 0x80)
 	{
 		bp0 &= 0x7f;
 		tickduration=bp0;
@@ -297,12 +265,12 @@ int MidiParser::doparse()
 		chunkend=pos+tracksize;
 		int anynotes=0;
 		int difficulties=0;
-		memset(a.stat,' ',sizeof(a.stat));
+		memset(a.val,' ',sizeof(a.val));
 		a.timestamp=0;
-		a.stat[63]=0;
+		a.val[63]=0;
 		score.resize(0);
 		string instrument="Guitar";
-		while (pos<chunkend) 
+		while (pos<chunkend)
 		{
 			unsigned int delta=readvarlen();
 			unsigned int event=readbyte();
@@ -348,13 +316,13 @@ int MidiParser::doparse()
 					INFO(READMID,"MIDI End of track\n");
 					pos=chunkend;
 					break;
-				
+
 				case 81:
 					uspqn=65536*readbyte();
 					uspqn+=256*readbyte();
 					uspqn+=readbyte();
 					tickduration=uspqn/1000000.0/ticksperbeat;
-					INFO(READMID,"MIDI Set tempo us/qnote %d, ticks/beat %d  1000ticks=%2.3fs\n", 
+					INFO(READMID,"MIDI Set tempo us/qnote %d, ticks/beat %d  1000ticks=%2.3fs\n",
 						uspqn, ticksperbeat, (tickduration*1000));
 					break;
 				case 84:
@@ -377,7 +345,7 @@ int MidiParser::doparse()
 			lastcmd=event;
 			int evhi=(event>>4) & 0x0f;
 			unsigned int notenum,velo,ournote;
-				
+
 			switch (evhi)
 			{
 			case 0x8:
@@ -398,10 +366,10 @@ int MidiParser::doparse()
 			if ((event & 0xf0)==0x90 && velo==0) event &= 0x8f;
 			if ((event & 0xf0)==0x90)
 			{
-				a.stat[ournote]='O';
-				DBG(READMID,"MIDI note-on:  %4d %4d %s\n", notenum, velo, a.stat);
+				a.val[ournote]='O';
+				DBG(READMID,"MIDI note-on:  %4d %4d %s\n", notenum, velo, a.val);
 				anynotes=1;
-				if (a.timestamp>40000 && 
+				if (a.timestamp>40000 &&
 					ournote%12<5)
 					{
 						difficulties |= 1<<(ournote/12);
@@ -411,9 +379,9 @@ int MidiParser::doparse()
 			}
 			if ((event & 0xf0)==0x80)
 			{
-				if (a.stat[ournote]=='-' || a.stat[ournote]==' ') a.stat[ournote]='X';
-				else a.stat[ournote]='B';
-				DBG(READMID,"MIDI note-off: %4d %4d %s\n", notenum, velo, a.stat);
+				if (a.val[ournote]=='-' || a.val[ournote]==' ') a.val[ournote]='X';
+				else a.val[ournote]='B';
+				DBG(READMID,"MIDI note-off: %4d %4d %s\n", notenum, velo, a.val);
 				continue;
 			}
 			if (evhi==0xc || evhi==0xd)
@@ -427,7 +395,7 @@ int MidiParser::doparse()
 				continue;
 			}
 			INFO(READMID,"Event %d 0x%02x, delta %d\n", event, event, delta);
-			
+
 			break;
 		}
 		if (anynotes)
@@ -447,5 +415,82 @@ int MidiParser::doparse()
 	return 1;
 }
 
+/*
+ * there is some overhead in doing this but at least we make our life more
+ * simple in a couple of other places
+ */
+vector<notestatusst> MidiParser::get_lane(int instrument, int difficulty)
+{
+	vector<notestatus> &v=trk_notes[instrument];
+	int i,j,same;
+	notestatusst a;
+	vector<notestatusst> res;
+	// skip all empty
+ 	for (i=0; i<v.size(); i++)
+	{
+		for (j=0; j<5; j++)
+			if (v[i].val[j+12*difficulty]!=' ')
+				j=10;
+		if (j>5) break;
+	}
+	// if we found nothing, copy at least one element
+	if (i>=v.size()) i--;
+	a.from_note_status(v[i],difficulty);
+	res.push_back(a);
+	for (;i<v.size(); i++)
+	{
+		// it can happen that there is nothing new on this difficulty
+		// because there are events on other tracks
+		same=1;
+		for (j=0; j<5; j++)
+		{
+			char ch=v[i].val[j+12*difficulty];
+			if (ch!=res.back().val[j] || (ch!=' ' && ch!='-'))
+			{
+				same=false;
+				break;
+			}
+		}
+		if (!same)
+		{
+			a.from_note_status(v[i],difficulty);
+			res.push_back(a);
+		}
+	}
+	// always copy last
+	a.from_note_status(v.back(),difficulty);
+	res.push_back(a);
+	return res;
+}
 
+void notestatusst::from_note_status(notestatus &v, int difficulty)
+{
+	int j;
+	for (j=0; j<5; j++) val[j]=v.val[j+12*difficulty];
+	timestamp=v.timestamp;
+	flags=0;
+	if (detect_hit()) flags |= ENS_HASHIT;
+	if (detect_line()) flags |= ENS_HASLINE;
+}
 
+int notestatusst::detect_hit()
+{
+	int i,cnt=0;
+	for (i=0; i<5; i++)
+	{
+		char ch=val[i];
+		if (ch=='O' || ch=='B') cnt++;
+	}
+	return cnt;
+}
+
+int notestatusst::detect_line()
+{
+	int i;
+	for (i=0; i<5; i++)
+	{
+		char ch=val[i];
+		if (ch=='-') return 1;
+	}
+	return 0;
+}

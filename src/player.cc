@@ -92,10 +92,10 @@ void tPlayer::passtime()
 	whammyon=hitactive && (whammy>5000) && (timenow-lasthit[5]>20000);
 	while (crtnote<crtSong.trk_notes[instrument].size())
 	{
-		notestatus &cn=cnotes[0][crtnote];
-		if (cn.timestamp>timenow-44*tolerance_late) break;
-		if (hitactive && !cn.hasline(difficulty)) unhitactive(cn.timestamp);
-		if (cnotes[0][crtnote].hashit(difficulty))
+		notestatusst &note=lane[crtnote];
+		if (note.timestamp>timenow-44*tolerance_late) break;
+		if (hitactive && !(note.flags & ENS_HASLINE)) unhitactive(note.timestamp);
+		if (note.flags & ENS_HASHIT)
 		{
 			hitactive=0;
 			streak=0;
@@ -112,7 +112,7 @@ int tPlayer::notematch(int i)
 	int notesunmatched=0;
 	for (j=0; j<5; j++)
 	{
-		char c=cnotes[0][i].stat[j+12*difficulty];
+		char c=lane[i].val[j];
 		int noteon=(c=='O' || c=='B');
 		if (noteon & !lastkeys[j]) return 0;
 		if (!noteon & lastkeys[j])
@@ -152,8 +152,8 @@ void tPlayer::handlehit()
 	if (multiplier>4) multiplier=4;
 	for (i=crtnote; i<crtSong.trk_notes[instrument].size(); i++)
 	{
-		if (cnotes[0][i].timestamp>timenow+44*tolerance_early) break;
-		if (cnotes[0][i].hashit(difficulty))
+		if (lane[i].timestamp>timenow+44*tolerance_early) break;
+		if (lane[i].flags & ENS_HASHIT)
 		{
 			// try to match anything within the window
 			if (notematch(i))
@@ -173,13 +173,13 @@ void tPlayer::handlehit()
 		guitarScene.timelasthit=timenow;
 		streak++;
 		if (streak>longeststreak) longeststreak=streak;
-		hitactive=cnotes[0][crtnote-1].hashit(difficulty);
+		hitactive=!!(lane[crtnote-1].flags & ENS_HASHIT);
 		notegood++;
-		history[crtnote-1]=2;
+		lane[crtnote-1].flags |= ENS_WELLPLAYED;
 		score+=50*hitactive*multiplier;
 		scorenomult+=50*hitactive;
 		scorehits+=50*hitactive*multiplier;
-		holdaccounted=cnotes[0][crtnote-1].timestamp+8000; // actually song.period*1.1/4
+		holdaccounted=lane[crtnote-1].timestamp+8000; // actually song.period*1.1/4
 		if (streak==10 || streak==20 || streak==30) timemultiplier=timenow;
 	}
 	else {

@@ -178,13 +178,13 @@ void tSceneGuitar::rfFlames2()
     for (i=pp.crtnote-1; i>=0; i--)
 	{
 		MESSAGE(".");
-		int nts=cnotes[0][i].timestamp;
+		int nts=lane[0][i].timestamp;
 		if (timenow-nts>100000) break;
-		if (pp.history[i]!=2) continue;
+		if (!(lane[0][i].flags & ENS_WELLPLAYED)) continue;
 		MESSAGE(">");
 		for (j=0; j<5; j++)
 		{
-			char ch=cnotes[0][i].stat[cdifficulty*12+j];
+			char ch=lane[0][i].val[j];
 			if (ch!='O' && ch!='B') continue;
 			MESSAGE("%d", j);
 			//int tev=player[cplayer].timelastgood[i];

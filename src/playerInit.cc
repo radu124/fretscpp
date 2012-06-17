@@ -18,6 +18,7 @@ GNU General Public License for more details.
 #include "player.h"
 #include "scnSetSongOpt.h"
 #include "configuration.h"
+#include "tappable.h"
 
 void tPlayer::init(int iid)
 {
@@ -35,7 +36,7 @@ void tPlayer::init(int iid)
 	crtnote=0;
 	hittnote=-1;
 	nextnote=0;
-	cnotes=&crtSong.trk_notes[instrument];
+	lane=crtSong.get_lane(instrument,difficulty);
 	notetotal=0;
 	notegood=0;
 	notexmiss=0;
@@ -43,14 +44,40 @@ void tPlayer::init(int iid)
 	streak=0;
 	lastwasgood=1;
 	lasttime=0;
-	for (i=0; i<cnotes->size(); i++) if (cnotes[0][i].hashit(difficulty)) notetotal++;
-	history.resize(cnotes->size());
-	for (i=0; i<history.size(); i++) history[i]=0;
-	tappable_init_track(tappablemode);
+	tapmode=tappablemode;
+	init_note_flags();
 	// for visual effects
 	timemultiplier=-1000000;
 	for (i=0; i<5; i++) lasthit[i]=-1000000;
 }
 
+void tPlayer::init_note_flags()
+{
+	int n=lane.size();
+	int i;
+	for (i=0; i<n; i++)
+	{
+		if (!(lane[i].flags & ENS_HASHIT)) continue;
+		notetotal++;
+		switch (tapmode)
+		{
+			case ET_NONE:
+				// do nothing, none of the notes is tappable
+				break;
+			case ET_RFMOD:
+				// TODO
+				break;
+			case ET_GH2STRICT:
+				break;
+			case ET_GH2:
+				break;
+			case ET_GH2SLOPPY:
+				break;
+			case ET_ANY:
+				lane[i].flags |= ENS_TAPPABLE;
+				break;
+		}
+	}
 
+}
 

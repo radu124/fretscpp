@@ -24,7 +24,7 @@ public:
 	int cdifficulty;
 	int statsmode;
 	int shouldstillstart;
-	vector<notestatus> *cnotes;
+	vector<notestatusst> *lane;
 	void enter();
 	void init();
 	void render();
