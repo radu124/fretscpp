@@ -37,6 +37,7 @@ void tScnSetGameplay::init()
 	additem(new tSIcheckbox("Strict single frets",&strictkeys));
 	additem(new tSIintrange("Guitar volume",0,150,&guitar_volume,10));
 	additem(new tSIintrange("Guitar off volume",0,150,&guitar_off_volume,10));
+	additem(new tSIintrange("Miss loudness",0,200,&miss_loudness,10));
 	tScnSetBase::init();
 }
 

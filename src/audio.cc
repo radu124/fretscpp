@@ -137,9 +137,9 @@ void tPlaying::callback(uint16_t *stream, int len)
 
 		if (en_play)
 		{
-			s+=vol_base    * afile[0].buffer[0][wrappos];
-			s+=vol_rhyt_rt * afile[1].buffer[0][wrappos];
-			s+=vol_gtar_rt * afile[2].buffer[0][wpos_rt];
+			s+=vol_base    * afile[0].buffer[1][wrappos];
+			s+=vol_rhyt_rt * afile[1].buffer[1][wrappos];
+			s+=vol_gtar_rt * afile[2].buffer[1][wpos_rt];
 		}
 		for (q=0; q<sfxcount; q++)
 		{
