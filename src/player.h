@@ -167,6 +167,11 @@ public:
 	 */
 	void init_note_flags();
 
+	/**
+	 * check if the note is tappable by the rfmod rules
+	 */
+	int is_rfmod_tappable(int notenum);
+
 	vector<notestatusst> lane;
 };
 

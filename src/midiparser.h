@@ -49,6 +49,7 @@ struct notestatusst
 	 * set from note status
 	 */
 	void from_note_status(notestatus &v, int difficulty);
+	string str();
 };
 
 typedef vector<notestatus> vnotestatus;
@@ -174,5 +175,9 @@ public:
 	void debug_dump_track(int track);
 };
 
+/**
+ * @return 1 if the character is 'O' or 'B'
+ */
+int ishit(char c);
 
 #endif

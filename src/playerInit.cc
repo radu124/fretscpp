@@ -53,31 +53,17 @@ void tPlayer::init(int iid)
 
 void tPlayer::init_note_flags()
 {
-	int n=lane.size();
 	int i;
-	for (i=0; i<n; i++)
+	int istappable;
+	for (i=0; i<lane.size(); i++)
 	{
 		if (!(lane[i].flags & ENS_HASHIT)) continue;
 		notetotal++;
-		switch (tapmode)
-		{
-			case ET_NONE:
-				// do nothing, none of the notes is tappable
-				break;
-			case ET_RFMOD:
-				// TODO
-				break;
-			case ET_GH2STRICT:
-				break;
-			case ET_GH2:
-				break;
-			case ET_GH2SLOPPY:
-				break;
-			case ET_ANY:
-				lane[i].flags |= ENS_TAPPABLE;
-				break;
-		}
+		istappable=1;
+		if (tapmode==ET_NONE) continue;
+		if (tapmode==ET_RFMOD)
+			istappable=is_rfmod_tappable(i);
+		if (istappable) lane[i].flags |= ENS_TAPPABLE;
 	}
 
 }
-

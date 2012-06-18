@@ -437,6 +437,7 @@ vector<notestatusst> MidiParser::get_lane(int instrument, int difficulty)
 	if (i>=v.size()) i--;
 	a.from_note_status(v[i],difficulty);
 	res.push_back(a);
+	i++;
 	for (;i<v.size(); i++)
 	{
 		// it can happen that there is nothing new on this difficulty
@@ -493,4 +494,14 @@ int notestatusst::detect_line()
 		if (ch=='-') return 1;
 	}
 	return 0;
+}
+
+string notestatusst::str()
+{
+	return string()+val[0]+val[1]+val[2]+val[3]+val[4];
+}
+
+int ishit(char c)
+{
+	return c=='O' || c=='B';
 }
