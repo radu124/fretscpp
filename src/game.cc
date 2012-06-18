@@ -34,6 +34,7 @@ GNU General Public License for more details.
 #include "score.h"
 #include "keyboard.h"
 #include "stage.h"
+#include "playGfx.h"
 
 void drawglstuff()
 {
@@ -77,13 +78,15 @@ int main( int argc, char* argv[] )
 	st_slist =new Stage();
 	st_score =new Stage();
 	st_settm =new Stage();
+	playgfx  =new playGfx();
 
-	stagePlay->readDir(datadir+"/stages/"+themeStage);
-	st_mainm ->readDir(datadir+"/st_mainm/"+themeMainm);
-	st_sopts ->readDir(datadir+"/st_sopts/"+themeSopts);
-	st_slist ->readDir(datadir+"/st_slist/"+themeSlist);
-	st_score ->readDir(datadir+"/st_score/"+themeScore);
-	st_settm ->readDir(datadir+"/st_settm/"+themeScore);
+	stagePlay->load(datadir+"/stages/"+themeStage);
+	st_mainm ->load(datadir+"/st_mainm/"+themeMainm);
+	st_sopts ->load(datadir+"/st_sopts/"+themeSopts);
+	st_slist ->load(datadir+"/st_slist/"+themeSlist);
+	st_score ->load(datadir+"/st_score/"+themeScore);
+	st_settm ->load(datadir+"/st_settm/"+themeScore);
+	playgfx  ->load(datadir+"/playgfx/"+themePlay);
 
 	init_audio();
 	load_all_sfx();

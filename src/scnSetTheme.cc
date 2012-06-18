@@ -19,6 +19,7 @@ GNU General Public License for more details.
 #include "message.h"
 #include "verbosity.h"
 #include "stage.h"
+#include "playGfx.h"
 #include "font.h"
 #include "texManager.h"
 #include "fileio.h"
@@ -59,6 +60,7 @@ void tScnSetTheme::init()
 	themesSlist=listDirContents(datadir+"/st_slist",3);
 	themesSopts=listDirContents(datadir+"/st_sopts",3);
 	themesSettm=listDirContents(datadir+"/st_settm",3);
+	themesPlay=listDirContents(datadir+"/playgfx",3);
 	additem(new tSIlist("Neck",themeNecknames,&themeNeckidx));
 	additem(new tSIlist("Stage",themeStages,&themeStage));
 	additem(new tSIlist("Main Menu"    ,themesMainm,&themeMainm));
@@ -66,6 +68,7 @@ void tScnSetTheme::init()
 	additem(new tSIlist("Song Options" ,themesSopts,&themeSopts));
 	additem(new tSIlist("Score Screen" ,themesScore,&themeScore));
 	additem(new tSIlist("Settings Menu",themesSettm,&themeSettm));
+	additem(new tSIlist("Gameplay Elements",themesPlay,&themePlay));
 	additem(new tSIintrange("Neck transparency",0,90,&themeNecktransparency,10));
 	tScnSetBase::init();
 }
@@ -82,27 +85,31 @@ void tScnSetTheme::itemAdjusted(int i)
 		break;
 	case 1:
 		stagePlay->cleanup();
-		stagePlay->readDir(datadir+"/stages/"+themeStage);
+		stagePlay->load(datadir+"/stages/"+themeStage);
 		break;
 	case 2:
 		st_mainm->cleanup();
-		st_mainm->readDir(datadir+"/st_mainm/"+themeMainm);
+		st_mainm->load(datadir+"/st_mainm/"+themeMainm);
 		break;
 	case 3:
 		st_slist->cleanup();
-		st_slist->readDir(datadir+"/st_slist/"+themeSlist);
+		st_slist->load(datadir+"/st_slist/"+themeSlist);
 		break;
 	case 4:
 		st_sopts->cleanup();
-		st_sopts->readDir(datadir+"/st_sopts/"+themeSopts);
+		st_sopts->load(datadir+"/st_sopts/"+themeSopts);
 		break;
 	case 5:
 		st_score->cleanup();
-		st_score->readDir(datadir+"/st_score/"+themeScore);
+		st_score->load(datadir+"/st_score/"+themeScore);
 		break;
 	case 6:
 		st_settm->cleanup();
-		st_settm->readDir(datadir+"/st_settm/"+themeSettm);
+		st_settm->load(datadir+"/st_settm/"+themeSettm);
+		break;
+	case 7:
+		playgfx->cleanup();
+		playgfx->load(datadir+"/playgfx/"+themePlay);
 		break;
 	}
 }

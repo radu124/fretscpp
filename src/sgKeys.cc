@@ -20,6 +20,7 @@ GNU General Public License for more details.
 #include "texManager.h"
 #include "tappable.h"
 #include "player.h"
+#include "playGfx.h"
 
 void tSceneGuitar::renderKey(int col, int flags)
 {
@@ -42,7 +43,7 @@ void tSceneGuitar::renderKey(int col, int flags)
 	glTranslatef(col-2,notePos(-1),yy);
 	glRotatef(60,1,0,0);
 	glScalef(sz,sz,1);
-	texDraw(sp_key[col]);
+	texDraw(playgfx->key[col]);
 	glPopMatrix();
 }
 

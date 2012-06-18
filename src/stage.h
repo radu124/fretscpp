@@ -55,7 +55,7 @@ class Stage
 {
 public:
 	vector<StageLayer*> layer;
-	void readDir(string d);
+	virtual void load(string dir, string filename="stage.ini");
 	void cleanup();
 	void render();
 	void renderForeground();

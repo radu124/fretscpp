@@ -25,8 +25,6 @@ int sp_neck;
 int sp_ball;
 int sp_flame;
 int sp_glow;
-int sp_key[5];
-int sp_note[5];
 int sp_hitg1, sp_hitg2;
 int sp_hitf1, sp_hitf2;
 int sp_noteline, sp_thinline;
@@ -124,14 +122,6 @@ void init_sprites()
 	sp_guitar[7] = texLoad("guitar4gs.png");
 	sp_star1     = texLoad("star1.png");
 	sp_star2     = texLoad("star2.png");
-	for (i=0; i<5; i++)
-	{
-		char a[32];
-		sprintf(a,"key%d.png",i+1);
-		sp_key[i]  = texLoad(a);
-		sprintf(a,"note0%d.png",i+1);
-		sp_note[i] = texLoad(a);
-	}
 }
 
 void sprite::release()

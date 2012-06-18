@@ -44,6 +44,7 @@ vstring themesScore;
 vstring themesSlist;
 vstring themesSopts;
 vstring themesSettm;
+vstring themesPlay;
 
 
 vector<tKeydefset> keydefs;

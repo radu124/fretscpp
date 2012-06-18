@@ -37,6 +37,7 @@ extern int themeNeckidx;
 extern vstring themeNecknames;
 extern vstring themeNeckfilenames;
 extern vstring themeStages;
+extern vstring themesPlay;
 extern vstring themesMainm;
 extern vstring themesScore;
 extern vstring themesSlist;
@@ -78,6 +79,7 @@ CONFIGITEM(string,themeScore,"default")         /* theme - score scene    */  \
 CONFIGITEM(string,themeSlist,"default")         /* theme - song list      */  \
 CONFIGITEM(string,themeSopts,"default")         /* theme - song options   */  \
 CONFIGITEM(string,themeSettm,"default")         /* theme - settings scene */  \
+CONFIGITEM(string,themePlay,"default")          /* theme - gameplay elements */  \
 CONFIGITEM(string,themeNeckname,"Default")      /* theme - neck name      */  \
 CONFIGITEM(int,themeNecktransparency,0)         /* theme - neck alpha     */  \
 CONFIGITEM(GLfloat,neckpos_extend,0)            /* neck - extend          */  \

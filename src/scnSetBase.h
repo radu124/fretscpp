@@ -54,8 +54,12 @@ struct tSIlist:public tSettingsItem
 		tSettingsItem(v,TYP_RANGE),choices(cv),val(vv),sval(&locsval)
 		{
 			if (!cv.size()) choices.push_back("");
-			if (!vv) val=&locval; capval();
-			*val=0;
+			if (!vv)
+			{
+				val=&locval;
+				*val=0;
+			}
+			capval();
 		}
 	tSIlist(string v, vector<string> cv,string *vv):
 		tSettingsItem(v,TYP_RANGE),choices(cv),val(&locval),sval(vv)

@@ -20,12 +20,15 @@ extern tSongini   crtIni;
 
 
 class Stage;
+class playGfx;
+
 extern Stage *stagePlay;
 extern Stage *st_mainm;
 extern Stage *st_sopts;
 extern Stage *st_slist;
 extern Stage *st_score;
 extern Stage *st_settm;
+extern playGfx *playgfx;
 
 extern mcolor C_WHITE;
 extern mcolor C_BLACK;

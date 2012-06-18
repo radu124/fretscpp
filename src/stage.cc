@@ -92,14 +92,14 @@ StageLayerFx *Stage::findFX(StageLayer *base, string name)
 }
 
 
-void Stage::readDir(string d)
+void Stage::load(string dir, string filename)
 {
 	char line[1024];
 	int mode=0;
 	int i;
 	StageLayer *crtl=NULL;
 	StageLayerFx *crtf=NULL;
-	FILE *fc=fopen((d+"/stage.ini").c_str(),"r");
+	FILE *fc=fopen((dir+"/"+filename).c_str(),"r");
 	if (!fc) return;
 
 	while (!feof(fc))
@@ -146,7 +146,7 @@ void Stage::readDir(string d)
 		if (pos!=string::npos)
 			txname.replace(pos,4,".png");
 		else if (txname[0]=='/') layer[i]->texid=texLoad(txname.substr(1,999));
-		else layer[i]->texid=texLoad(d+"/"+txname,1);
+		else layer[i]->texid=texLoad(dir+"/"+txname,1);
 
 		layer[i]->lv_yscale=layer[i]->lv_yscale*texAspect(layer[i]->texid);
 		layer[i]->lv_yscale*=layer[i]->lv_scale;

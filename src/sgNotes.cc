@@ -16,6 +16,7 @@ GNU General Public License for more details.
 // for the tSceneGuitar class declared in scnGuitar.h
 
 #include "scnGuitar.h"
+#include "playGfx.h"
 #include "midiparser.h"
 #include "globals.h"
 #include "configuration.h"
@@ -68,7 +69,17 @@ int tSceneGuitar::renderNote(int col, int ts, int flags)
 	glTranslatef(col-2,y,0);
 	glRotatef(60,1,0,0);
 	glScalef(sz,sz,sz);
-	texDraw(sp_note[col]);
+	texDraw(playgfx->note[col]);
+	if (playgfx->notehl[col] && (flags & ENS_TAPPABLE))
+	{
+		// not nice that I hardcoded this, maybe it would be better
+		// to defer it to the layer for display, this way we can also
+		// apply effects
+		glColor4f(1.0,1.0,1.0,1.0);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		texDraw(playgfx->notehl[col]);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
 	glPopMatrix();
 	return 0;
 }
@@ -185,7 +196,7 @@ void tSceneGuitar::renderNotes()
 			res=2;
 			if (ch=='O' || ch=='B')
 			{
-				res=renderNote(j,v.timestamp);
+				res=renderNote(j,v.timestamp,v.flags);
 			}
 			if (res) ch='!';
 		//	MESSAGE("%c" &ch);

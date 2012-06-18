@@ -21,6 +21,7 @@ Stage *st_sopts;
 Stage *st_slist;
 Stage *st_score;
 Stage *st_settm;
+playGfx *playgfx;
 
 MidiParser crtSong;
 tSongini   crtIni;
