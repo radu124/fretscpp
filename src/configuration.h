@@ -64,6 +64,7 @@ CONFIGITEM(int,guitar_off_volume,20)            /* volume - bad note      */  \
 CONFIGITEM(int,conf_stretch,0)                  /* stretch scene 4:3      */  \
 CONFIGITEM(int,video_glflush,0)                 /* video use glFlush()    */  \
 CONFIGITEM(int,video_glfinish,0)                /* video use glFinish()   */  \
+CONFIGITEM(int,video_polysmooth,0)              /* video use polygonSmoothing */  \
 CONFIGITEM(int,video_vsync,0)                   /* video vsync            */  \
 CONFIGITEM(int,video_limiter,0)                 /* video fps limit enable */  \
 CONFIGITEM(int,video_nodoublebuf,0)             /* disable double buffer  */  \

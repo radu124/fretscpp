@@ -108,9 +108,12 @@ int main( int argc, char* argv[] )
 	glViewport( 0, 0, scr_width, scr_height );
 	glClear( GL_COLOR_BUFFER_BIT );
 	scene_setOrtho();
-	glEnable(GL_POLYGON_SMOOTH);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-
+	if (video_polysmooth)
+	{
+		// this actually does more harm than good
+		glEnable(GL_POLYGON_SMOOTH);
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	}
 	/* load bitmap to temp surface */
 	//SDL_Surface* temp = SDL_LoadBMP("sdl_logo.bmp");
 	/* convert bitmap to display format */
