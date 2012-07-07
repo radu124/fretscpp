@@ -70,7 +70,7 @@ int tSceneGuitar::renderNote(int col, int ts, int flags)
 	glRotatef(60,1,0,0);
 	glScalef(sz,sz,sz);
 	texDraw(playgfx->note[col]);
-	if (playgfx->notehl[col] && (flags & ENS_TAPPABLE))
+	if (playgfx->notehl[col] && (flags & ENS_TAPPABLE) && player[cplayer].maytap)
 	{
 		// not nice that I hardcoded this, maybe it would be better
 		// to defer it to the layer for display, this way we can also

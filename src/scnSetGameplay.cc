@@ -33,8 +33,9 @@ void tScnSetGameplay::init()
 	tappablemodes.push_back("GH2");
 	tappablemodes.push_back("GH2-Sloppy");
 	tappablemodes.push_back("Any");
-	additem(new tSIlist("Tappable",tappablemodes,&tappablemode));
 	additem(new tSIcheckbox("Strict single frets",&strictkeys));
+	additem(new tSIlist("Tappable",tappablemodes,&tappablemode));
+	additem(new tSIcheckbox("Chord pull-off",&chordpulloff));
 	additem(new tSIintrange("Guitar volume",0,150,&guitar_volume,10));
 	additem(new tSIintrange("Guitar off volume",0,150,&guitar_off_volume,10));
 	additem(new tSIintrange("Miss loudness",0,200,&miss_loudness,10));

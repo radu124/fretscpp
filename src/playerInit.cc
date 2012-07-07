@@ -26,25 +26,28 @@ void tPlayer::init(int iid)
 	id=iid;
 	neckvelocity=default_neck_velocity;
 	whammy=0;
-	longeststreak=0;
+	stat_longeststreak=0;
 	score=0;
-	scorefrac=0;
-	scorenomult=0;
-	scorehits=0;
-	scorehold=0;
-	scorewham=0;
+	score_frac=0;
+	score_nomult=0;
+	score_fromhits=0;
+	score_hold=0;
+	score_whammy=0;
+	stat_hopos=0;
 	crtnote=0;
 	hittnote=-1;
 	nextnote=0;
 	lane=crtSong.get_lane(instrument,difficulty);
-	notetotal=0;
-	notegood=0;
-	notexmiss=0;
-	notehopo=0;
-	streak=0;
+	stat_notestotal=0;
+	stat_noteshit=0;
+	stat_xmiss=0;
+	notetapped=0;
+	stat_streak=0;
 	lastwasgood=1;
-	lasttime=0;
+	timepassed=0;
 	tapmode=tappablemode;
+	maytap=1;
+	pulloffmode=chordpulloff;
 	init_note_flags();
 	// for visual effects
 	timemultiplier=-1000000;
@@ -58,7 +61,7 @@ void tPlayer::init_note_flags()
 	for (i=0; i<lane.size(); i++)
 	{
 		if (!(lane[i].flags & ENS_HASHIT)) continue;
-		notetotal++;
+		stat_notestotal++;
 		istappable=1;
 		if (tapmode==ET_NONE) continue;
 		if (tapmode==ET_RFMOD)

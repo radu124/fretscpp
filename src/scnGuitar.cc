@@ -71,7 +71,7 @@ void tSceneGuitar::render()
 		lane=&player[cplayer].lane;
 		scene_setNeck(cplayer,numplayers);
 		noteRegion();
-		player[cplayer].passtime();
+		player[cplayer].passtime(timenow);
 		renderNeck();
 		renderTracks();
 		renderNoteLines();

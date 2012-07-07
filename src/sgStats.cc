@@ -57,9 +57,9 @@ void tSceneGuitar::statPosition()
 void tSceneGuitar::renderMultiplierVal()
 {
 	tPlayer &pp=player[cplayer];
-	int mult=pp.streak/10*2;
-	int mr=pp.streak%10;
-	if (pp.streak>=40) { mult=6; mr=10; }
+	int mult=pp.stat_streak/10*2;
+	int mr=pp.stat_streak%10;
+	if (pp.stat_streak>=40) { mult=6; mr=10; }
 	glPushMatrix();
 	statPosition();
 	glTranslatef(multvalx,multvaly,0);
@@ -91,7 +91,7 @@ void tSceneGuitar::renderStats()
 	char a[256];
 	glLoadIdentity();
 	glColor4f(1.0,1.0,1.0,1.0);
-	sprintf(a,"streak: %d",pp.streak);
+	sprintf(a,"stat_streak: %d",pp.stat_streak);
 	deffont.displayString(a,statx,staty,statfontsize,statalign);
 	sprintf(a,"score: %d",pp.score);
 	deffont.displayString(a,statx,staty+statfontsize,statfontsize,statalign);

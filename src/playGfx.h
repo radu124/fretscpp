@@ -1,5 +1,5 @@
 #ifndef __HDR_playGfx_h
-#define __HDR_stagGfx_h
+#define __HDR_playGfx_h
 
 #include "stage.h"
 

@@ -23,10 +23,15 @@ struct notestatus
 
 enum notestatusflags
 {
-	ENS_HASHIT=1,
-	ENS_HASLINE=2,
-	ENS_WELLPLAYED=4,
-	ENS_TAPPABLE=8
+	/* initialized during track extraction */
+	ENS_HASHIT=1,     // whether the note has an 'O' or a 'B'
+	ENS_HASLINE=2,    // whether the note is a '-' note
+	ENS_ISMULTI=4,    // whether the note has multiple 'O's or 'B's
+	/* initialized during player init */
+	ENS_TAPPABLE=8,   // whether the note is tappable
+	/* updated during gameplay */
+	ENS_WELLPLAYED=16,// whether the note was correctly played
+	ENS_EARLYRELEASE=32 // whether the player released the fret early
 };
 
 /**
@@ -37,6 +42,12 @@ struct notestatusst
 	int timestamp;
 	char val[6];
 	int flags;
+	/**
+	 * check whether the value at index i is a note
+	 * @param i note of interest
+	 * @return 1 if val[i] is "O" or "B"
+	 */
+	int noteon(int i);
 	/**
 	 * @return 1 if this note has a hit (O or B character)
 	 */

@@ -8,13 +8,16 @@ at this time.
 
 Things that work:
  * playing
- * score computation more or less compatible with FoF
+ * score computation more or less in line with FoF
  * whammy
  * game controller (guitar)
  * split screen multiplayer
- * basic settings
+ * settings
+ * basic themes
  * fullscreen
  * stage animations and lights
+ * video
+ * tappable notes
  
 Things that do not work:
  * network play

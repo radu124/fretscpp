@@ -22,6 +22,7 @@ GNU General Public License for more details.
 #include "scene.h"
 #include "message.h"
 #include "verbosity.h"
+#include "scnGuitar.h"
 
 string keyname(int id)
 {
@@ -142,8 +143,8 @@ void guitarkey(int ev, int key, int other)
 				if (key==keydefs[q].key[i]) id=i;
 			}
 			if (id==6) id=5;
-			if (id>=0 && ev==SDL_KEYDOWN) player[pl].presskey(id);
-			if (id>=0 && ev==SDL_KEYUP)   player[pl].releasekey(id);
+			if (id>=0 && ev==SDL_KEYDOWN) player[pl].presskey(guitarScene.timenow, id);
+			if (id>=0 && ev==SDL_KEYUP)   player[pl].releasekey(guitarScene.timenow, id);
 			if (id==7 && ev==SDL_JOYAXISMOTION) player[pl].whammyaxis(other);
 		}
 	}

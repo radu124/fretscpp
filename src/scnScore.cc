@@ -41,13 +41,13 @@ void tScnScore::render()
 	{
 		tPlayer &pp=player[i];
 
-		if (pp.notetotal>0) percentage=pp.notegood*100/pp.notetotal;
+		if (pp.stat_notestotal>0) percentage=pp.stat_noteshit*100/pp.stat_notestotal;
 		glLoadIdentity();
 		glColor4f(1.0,1.0,1.0,1.0);
-		sprintf(a,"%d/%d (%d%%)",pp.notegood,pp.notetotal,percentage);
-		if (pp.notegood==pp.notetotal && pp.notexmiss)
+		sprintf(a,"%d/%d (%d%%)",pp.stat_noteshit,pp.stat_notestotal,percentage);
+		if (pp.stat_noteshit==pp.stat_notestotal && pp.stat_xmiss)
 		{
-			sprintf(a+strlen(a)," and %d extra misses",pp.notexmiss);
+			sprintf(a+strlen(a)," and %d extra misses",pp.stat_xmiss);
 		}
 		GLfloat scoreposx,scoreposy;
 		scoreposx=-38+(i%2)*40;
@@ -56,7 +56,7 @@ void tScnScore::render()
 		glPushMatrix();
 		glTranslatef(scoreposx+25,scoreposy+1.6,0);
 		glScalef(3,3,1);
-		showStars(scorepromille(pp.notetotal,pp.notegood,pp.notexmiss));
+		showStars(scorepromille(pp.stat_notestotal,pp.stat_noteshit,pp.stat_xmiss));
 		glPopMatrix();
 		sprintf(a,"%d points",pp.score);
 		deffont.displayString(a,scoreposx,scoreposy+3,3,0);
@@ -76,7 +76,7 @@ void tScnScore::writescores()
 	for (i=0; i<numplayers; i++)
 	{
 		scoreline a;
-		if (player[i].notegood<2) continue;
+		if (player[i].stat_noteshit<2) continue;
 		if (!player[i].name.length()) continue;
 		a.readfromplayer(i);
 		a.write(scf);

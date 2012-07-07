@@ -471,6 +471,7 @@ void notestatusst::from_note_status(notestatus &v, int difficulty)
 	timestamp=v.timestamp;
 	flags=0;
 	if (detect_hit()) flags |= ENS_HASHIT;
+	if (detect_hit()>1) flags |= ENS_ISMULTI;
 	if (detect_line()) flags |= ENS_HASLINE;
 }
 
@@ -499,6 +500,11 @@ int notestatusst::detect_line()
 string notestatusst::str()
 {
 	return string()+val[0]+val[1]+val[2]+val[3]+val[4];
+}
+
+int notestatusst::noteon(int i)
+{
+	return val[i]=='O' || val[i]=='B';
 }
 
 int ishit(char c)

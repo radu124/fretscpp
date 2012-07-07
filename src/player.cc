@@ -37,87 +37,94 @@ void tPlayer::addwhammy(int i)
 	if (hitactive) whammy+=i;
 }
 
-void tPlayer::presskey(int i)
+void tPlayer::presskey(int evtime, int i)
 {
 	lastkeys[i]=1;
-	if (i<5) unhitactive(guitarScene.timenow);
-	if (i>=5 && i<=6) handlehit();
+	if (i<5)
+	{
+		unhitactive(evtime);
+		tapopportunity(evtime, i);
+	}
+	if (i>=5 && i<=6) handlehit(evtime);
 	if (i==7) addwhammy(15000);
 }
 
-void tPlayer::releasekey(int i)
+void tPlayer::releasekey(int evtime, int i)
 {
 	lastkeys[i]=0;
-	if (i<5) unhitactive(guitarScene.timenow);
+	if (i<5)
+	{
+		unhitactive(evtime);
+		pulloffopportunity(evtime, i);
+	}
 }
 
-void tPlayer::holdscore(int ts)
+void tPlayer::holdscore(int evtime)
 {
 // guitarscene line 334
 	const int SCOREDIV=441;
-	int multiplier=1+streak/10;
-	int scoreplus;
+	int multiplier=1+stat_streak/10;
 	if (multiplier>4) multiplier=4;
-	if (ts<holdaccounted) return;
-	scoreplus=multiplier*(ts-holdaccounted);
+	if (evtime<stat_holdaccounted) return;
+	int scoreplus=multiplier*(evtime-stat_holdaccounted);
 	if (whammyon) scoreplus*=2;
-	scorefrac+=scoreplus; //hitactive*
-	holdaccounted=ts;
-	score+=scorefrac/SCOREDIV;
-	scorehold+=scorefrac/SCOREDIV;
-	if (whammyon) scorewham+=scorefrac/SCOREDIV/2;
-	scorenomult+=(scorefrac/SCOREDIV+multiplier-1)/multiplier; // not really good
-	scorefrac%=SCOREDIV;
+	score_frac+=scoreplus; //hitactive*
+	stat_holdaccounted=evtime;
+	score+=score_frac/SCOREDIV;
+	score_hold+=score_frac/SCOREDIV;
+	// slightly inaccurate
+	if (whammyon) score_whammy+=score_frac/SCOREDIV/2;
+	score_nomult+=(score_frac/SCOREDIV+multiplier-1)/multiplier;
+	score_frac%=SCOREDIV;
 }
 
-void tPlayer::unhitactive(int ts)
+void tPlayer::unhitactive(int evtime)
 {
 	if (hitactive)
-		holdscore(ts);
+		holdscore(evtime);
 	hitactive=0;
 }
 
-void tPlayer::passtime()
+void tPlayer::passtime(int evtime)
 {
-	int timenow=guitarScene.timenow;
-	int timeincr=timenow-lasttime;
+	int timeincr=evtime-timepassed;
 	int j;
-	lasttime=timenow;
+	timepassed=evtime;
 	if (timeincr>0)
 	{
 		// whammy fades out
 		whammy=(int) (whammy*exp(-timeincr*0.0001)-timeincr*0.01);
 		if (whammy<0) whammy=0;
 	}
-	whammyon=hitactive && (whammy>5000) && (timenow-lasthit[5]>20000);
-	while (crtnote<crtSong.trk_notes[instrument].size())
+	whammyon=hitactive && (whammy>5000) && (evtime-lasthit[5]>20000);
+	while (crtnote<lane.size())
 	{
 		notestatusst &note=lane[crtnote];
-		if (note.timestamp>timenow-44*tolerance_late) break;
+		if (note.timestamp>evtime-44*tolerance_late) break;
 		if (hitactive && !(note.flags & ENS_HASLINE)) unhitactive(note.timestamp);
 		if (note.flags & ENS_HASHIT)
 		{
 			hitactive=0;
-			streak=0;
+			stat_streak=0;
+			tapmissnote();
 		}
 		crtnote++;
 	}
-	if (hitactive) holdscore(timenow);
+	if (hitactive) holdscore(evtime);
 }
 
-int tPlayer::notematch(int i)
+int tPlayer::notematch(int idx, int strict)
 {
 	int j;
 	int notesmatched=0;
 	int notesunmatched=0;
 	for (j=0; j<5; j++)
 	{
-		char c=lane[i].val[j];
-		int noteon=(c=='O' || c=='B');
+		int noteon=lane[idx].noteon(j);
 		if (noteon & !lastkeys[j]) return 0;
 		if (!noteon & lastkeys[j])
 		{
-			if (strictkeys) return 0;
+			if (strict) return 0;
 			if (notesmatched) return 0;
 			notesunmatched++;
 		}
@@ -126,7 +133,6 @@ int tPlayer::notematch(int i)
 			notesmatched++;
 		}
 		if (notesmatched>1 && notesunmatched) return 0;
-		//if (lastkeys[j]) c++;
 	}
 	return 1;
 }
@@ -144,19 +150,18 @@ int player_channel(int id)
 	return 2;
 }
 
-void tPlayer::handlehit()
+void tPlayer::handlehit(int evtime)
 {
-	int timenow=guitarScene.timenow;
 	int i,found=-1,good=0,j;
-	int multiplier=streak/10+1;
+	int multiplier=stat_streak/10+1;
 	if (multiplier>4) multiplier=4;
-	for (i=crtnote; i<crtSong.trk_notes[instrument].size(); i++)
+	for (i=crtnote; i<lane.size(); i++)
 	{
-		if (lane[i].timestamp>timenow+44*tolerance_early) break;
+		if (lane[i].timestamp>evtime+44*tolerance_early) break;
 		if (lane[i].flags & ENS_HASHIT)
 		{
 			// try to match anything within the window
-			if (notematch(i))
+			if (notematch(i,strictkeys))
 			{
 				found=i;
 				crtnote=i+1;
@@ -165,31 +170,63 @@ void tPlayer::handlehit()
 			}
 		}
 	}
-	if (good) {
-		lastwasgood=1;
-		for (i=0; i<5; i++)
-			if (lastkeys[i]) lasthit[i]=timenow;
-		lasthit[5]=timenow;
-		guitarScene.timelasthit=timenow;
-		streak++;
-		if (streak>longeststreak) longeststreak=streak;
-		hitactive=!!(lane[crtnote-1].flags & ENS_HASHIT);
-		notegood++;
-		lane[crtnote-1].flags |= ENS_WELLPLAYED;
-		score+=50*hitactive*multiplier;
-		scorenomult+=50*hitactive;
-		scorehits+=50*hitactive*multiplier;
-		holdaccounted=lane[crtnote-1].timestamp+8000; // actually song.period*1.1/4
-		if (streak==10 || streak==20 || streak==30) timemultiplier=timenow;
+	if (!good & notetapped)
+	{
+		// if we don't get a match on the next note
+		// we allow a note that was already tapped to be strummed
+		for (i=crtnote-1; i>=0; i--)
+		{
+			if (lane[i].timestamp<evtime-44*tolerance_late) break;
+			if (lane[i].flags & ENS_HASHIT)
+			{
+				// no harm done, but we shouldn't call
+				// hitcorrect again
+				if (notematch(i,strictkeys))
+				{
+					notetapped=0;
+					return;
+				}
+				// only the last note
+				break;
+			}
+		}
 	}
-	else {
-		guitarScene.timelastmiss=timenow;
-		sfx_start(esfx_randombadnote(),player_channel(id),miss_loudness);
-		streak=0;
-		lastwasgood=0;
-		hitactive=0;
-		notexmiss++;
-	}
+	if (good) hitcorrect(evtime,found);
+	else hitincorrect(evtime);
+}
+
+void tPlayer::hitcorrect(int evtime, int idx)
+{
+	int i;
+	crtnote=idx+1;
+	lastwasgood=1;
+	maytap=1;
+	notetapped=0;
+	for (i=0; i<5; i++)
+		if (lane[idx].noteon(i)) lasthit[i]=evtime;
+	lasthit[5]=evtime;
+	guitarScene.timelasthit=evtime;
+	stat_streak++;
+	if (stat_streak>stat_longeststreak) stat_longeststreak=stat_streak;
+	hitactive=!!(lane[idx].flags & ENS_HASHIT); // ??
+	stat_noteshit++;
+	lane[idx].flags |= ENS_WELLPLAYED;
+	score+=50*hitactive*multiplier;
+	score_nomult+=50*hitactive;
+	score_fromhits+=50*hitactive*multiplier;
+	stat_holdaccounted=lane[idx].timestamp+8000; // actually song.period*1.1/4
+	if (stat_streak==10 || stat_streak==20 || stat_streak==30) timemultiplier=evtime;
+}
+
+void tPlayer::hitincorrect(int evtime)
+{
+	guitarScene.timelastmiss=evtime;
+	sfx_start(esfx_randombadnote(),player_channel(id),miss_loudness);
+	stat_streak=0;
+	lastwasgood=0;
+	hitactive=0;
+	if (tapmode!=ET_ANY) maytap=0;
+	stat_xmiss++;
 }
 
 void player_get_music_volume(int &gtar_le, int &gtar_rt, int &rhyt_le, int &rhyt_rt, int &wham_le, int &wham_rt)

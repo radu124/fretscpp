@@ -57,6 +57,7 @@ extern vstring themesSettm;
 CONFIGITEM(GLfloat,tolerance_early,120)         /* gameplay - toler. early*/  \
 CONFIGITEM(GLfloat,tolerance_late,120)          /* gameplay - toler. late */  \
 CONFIGITEM(int,tappablemode,0)                  /* gameplay - tappable    */  \
+CONFIGITEM(int,chordpulloff,0)                  /* gameplay - pull off    */  \
 CONFIGITEM(int,strictkeys,0)                    /* gameplay - strict      */  \
 CONFIGITEM(int,miss_loudness,200)               /* volume - miss          */  \
 CONFIGITEM(int,guitar_volume,100)               /* volume - good note     */  \

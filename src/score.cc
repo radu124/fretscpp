@@ -126,15 +126,15 @@ void scoreline::readfromplayer(int num)
 	instrument  = player[num].instrument;
 	difficulty  = player[num].difficulty;
 	score       = player[num].score;
-	streak      = player[num].longeststreak;
-	notestotal  = player[num].notetotal;
-	notesgood   = player[num].notegood;
-	xmisses     = player[num].notexmiss;
-	noteshopo   = player[num].notehopo;
-	scorenomult = player[num].scorenomult;
-	scorehits   = player[num].scorehits;
-	scorehold   = player[num].scorehold;
-	scorewham   = player[num].scorewham;
+	streak      = player[num].stat_longeststreak;
+	notestotal  = player[num].stat_notestotal;
+	notesgood   = player[num].stat_noteshit;
+	xmisses     = player[num].stat_xmiss;
+	noteshopo   = player[num].stat_hopos;
+	scorenomult = player[num].score_nomult;
+	scorehits   = player[num].score_fromhits;
+	scorehold   = player[num].score_hold;
+	scorewham   = player[num].score_whammy;
 	flags       = 0;
 }
 

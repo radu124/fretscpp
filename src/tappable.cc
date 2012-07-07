@@ -16,6 +16,7 @@ GNU General Public License for more details.
 #include "player.h"
 #include "verbosity.h"
 #include "message.h"
+#include "configuration.h"
 
 // this is probably more complex than it should be !
 int tPlayer::is_rfmod_tappable(int i)
@@ -73,4 +74,96 @@ int tPlayer::is_rfmod_tappable(int i)
 	DBG(TAPPABLE," tap, same next, same prev\n");
 	return 1;
 	// The first note in a string of the same notes can NOT be tapped.
+}
+
+void tPlayer::tapopportunity(int evtime, int i)
+{
+	if (!tapmode) return;
+	if (!maytap) return;
+	int nxt;
+	for (nxt=crtnote; nxt<lane.size(); nxt++)
+	{
+		if (lane[nxt].timestamp>evtime+44*tolerance_early)
+		{
+			nxt=lane.size();
+			break;
+		}
+		if (lane[nxt].flags & ENS_HASHIT) break;
+	}
+	if (nxt>=lane.size())
+	{
+		// incorrect tap
+		tapincorrect(evtime);
+		return;
+	}
+	if (!(lane[nxt].flags & ENS_TAPPABLE)) return;
+	if (!lane[nxt].noteon(i))
+	{
+		tapincorrect(evtime);
+		return;
+	}
+	if (notematch(nxt,1))
+	{
+		hitcorrect(evtime,nxt);
+		notetapped=1;
+		stat_hopos++;
+		return;
+	}
+	// allow tapping the notes of a chord one-by-one, thus not an error
+	if (lane[nxt].flags & ENS_ISMULTI)
+		return;
+	// tapped a single while holding another fret
+	tapincorrect(evtime);
+}
+
+void tPlayer::tapincorrect(int evtime)
+{
+	switch (tapmode)
+	{
+	case ET_RFMOD:
+		maytap=0;
+		break;
+	case ET_GH2STRICT:
+		maytap=0;
+		hitincorrect(evtime);
+		break;
+	case ET_GH2:
+		maytap=0;
+		break;
+	case ET_GH2SLOPPY:
+		break;
+	case ET_ANY:
+		hitincorrect(evtime);
+		break;
+	}
+}
+
+void tPlayer::pulloffopportunity(int evtime, int i)
+{
+	// nothing to do if pull-off is disabled
+	if (!pulloffmode) return;
+	if (!maytap) return;
+	int nxt;
+	for (nxt=crtnote; nxt<lane.size(); nxt++)
+	{
+		if (lane[nxt].timestamp>evtime+44*tolerance_early)
+		{
+			nxt=lane.size();
+			break;
+		}
+		if (lane[nxt].flags & ENS_HASHIT) break;
+	}
+	if (nxt>=lane.size()
+		|| !(lane[nxt].flags & ENS_TAPPABLE))
+		return;
+	if (notematch(nxt,1)) {
+		hitcorrect(evtime,nxt);
+		notetapped=1;
+		stat_hopos++;
+	}
+}
+
+void tPlayer::tapmissnote()
+{
+	// not sure what do do
 }

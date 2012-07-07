@@ -36,9 +36,9 @@ void tSceneGuitar::renderMultiplier()
 		glScalef(sv,sv,1);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-		if (pp.streak>=30) texDraw(sp_m4);
-		else if (pp.streak>=20) texDraw(sp_m3);
-		else if (pp.streak>=10) texDraw(sp_m2);
+		if (pp.stat_streak>=30) texDraw(sp_m4);
+		else if (pp.stat_streak>=20) texDraw(sp_m3);
+		else if (pp.stat_streak>=10) texDraw(sp_m2);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPopMatrix();
 	}
@@ -184,8 +184,7 @@ void tSceneGuitar::rfFlames2()
 		MESSAGE(">");
 		for (j=0; j<5; j++)
 		{
-			char ch=lane[0][i].val[j];
-			if (ch!='O' && ch!='B') continue;
+			if (!lane[0][i].noteon(j)) continue;
 			MESSAGE("%d", j);
 			//int tev=player[cplayer].timelastgood[i];
 			int mult;
@@ -198,9 +197,9 @@ void tSceneGuitar::rfFlames2()
 			ff = 1.25;
 			y = -boardline; //-ff / 6; //v +
 
-			flameSize = (10-9/(3+pp.streak))*((timenow-nts)/10000000.0);
+			flameSize = (10-9/(3+pp.stat_streak))*((timenow-nts)/10000000.0);
 
-			mult=pp.streak/10;
+			mult=pp.stat_streak/10;
 			if (mult>3) mult=3;
 			flameColor[0] = keycolors[mult][0]; // ev.number
 			flameColor[1] = keycolors[mult][1];
