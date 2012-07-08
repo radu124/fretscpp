@@ -89,7 +89,7 @@ void tSceneGuitar::renderStats()
 	char a[256];
 	glLoadIdentity();
 	glColor4f(1.0,1.0,1.0,1.0);
-	sprintf(a,"stat_streak: %d",pp->stat_streak);
+	sprintf(a,"streak: %d",pp->stat_streak);
 	deffont.displayString(a,statx,staty,statfontsize,statalign);
 	sprintf(a,"score: %d",pp->score);
 	deffont.displayString(a,statx,staty+statfontsize,statfontsize,statalign);

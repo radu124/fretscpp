@@ -158,7 +158,6 @@ void tSceneGuitar::renderNoteLines()
 		if (active[i]) activecount++;
 		startNote[i]=startNote[0];
 	}
-	if (!activecount) pp->hitactive=0;
 	for (j=nearnote; j<farrnote; j++)
 	{
 		v=lane[0][j];

@@ -226,6 +226,7 @@ void tPlayer::hitcorrect(int evtime, int idx)
 void tPlayer::hitincorrect(int evtime)
 {
 	guitarScene.timelastmiss=evtime;
+	flames.stop(evtime);
 	sfx_start(esfx_randombadnote(),player_channel(id),miss_loudness);
 	stat_streak=0;
 	lastwasgood=0;
