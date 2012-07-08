@@ -112,16 +112,18 @@ void tScnSetTheme::render()
 	video_globalcleardisabled=0;
 
 	scene_setNeck(0,1);
+	guitarScene.timenow=((int)(scn.time*44100)%882000+882000)%882000;
+	updateDummyPlayer(guitarScene.timenow);
 	guitarScene.pp=&player[MAX_PLAYERS];
 	guitarScene.lane=&player[MAX_PLAYERS].lane;
-	//guitarScene.noteRegion();
+	guitarScene.noteRegion();
 	guitarScene.renderNeck();
 	guitarScene.renderTracks();
-	//guitarScene.renderNoteLines();
+	guitarScene.renderNoteLines();
 	guitarScene.renderKeys();
-	//guitarScene.renderNotes();
-	//guitarScene.renderFlames();
-	//guitarScene.renderMultiplier();
+	guitarScene.renderNotes();
+	guitarScene.renderFlames();
+	guitarScene.renderMultiplier();
 
 	scene_setOrtho();
 	guitarScene.activeneckpos=10;

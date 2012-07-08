@@ -314,5 +314,10 @@ const int MAX_PLAYERS=4;
 // + 1 dummy player for theme menus
 extern tPlayer player[MAX_PLAYERS+1];
 
+/**
+ * initialize data for the dummy player
+ * implemented in playerDummy.cc
+ */
+void updateDummyPlayer(int evtime);
 
 #endif

@@ -78,11 +78,21 @@ void tScnSetLayout::render()
 {
 	int cplayer;
 	stagePlay->render();
+	guitarScene.timenow=((int)(scn.time*44100)%882000+882000)%882000;
+	updateDummyPlayer(guitarScene.timenow);
 	for (cplayer=0; cplayer<np; cplayer++)
 	{
 		scene_setNeck(cplayer,np);
+		guitarScene.pp=&player[MAX_PLAYERS];
+		guitarScene.lane=&player[MAX_PLAYERS].lane;
+		guitarScene.noteRegion();
 		guitarScene.renderNeck();
 		guitarScene.renderTracks();
+		guitarScene.renderNoteLines();
+		guitarScene.renderKeys();
+		guitarScene.renderNotes();
+		guitarScene.renderFlames();
+		guitarScene.renderMultiplier();
 	}
 	scene_setOrtho();
 	for (cplayer=0; cplayer<np; cplayer++)
