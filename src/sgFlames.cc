@@ -49,16 +49,21 @@ void tSceneGuitar::renderFlame(int col, GLfloat sz)
 
 void tSceneGuitar::renderFlames()
 {
-	int i;
-	for (i=0; i<5; i++)
+	int i, fl;
+	int maxflames=1;
+	int flamefadetime=0;
+
+	for (fl=maxflames-1; fl>=0; fl--)
 	{
-		if ((pp->hitactive && pp->lastkeys[i])
-			|| (pp->lasthit[i]+10000>timenow))
+		if (pp->flames.endts[fl]<timenow+flamefadetime) continue;
+		for (i=0; i<5; i++)
 		{
-			rfFlame(i,1);
+			if (pp->flames.mask[fl] & (1<<i))
+			{
+				rfFlame(i,1);
+			}
 		}
 	}
-
 	//rfFlames2();
 //	rfFlame(0,1);
 //	origGlow(4);

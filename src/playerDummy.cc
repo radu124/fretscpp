@@ -40,14 +40,25 @@ void generateDummyLane()
 void updateDummyPlayer(int evtime)
 {
 	int i,lasthittime;
+	int lastn;
 	tPlayer &pp=player[MAX_PLAYERS];
-	if (!pp.lane.size()) generateDummyLane();
-	pp.crtnote=0;
+	if (!pp.lane.size())
+	{
+		generateDummyLane();
+		pp.crtnote=0;
+		pp.flames.clear();
+	}
+	// it means we reset the timer
+	if (pp.lane[pp.crtnote].timestamp>evtime+44100)
+	{
+		pp.crtnote=0;
+		pp.flames.clear();
+	}
 	//lasthittime=-1;
 	while (pp.crtnote<pp.lane.size() && evtime>pp.lane[pp.crtnote].timestamp)
 	{
-		//if (pp.lane[pp.crtnote].flags & ENS_HASHIT)
-		//	lasthittime=pp.lane[pp.crtnote].timestamp;
+		if (pp.lane[pp.crtnote].flags & ENS_HASHIT)
+			pp.flames.fireup(&pp.lane,pp.crtnote,pp.lane[pp.crtnote].timestamp);
 		pp.crtnote++;
 	}
 	if (pp.crtnote<pp.lane.size())

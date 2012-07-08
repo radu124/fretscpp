@@ -3,6 +3,7 @@
 
 #include "includes.h"
 #include "midiparser.h"
+#include "flames.h"
 
 /**
  * Set the music volume based on the number of players and each player's
@@ -98,13 +99,11 @@ public:
 	 * Note after the one that was just played
 	 */
 	int crtnote;
-	int nextnote;
 	/**
 	 * the note furthest in the future that is visible on the neck
 	 * used in sgNotes.cc,
 	 * TODO: move away from tPlayer
 	 */
-	int farrnote;
 	int hittnote;
 	int id;
 	int crtnotehit;
@@ -306,7 +305,15 @@ public:
 	 */
 	int is_rfmod_tappable(int notenum);
 
+	/**
+	 * The lane being played (the difficulty subset of the track)
+	 */
 	vector<notestatusst> lane;
+
+	/**
+	 * State of the flames, these are per player
+	 */
+	tFlames flames;
 };
 
 const int MAX_PLAYERS=4;

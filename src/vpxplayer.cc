@@ -119,6 +119,10 @@ int vpxplayer::load_next_frame(int gltexture, uint64_t time, int flags)
 	time%=filmtime;
 	DBG(VPXDEC,"time:%d last:%d uspf:%d eframe:%d frame:%d\n",time,lastframeadvance,uspf,time/uspf,crtframe);
 	if (lastframeadvance>time) lastframeadvance=0;
+	// crtframe is a long way into the future (2s) and time is low (1s)
+	// thus we can reset to the beginning of the movie
+	// this will happen when entering a menu
+	if (time<1000000 && crtframe*uspf>time+2000000) crtframe=0;
 	if (!flags) if (time/uspf<crtframe || lastframeadvance+uspf/2>time) return 0;
 	lastframeadvance=time;
 	decode_frame(crtframe,decodeddata,glbufwidth,glbufheight);

@@ -82,7 +82,10 @@ void tPlayer::holdscore(int evtime)
 void tPlayer::unhitactive(int evtime)
 {
 	if (hitactive)
+	{
 		holdscore(evtime);
+		flames.stop(evtime);
+	}
 	hitactive=0;
 }
 
@@ -199,6 +202,7 @@ void tPlayer::handlehit(int evtime)
 void tPlayer::hitcorrect(int evtime, int idx)
 {
 	int i;
+	flames.fireup(&lane,idx,evtime);
 	crtnote=idx+1;
 	lastwasgood=1;
 	maytap=1;

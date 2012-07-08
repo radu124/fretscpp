@@ -36,7 +36,6 @@ void tPlayer::init(int iid)
 	stat_hopos=0;
 	crtnote=0;
 	hittnote=-1;
-	nextnote=0;
 	lane=crtSong.get_lane(instrument,difficulty);
 	stat_notestotal=0;
 	stat_noteshit=0;
@@ -52,6 +51,7 @@ void tPlayer::init(int iid)
 	// for visual effects
 	timemultiplier=-1000000;
 	for (i=0; i<5; i++) lasthit[i]=-1000000;
+	flames.clear();
 }
 
 void tPlayer::init_note_flags()

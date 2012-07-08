@@ -32,16 +32,22 @@ GLfloat tSceneGuitar::notePos(int timestamp)
 
 void tSceneGuitar::noteRegion()
 {
-	pp->nextnote=pp->crtnote;
-	while (pp->nextnote<lane->size())
+	int step=1048576;
+	nearnote=0;
+	// do a binary search to find first note
+	while (step>0)
 	{
-		if (lane[0][pp->nextnote].timestamp>timenow) break;
-		pp->nextnote++;
+		int nxt=nearnote+step;
+		step/=2;
+		if (nxt>=lane->size()) continue;
+		if (lane[0][nxt].timestamp>timenow) continue;
+		nearnote=nxt;
 	}
+	if (nearnote<lane->size() && lane[0][nearnote].timestamp<timenow) nearnote++;
 	//INFO(SCNGUITAR,"note %d\n" &crtnote);
-	for (pp->farrnote=pp->nextnote; pp->farrnote<lane->size(); pp->farrnote++)
+	for (farrnote=nearnote; farrnote<lane->size(); farrnote++)
 	{
-		if (lane[0][pp->farrnote].timestamp>timenow+120000) break;
+		if (lane[0][farrnote].timestamp>timenow+120000/pp->neckvelocity) break;
 	}
 }
 
@@ -143,8 +149,8 @@ void tSceneGuitar::renderNoteLines()
 	int i,j;
 	startNote[0]=notePos(-1);
 	notestatusst v;
-	if (pp->nextnote>0)
-		v=lane[0][pp->nextnote-1];
+	if (nearnote>0)
+		v=lane[0][nearnote-1];
 	for (i=0; i<5; i++)
 	{
 		char ch=v.val[i];
@@ -153,7 +159,7 @@ void tSceneGuitar::renderNoteLines()
 		startNote[i]=startNote[0];
 	}
 	if (!activecount) pp->hitactive=0;
-	for (j=pp->nextnote; j<pp->farrnote; j++)
+	for (j=nearnote; j<farrnote; j++)
 	{
 		v=lane[0][j];
 		GLfloat lend=notePos(v.timestamp);
@@ -181,8 +187,7 @@ void tSceneGuitar::renderNoteLines()
 void tSceneGuitar::renderNotes()
 {
 	int i,j;
-	//MESSAGE("notes: %d %d" &pp->nextnote &pp->farrnote);
-	for (i=pp->farrnote-1; i>=pp->nextnote; i--)
+	for (i=farrnote-1; i>=nearnote; i--)
 	{
 		notestatusst v=lane[0][i];
 		int res;
@@ -195,10 +200,8 @@ void tSceneGuitar::renderNotes()
 				res=renderNote(j,v.timestamp,v.flags);
 			}
 			if (res) ch='!';
-		//	MESSAGE("%c" &ch);
 		}
 	}
-	//MESSAGE("\n");
 }
 
 

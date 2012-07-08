@@ -120,9 +120,9 @@ void tSceneGuitar::globalStats()
 	case 2:
 		sprintf(a,"Whammy: %d %d",player[0].whammy,player[1].whammy);
 		deffont.displayString(a,-38,-28,2,0);
-		sprintf(a,"crtnote: %d %d  farnote: %d %d",
+		sprintf(a,"crtnote: %d %d  near/far: %d %d",
 			player[0].crtnote, player[1].crtnote,
-			player[0].farrnote, player[1].farrnote
+			nearnote,farrnote
 			);
 		deffont.displayString(a,-38,-26,2,0);
 		sprintf(a,"shouldstart: %d time %d",shouldstillstart,timenow);

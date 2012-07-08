@@ -23,8 +23,19 @@ public:
 	int timelastmiss;
 	int statsmode;
 	int shouldstillstart;
+
+	// player linked
 	tPlayer *pp;
 	vector<notestatusst> *lane;
+	/**
+	 * nearest note (mark) after the current playing time
+	 */
+	int nearnote;
+	/**
+	 * furthest note that can be seen on the guitar
+	 */
+	int farrnote;
+
 	void enter();
 	void init();
 	void render();
