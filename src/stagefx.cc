@@ -17,25 +17,31 @@ GNU General Public License for more details.
 #include "scnGuitar.h"
 #include "stage.h"
 
-MULTIRDR(FXTYPE,"none,scale,light,wiggle,rotoback,jumpinleft,wobble,tvfade,rotate");
 MULTIRDR(FXTRIGGER,"none,pick,miss,beat");
 MULTIRDR(FXPROFILE,"none,step,linstep,smoothstep,sinstep");
 
-StageLayerFx::StageLayerFx()
+tStageFx* createStageFx(string vtyp)
+{
+	tStageFx *fx=new tStageFx();
+	fx->fx_type=(FXTYPE) multiplechoice(vtyp.c_str(),"none,scale,light,wiggle,rotoback,jumpinleft,wobble,tvfade,rotate");
+	return fx;
+}
+
+tStageFx::tStageFx()
 {
 #define FXPD FXPD_INIT
 	FXINI_LIST
 #undef FXPD
 }
 
-void StageLayerFx::read(char *line)
+void tStageFx::read(char *line)
 {
 #define FXPD FXPD_READ
 	FXINI_LIST
 #undef FXPD
 }
 
-float StageLayerFx::trigval()
+float tStageFx::trigval()
 {
 	double temp;
 	switch (fx_trigger)
@@ -50,7 +56,7 @@ float StageLayerFx::trigval()
 	return 0;
 }
 
-float StageLayerFx::trigprofiled()
+float tStageFx::trigprofiled()
 {
 	float tv=trigval();
 	if (tv<0) tv=0;
@@ -72,7 +78,7 @@ float beatprofile(float x)
 	return 1.25-x*1.25;
 }
 
-void StageLayerFx::apply(mcolor &color)
+void tStageFx::apply(tStageElem *el)
 {
 	GLfloat t,s,v;
 	switch (fx_type)
@@ -94,7 +100,7 @@ void StageLayerFx::apply(mcolor &color)
 		v=scn.fade*2;
 		v=(v>1)?1:v*v;
 		glScalef(1,1-v*v*v,1.0);
-		if (v>0.95) color.Alpha=0;
+		if (v>0.95) el->color.Alpha=0;
 		break;
 	case FX_JUMPINLEFT:
 		v=scn.fade*2;
@@ -103,7 +109,7 @@ void StageLayerFx::apply(mcolor &color)
 		break;
 	case FX_WIGGLE:
 		v=sin(trigval()*1.57);
-		glTranslatef(sin(6.28*v)*fx_xmagnitude*parent->lv_xscale*10,cos(6.28*v)*fx_ymagnitude*parent->lv_yscale*10,0);
+		glTranslatef(sin(6.28*v)*fx_xmagnitude*el->lv_xscale*10,cos(6.28*v)*fx_ymagnitude*el->lv_yscale*10,0);
 		break;
 	case FX_SCALE:
 		v=beatprofile(trigval());
@@ -116,7 +122,7 @@ void StageLayerFx::apply(mcolor &color)
 	case FX_LIGHT:
 		if (guitarScene.timenow<=fx_light_number*44100)
 		{
-			color=C_TRANSPARENT;
+			el->color=C_TRANSPARENT;
 			return;
 		}
 		v=trigval()*0.9;
@@ -126,7 +132,7 @@ void StageLayerFx::apply(mcolor &color)
 		else v=0;
 		if (v<0.01) return;
 		mcolor efcolor(1,1,0.8,0.8);
-		color.weight(color,efcolor,v*fx_intensity);
+		el->color.weight(el->color,efcolor,v*fx_intensity);
 		break;
 	}
 }

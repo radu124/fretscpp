@@ -16,7 +16,6 @@ enum FXTRIGGER { FXT_NONE=0, FXT_PICK, FXT_MISS, FXT_BEAT };
 enum FXPROFILE { FXP_NONE=0, FXP_STEP, FXP_LINSTEP, FXP_SMOOTHSTEP, FXP_SINSTEP };
 
 #define FXINI_LIST \
-FXPD(FXTYPE,type,FX_NONE) \
 FXPD(FXTRIGGER,trigger,FXT_NONE) \
 FXPD(FXPROFILE,profile,FXP_NONE) \
 FXPD(int,light_number,0) \
@@ -34,22 +33,23 @@ FXPD(GLfloat,intensity,1)
 #define FXPD_INIT(a,b,c) fx_##b = c;
 #define FXPD_READ(a,b,c) if (tsimatch(line,"" #b)) { CONFREAD_##a(line,fx_##b); return; }
 
-class StageLayer;
+class tStageElem;
 
-class StageLayerFx
+class tStageFx
 {
 public:
+	FXTYPE fx_type;
 	string name;
-	StageLayer *parent;
-	void apply(mcolor &color);
+	void apply(tStageElem *el);
 	float trigval();
 	float trigprofiled();
-	StageLayerFx();
+	tStageFx();
 	void read(char *line);
 #define FXPD FXPD_DECLARE
 	FXINI_LIST
 #undef FXPD
 };
 
+tStageFx* createStageFx(string typ);
 
 #endif

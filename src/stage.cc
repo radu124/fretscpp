@@ -1,5 +1,5 @@
 /*******************************************************************
-(C) 2011 by Radu Stefan
+(C) 2011,2012 by Radu Stefan
 radu124@gmail.com
 
 This program is free software; you can redistribute it and/or modify
@@ -16,93 +16,40 @@ GNU General Public License for more details.
 
 #include "configuration.h"
 #include "texManager.h"
+#include "stagefx.h"
 
-MULTIRDR(SLBLENDTYPE,"default,one")
-
-StageLayer::StageLayer()
-{
-#define SLPD SLPD_INIT
-	SLINI_LIST
-#undef SLPD
-}
-
-void StageLayer::read(char *line)
-{
-#define SLPD SLPD_READ
-	SLINI_LIST
-#undef SLPD
-}
-
-
-void StageLayer::render()
-{
-	int i;
-	if (isBackground)
-	{
-		if (video_globalcleardisabled)
-		{
-			glColor4f( lv_color.Red, lv_color.Green, lv_color.Blue, 1.0 );
-			glBegin(GL_TRIANGLE_STRIP);
-			glVertex3f(-scr_lrlim, -scr_tblim, 0);
-			glVertex3f( scr_lrlim, -scr_tblim, 0);
-			glVertex3f(-scr_lrlim,  scr_tblim, 0);
-			glVertex3f( scr_lrlim,  scr_tblim, 0);
-			glEnd();
-		}
-		else
-		{
-			// plain clear, this may be faster?
-			glClearColor( lv_color.Red, lv_color.Green, lv_color.Blue, 0 );
-			glClear( GL_COLOR_BUFFER_BIT );
-		}
-		return;
-	}
-	glPushMatrix();
-	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	color=lv_color;
-	glTranslatef(40*lv_xpos,30*lv_ypos,0);
-	for (i=0; i<fx.size(); i++) fx[i]->apply(color);
-	glScalef(10*lv_xscale,-10*lv_yscale,0);
-	if (lv_angle!=0) glRotatef(-lv_angle,0,0,1);
-	color.set();
-	texDraw(texid);
-	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glPopMatrix();
-}
-
-StageLayer *Stage::findLayer(string name)
+tStageElem *Stage::findElem(string name)
 {
 	int v=-1,i;
-	for (i=0; i<layer.size(); i++)
-		if (layer[i]->name==name) v=i;
+	for (i=0; i<elem.size(); i++)
+		if (elem[i]->name==name) v=i;
 	if (v<0)
 	{
-		StageLayer *a=new StageLayer();
+		tStageElem *a=new tStageElem();
 		a->name=name;
 		a->isBackground=(a->name=="background");
-		layer.push_back(a);
+		elem.push_back(a);
 		DBG(STAGE,"Stage: new layer %s\n", name);
 		a->parent=this;
 		return a;
 	}
-	return layer[v];
+	return elem[v];
 }
 
-StageLayerFx *Stage::findFX(StageLayer *base, string name)
+tStageFx *Stage::findFX(string name, string typ)
 {
 	int v=-1,i;
-	for (i=0; i<base->fx.size(); i++)
-		if (base->fx[i]->name==name) v=i;
+	for (i=0; i<fx.size(); i++)
+		if (fx[i]->name==name) v=i;
 	if (v<0)
 	{
-		StageLayerFx *a=new StageLayerFx();
+		tStageFx *a=createStageFx(typ);
 		a->name=name;
-		base->fx.push_back(a);
-		DBG(STAGE,"Stage: new fx %s (layer %s)\n", name, base->name);
-		a->parent=base;
+		fx.push_back(a);
+		DBG(STAGE,"Stage: new fx %s, type:%s\n", name, typ);
 		return a;
 	}
-	return base->fx[v];
+	return fx[v];
 }
 
 
@@ -112,8 +59,8 @@ void Stage::load(string dir, string filename)
 	int mode=0;
 	int i;
 	cleanup();
-	StageLayer *crtl=NULL;
-	StageLayerFx *crtf=NULL;
+	tStageElem *crtl=NULL;
+	tStageFx *crtf=NULL;
 	FILE *fc=fopen((dir+"/"+filename).c_str(),"r");
 	if (!fc) return;
 
@@ -135,37 +82,57 @@ void Stage::load(string dir, string filename)
 			sav=++p;
 			while (*p!=']' && *p) p++;
 			*p=0;
-			fxs=strchr(sav,':');
-			if (fxs) {
-				*fxs=0;
-				fxs++;
+			if (*sav==':')
+			{
+				sav++;
+				fxs=strchr(sav,' ');
+				const char *fxnam="unnamed";
+				if (!fxs)
+				{
+					WARN(STAGE,"Invalid effect %s\n",line);
+				}
+				else
+				{
+					fxnam=fxs+1;
+					*fxs=0;
+				}
+
 				mode=2;
-				crtl=findLayer(sav);
-				crtf=findFX(crtl,fxs);
+				crtf=findFX(fxnam,sav);
 			} else {
 				mode=1;
-				crtl=findLayer(sav);
+				crtl=findElem(sav);
 			}
 			continue;
 		}
-		if (*p==';')
+		if (*p==';' || *p=='#')
 			continue;
 		if (mode==1) crtl->read(p);
 		if (mode==2) crtf->read(p);
 	}
-	for (i=0; i<layer.size(); i++) layer[i]->texid=-1;
-	for (i=0; i<layer.size(); i++) if (layer[i]->lv_texture!="")
+	for (i=0; i<elem.size(); i++) elem[i]->texid=-1;
+	for (i=0; i<elem.size(); i++) if (elem[i]->lv_texture!="")
 	{
-		string txname=layer[i]->lv_texture;
+		string txname=elem[i]->lv_texture;
 		int pos=txname.rfind(".svg");
 		if (pos!=string::npos)
 			txname.replace(pos,4,".png");
-		else if (txname[0]=='/') layer[i]->texid=texLoad(txname.substr(1,999));
-		else layer[i]->texid=texLoad(dir+"/"+txname,1);
+		else if (txname[0]=='/') elem[i]->texid=texLoad(txname.substr(1,999));
+		else elem[i]->texid=texLoad(dir+"/"+txname,1);
 
-		layer[i]->lv_yscale=layer[i]->lv_yscale*texAspect(layer[i]->texid);
-		layer[i]->lv_yscale*=layer[i]->lv_scale;
-		layer[i]->lv_xscale*=layer[i]->lv_scale;
+		elem[i]->lv_yscale=elem[i]->lv_yscale*texAspect(elem[i]->texid);
+		elem[i]->lv_yscale*=elem[i]->lv_scale;
+		elem[i]->lv_xscale*=elem[i]->lv_scale;
+	}
+	for (i=0; i<elem.size(); i++) if (elem[i]->lv_effects!="")
+	{
+		vector<string> effects=split_string(elem[i]->lv_effects,' ');
+		int j;
+		for (j=0; j<effects.size(); j++)
+		{
+			INFO(STAGE,"Binding effect %s to %s\n",effects[j],elem[i]->name);
+			elem[i]->fx.push_back(findFX(effects[j]));
+		}
 	}
 	fclose(fc);
 }
@@ -173,33 +140,38 @@ void Stage::load(string dir, string filename)
 void Stage::cleanup()
 {
 	int i;
-	for (i=0; i<layer.size(); i++)
+	for (i=0; i<elem.size(); i++)
 	{
-		if (layer[i]->texid>=0) texRelease(layer[i]->texid);
-		delete layer[i];
+		if (elem[i]->texid>=0) texRelease(elem[i]->texid);
+		delete elem[i];
 	}
-	layer.resize(0);
+	elem.resize(0);
+	for (i=0; i<fx.size(); i++)
+	{
+		delete fx[i];
+	}
+	fx.resize(0);
 }
 
 void Stage::render()
 {
 	int i;
-	for (i=0; i<layer.size(); i++)
+	for (i=0; i<elem.size(); i++)
 	{
-		if (layer[i]->lv_foreground) continue;
-		if (!(layer[i]->lv_players & (1<<(numplayers-1)))) continue;
-		layer[i]->render();
+		if (elem[i]->lv_foreground) continue;
+		if (!(elem[i]->lv_players & (1<<(numplayers-1)))) continue;
+		elem[i]->render();
 	}
 }
 
 void Stage::renderForeground()
 {
 	int i;
-	for (i=0; i<layer.size(); i++)
+	for (i=0; i<elem.size(); i++)
 	{
-		if (!layer[i]->lv_foreground) continue;
-		if (!(layer[i]->lv_players & (1<<(numplayers-1)))) continue;
-		layer[i]->render();
+		if (elem[i]->lv_foreground!=1) continue;
+		if (!(elem[i]->lv_players & (1<<(numplayers-1)))) continue;
+		elem[i]->render();
 	}
 }
 

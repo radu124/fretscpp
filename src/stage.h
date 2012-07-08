@@ -7,60 +7,56 @@
 #include "scene.h"
 #include "sprites.h"
 #include "stagefx.h"
-
-enum SLBLENDTYPE { SLB_DEFAULT=0, SLB_ONE };
-
-#define SLINI_LIST \
-SLPD(int, xres, 256) \
-SLPD(int, yres, 256) \
-SLPD(int, players, 255) \
-SLPD(string, texture, "") \
-SLPD(mcolor, color, C_WHITE) \
-SLPD(GLfloat, xscale, 1) \
-SLPD(GLfloat, scale, 1) \
-SLPD(GLfloat, yscale, 1) \
-SLPD(GLfloat, xpos, 0) \
-SLPD(GLfloat, ypos, 0) \
-SLPD(GLfloat, xcenter, 0) \
-SLPD(GLfloat, ycenter, 0) \
-SLPD(GLfloat, angle, 0) \
-SLPD(SLBLENDTYPE, src_blending, SLB_DEFAULT) \
-SLPD(SLBLENDTYPE, dst_blending, SLB_DEFAULT) \
-SLPD(int, foreground, 0)
-
-#define SLPD_DECLARE(a,b,c) a lv_##b;
-#define SLPD_INIT(a,b,c) lv_##b = c;
-#define SLPD_READ(a,b,c) if (tsimatch(line,"" #b)) { CONFREAD_##a(line,lv_##b); return; }
-
-class Stage;
-
-class StageLayer
-{
-public:
-	string name;
-	Stage *parent;
-	int texid;
-	mcolor color;
-	int isBackground;
-	vector<StageLayerFx*> fx;
-	StageLayer();
-	void read(char *line);
-	void render();
-#define SLPD SLPD_DECLARE
-	SLINI_LIST
-#undef SLPD
-};
+#include "stageelement.h"
 
 class Stage
 {
 public:
-	vector<StageLayer*> layer;
+	/**
+	 * List of elements
+	 */
+	vector<tStageElem*> elem;
+	/**
+	 * List of layers
+	 */
+	vector<tStageFx*> fx;
+	/**
+	 * load the stage description from a file, including all required
+	 * textures
+	 */
 	virtual void load(string dir, string filename="stage.ini");
+	/**
+	 * deallocate everything
+	 */
 	void cleanup();
+	/**
+	 * render the non-foreground part of the stage,
+	 * all the elements not marked foreground=1
+	 */
 	void render();
+	/**
+	 * Render the foreground of the stage
+	 * for example what should come above menu text or
+	 * guitar neck
+	 *
+	 * these are the elements marked with foreground=1
+	 */
 	void renderForeground();
-	StageLayer *findLayer(string name);
-	StageLayerFx *findFX(StageLayer *base, string name);
+	/**
+	 * Return a pointer to the element with the given name,
+	 * create the element if it does not exist
+	 * @param name the Element name
+	 * @return pointer to Element
+	 */
+	tStageElem *findElem(string name);
+	/**
+	 * Return a pointer to the FX with the given name,
+	 * create the FX if it does not exist create an effect of the
+	 * type typ
+	 * @param name the FX name
+	 * @return pointer to FX
+	 */
+	tStageFx *findFX(string name, string typ="");
 	~Stage() { cleanup();}
 };
 

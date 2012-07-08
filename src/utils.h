@@ -23,4 +23,6 @@ T* dorealloc(T* &adr,int len)
 	adr=res;
 }
 
+vector<string> split_string(string s, char c);
+
 #endif

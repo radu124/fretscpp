@@ -49,4 +49,19 @@ string toString_int(int v)
 	return a;
 }
 
+vector<string> split_string(string s, char c)
+{
+	int pos=0,mark;
+	vector<string> res;
+	while (pos<s.length())
+	{
+		while (pos<s.length() && s[pos]==c) pos++;
+		if (pos>=s.length()) break;
+		mark=pos+1;
+		while (mark<s.length() && s[mark]!=c) mark++;
+		res.push_back(s.substr(pos,mark-pos));
+		pos=mark;
+	}
+	return res;
+}
 
