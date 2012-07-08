@@ -29,7 +29,7 @@ Source: "fretscpp.exe"; DestDir: "{app}"
 Source: "data\*"; DestDir: "{app}\data"; Flags: recursesubdirs
 ;Source: "*.dll"; DestDir: "{app}";
 Source: "dlsongs\*"; DestDir: "{app}\dlsongs";
-Source: "README"; DestDir: "{app}"; DestName: "README.TXT"; Flags: isreadme
+Source: "README.TXT"; DestDir: "{app}"; DestName: "README.TXT"; Flags: isreadme
 
 [Icons]
 Name: "{group}\Games";              Filename: "{app}\fretscpp.exe"; Tasks: startmicon
@@ -37,14 +37,14 @@ Name: "{commondesktop}\FretsC++";   Filename: "{app}\fretscpp.exe"; Tasks: deskt
 Name: "{userdesktop}\FretsC++";     Filename: "{app}\fretscpp.exe"; Tasks: desktopicon\user
 
 [Run]
-;Filename: "{app}\dlsongs\down-foforig.bat";   WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Original Frets-on-Fire";  Components: down\foforig
-Filename: "{app}\dlsongs\down-muldjord.bat";  WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Muldjord";                Components: down\muldjord
-Filename: "{app}\dlsongs\down-sectoid.bat";   WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Sectoid";                 Components: down\sectoid
-;Filename: "{app}\dlsongs\down-100ftsnow.bat"; WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... 100ft Snowman";           Components: down\100ftsnow
-;Filename: "{app}\dlsongs\down-hoshi.bat";     WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... hOSHI";                   Components: down\hoshi
-;Filename: "{app}\dlsongs\down-mhalo.bat";     WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... M-Halo";                  Components: down\mhalo
-Filename: "{app}\dlsongs\down-rustyjazz.bat"; WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Rusty Jazz MotorFuck";    Components: down\rustyjazz
-;Filename: "{app}\dlsongs\down-scenery.bat";   WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Scenery Channel";         Components: down\scenery
+;Filename: "{cmd}"; Parameters: "/c ""down-foforig.bat";   WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Original Frets-on-Fire";  Components: down\foforig
+ Filename: "{cmd}"; Parameters: "/c ""down-muldjord.bat";  WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Muldjord";                Components: down\muldjord
+ Filename: "{cmd}"; Parameters: "/c ""down-sectoid.bat";   WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Sectoid";                 Components: down\sectoid
+;Filename: "{cmd}"; Parameters: "/c ""down-100ftsnow.bat"; WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... 100ft Snowman";           Components: down\100ftsnow
+;Filename: "{cmd}"; Parameters: "/c ""down-hoshi.bat";     WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... hOSHI";                   Components: down\hoshi
+;Filename: "{cmd}"; Parameters: "/c ""down-mhalo.bat";     WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... M-Halo";                  Components: down\mhalo
+ Filename: "{cmd}"; Parameters: "/c ""down-rustyjazz.bat"; WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Rusty Jazz MotorFuck";    Components: down\rustyjazz
+;Filename: "{cmd}"; Parameters: "/c ""down-scenery.bat";   WorkingDir: "{app}\dlsongs"; StatusMsg: "Downloading Songs ... Scenery Channel";         Components: down\scenery
 
 Filename: "{app}\fretscpp.exe"; Description: "Launch game"; Flags: postinstall nowait skipifsilent unchecked
 
