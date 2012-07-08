@@ -12,7 +12,7 @@ ifeq ($(UNCOMMITTED),1)
 else
   VERDATE:=$(shell TZ=UTC git log -n 1 --format="format:%cd" --date=short)
   VERMINOR:=$(shell TZ=UTC git log --since $(VERDATE):00:00:00 --format="oneline" | wc -l)
-  THEVER=$(VERDATE)-$(VERMINOR)
+  THEVER=$(subst -,.,$(VERDATE)).$(VERMINOR)
 endif
 
 
@@ -30,7 +30,7 @@ DATAFILES=$(shell find $(FOFMYBASE)/data -type f)
 
 ##
 # Windows build
-WINSPECIFIC=$(FOFMYBASE)/windows/make2.bat $(wildcard $(FOFMYBASE)/windows/*.rc) $(wildcard $(FOFMYBASE)/windows/*.ico)
+WINSPECIFIC=$(wildcard $(FOFMYBASE)/windows/*.rc) $(wildcard $(FOFMYBASE)/windows/*.ico)
 WINDEFS=-DDISABLEMESSAGES -D_WINDOWS -D_GNU_SOURCE=1 -Dmain=SDL_main 
 WINLIBS=-L/mingw/lib -lmingw32 -lSDLmain -lSDL -lSDLmain -liconv -lm -luser32 -lgdi32 -lwinmm -lopengl32 -lglu32 -lpng -lfreetype -lz c:/MinGW/lib/libogv.a -lvpx
 WININCL=-Ic:/MinGW/include -Ic:/MinGW/include/freetype2 -Ic:/MinGW/include/SDL
@@ -97,4 +97,4 @@ clean:
 push-win: build-wininst/setup_fretscpp.exe
 	mkdir -p push
 	cp $< push/fretscpp-$(THEVER)-setup.exe
-	googlecode_upload -s fretscpp-$(THEVER)-setup.exe -p fretscpp -u $(GOOGLECODE_USER) -w $(GOOGLECODE_PASS) -l Featured push/fretscpp-$(THEVER)-setup.exe
+	googlecode_upload -s "Fretscpp $(THEVER) Windows Setup" -p fretscpp -u $(GOOGLECODE_USER) -w $(GOOGLECODE_PASS) -l Featured push/fretscpp-$(THEVER)-setup.exe
