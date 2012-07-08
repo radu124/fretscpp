@@ -80,13 +80,13 @@ int main( int argc, char* argv[] )
 	st_settm =new Stage();
 	playgfx  =new playGfx();
 
-	stagePlay->load(datadir+"/stages/"+themeStage);
-	st_mainm ->load(datadir+"/st_mainm/"+themeMainm);
-	st_sopts ->load(datadir+"/st_sopts/"+themeSopts);
-	st_slist ->load(datadir+"/st_slist/"+themeSlist);
-	st_score ->load(datadir+"/st_score/"+themeScore);
-	st_settm ->load(datadir+"/st_settm/"+themeScore);
-	playgfx  ->load(datadir+"/playgfx/"+themePlay);
+	stagePlay->load(datadir+"/stages/"   +selthm_Stage);
+	playgfx  ->load(datadir+"/playgfx/"  +selthm_Playg);
+	st_mainm ->load(datadir+"/menutheme/"+selthm_Menus, "mainmenu.ini");
+	st_sopts ->load(datadir+"/menutheme/"+selthm_Menus, "startsongmenu.ini");
+	st_slist ->load(datadir+"/menutheme/"+selthm_Menus, "songlist.ini");
+	st_score ->load(datadir+"/menutheme/"+selthm_Menus, "scoremenu.ini");
+	st_settm ->load(datadir+"/menutheme/"+selthm_Menus, "settingsmenu.ini");
 
 	init_audio();
 	load_all_sfx();

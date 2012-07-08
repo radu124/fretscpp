@@ -11,7 +11,7 @@ ifeq ($(UNCOMMITTED),1)
   THEVER:=TEMPORARY
 else
   VERDATE:=$(shell TZ=UTC git log -n 1 --format="format:%cd" --date=short)
-  VERMINOR:=$(shell TZ=UTC git log --since $(VERDATE) --format="oneline" | wc -l)
+  VERMINOR:=$(shell TZ=UTC git log --since $(VERDATE):00:00:00 --format="oneline" | wc -l)
   THEVER=$(VERDATE)-$(VERMINOR)
 endif
 

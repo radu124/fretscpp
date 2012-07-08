@@ -97,6 +97,7 @@ void Stage::load(string dir, string filename)
 	char line[1024];
 	int mode=0;
 	int i;
+	cleanup();
 	StageLayer *crtl=NULL;
 	StageLayerFx *crtf=NULL;
 	FILE *fc=fopen((dir+"/"+filename).c_str(),"r");

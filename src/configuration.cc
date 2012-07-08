@@ -38,13 +38,9 @@ int themeNeckidx;
 // the config name of the neck: themeNeckname
 vstring themeNecknames;
 vstring themeNeckfilenames;
-vstring themeStages;
-vstring themesMainm;
-vstring themesScore;
-vstring themesSlist;
-vstring themesSopts;
-vstring themesSettm;
-vstring themesPlay;
+vstring themes_Stage;
+vstring themes_Menus;
+vstring themes_Playg;
 
 
 vector<tKeydefset> keydefs;

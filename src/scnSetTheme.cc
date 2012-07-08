@@ -54,21 +54,17 @@ void theme_init()
 
 void tScnSetTheme::init()
 {
-	themeStages=listDirContents(datadir+"/stages",3);
-	themesMainm=listDirContents(datadir+"/st_mainm",3);
-	themesScore=listDirContents(datadir+"/st_score",3);
-	themesSlist=listDirContents(datadir+"/st_slist",3);
-	themesSopts=listDirContents(datadir+"/st_sopts",3);
-	themesSettm=listDirContents(datadir+"/st_settm",3);
-	themesPlay=listDirContents(datadir+"/playgfx",3);
-	additem(new tSIlist("Neck",themeNecknames,&themeNeckidx));
-	additem(new tSIlist("Stage",themeStages,&themeStage));
-	additem(new tSIlist("Main Menu"    ,themesMainm,&themeMainm));
-	additem(new tSIlist("Song list"    ,themesSlist,&themeSlist));
-	additem(new tSIlist("Song Options" ,themesSopts,&themeSopts));
-	additem(new tSIlist("Score Screen" ,themesScore,&themeScore));
-	additem(new tSIlist("Settings Menu",themesSettm,&themeSettm));
-	additem(new tSIlist("Gameplay Elements",themesPlay,&themePlay));
+	themes_Stage=listDirContents(datadir+"/stages",3);
+	themes_Menus=listDirContents(datadir+"/menutheme",3);
+	themes_Playg=listDirContents(datadir+"/playgfx",3);
+	//themesScore=listDirContents(datadir+"/st_score",3);
+	//themesSlist=listDirContents(datadir+"/st_slist",3);
+	//themesSopts=listDirContents(datadir+"/st_sopts",3);
+	//themesSettm=listDirContents(datadir+"/st_settm",3);
+	additem(new tSIlist("Neck"        ,themeNecknames,&themeNeckidx));
+	additem(new tSIlist("Stage"       ,themes_Stage,&selthm_Stage));
+	additem(new tSIlist("Main Menu"   ,themes_Menus,&selthm_Menus));
+	additem(new tSIlist("Gameplay Elements", themes_Playg, &selthm_Playg));
 	additem(new tSIintrange("Neck transparency",0,90,&themeNecktransparency,10));
 	tScnSetBase::init();
 }
@@ -84,32 +80,18 @@ void tScnSetTheme::itemAdjusted(int i)
 		sp_neck=texLoad(themeNeckfilename);
 		break;
 	case 1:
-		stagePlay->cleanup();
-		stagePlay->load(datadir+"/stages/"+themeStage);
+		stagePlay->load(datadir+"/stages/"+selthm_Stage);
 		break;
 	case 2:
-		st_mainm->cleanup();
-		st_mainm->load(datadir+"/st_mainm/"+themeMainm);
+		st_mainm ->load(datadir+"/menutheme/"+selthm_Menus, "mainmenu.ini");
+		st_sopts ->load(datadir+"/menutheme/"+selthm_Menus, "startsongmenu.ini");
+		st_slist ->load(datadir+"/menutheme/"+selthm_Menus, "songlist.ini");
+		st_score ->load(datadir+"/menutheme/"+selthm_Menus, "scoremenu.ini");
+		st_settm ->load(datadir+"/menutheme/"+selthm_Menus, "settingsmenu.ini");
 		break;
 	case 3:
-		st_slist->cleanup();
-		st_slist->load(datadir+"/st_slist/"+themeSlist);
-		break;
-	case 4:
-		st_sopts->cleanup();
-		st_sopts->load(datadir+"/st_sopts/"+themeSopts);
-		break;
-	case 5:
-		st_score->cleanup();
-		st_score->load(datadir+"/st_score/"+themeScore);
-		break;
-	case 6:
-		st_settm->cleanup();
-		st_settm->load(datadir+"/st_settm/"+themeSettm);
-		break;
-	case 7:
 		playgfx->cleanup();
-		playgfx->load(datadir+"/playgfx/"+themePlay);
+		playgfx->load(datadir+"/playgfx/"+selthm_Playg);
 		break;
 	}
 }

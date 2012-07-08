@@ -36,13 +36,9 @@ extern int themeNeckidx;
 // the config name of the neck: themeNeckname
 extern vstring themeNecknames;
 extern vstring themeNeckfilenames;
-extern vstring themeStages;
-extern vstring themesPlay;
-extern vstring themesMainm;
-extern vstring themesScore;
-extern vstring themesSlist;
-extern vstring themesSopts;
-extern vstring themesSettm;
+extern vstring themes_Stage;
+extern vstring themes_Playg;
+extern vstring themes_Menus;
 
 /**
  * This is a list of configuration variables, their types and default values
@@ -75,13 +71,9 @@ CONFIGITEM(int,video_dofullscreen,0)            /* video full screen      */  \
 CONFIGITEM(int,video_overrideres,0)             /* video not desktop res  */  \
 CONFIGITEM(int,scr_width,800)                   /* screen/window horiz res*/  \
 CONFIGITEM(int,scr_height,600)                  /* screen/window vert res */  \
-CONFIGITEM(string,themeStage,"rf-mod")          /* theme - stage (play)   */  \
-CONFIGITEM(string,themeMainm,"default")         /* theme - main menu      */  \
-CONFIGITEM(string,themeScore,"default")         /* theme - score scene    */  \
-CONFIGITEM(string,themeSlist,"default")         /* theme - song list      */  \
-CONFIGITEM(string,themeSopts,"default")         /* theme - song options   */  \
-CONFIGITEM(string,themeSettm,"default")         /* theme - settings scene */  \
-CONFIGITEM(string,themePlay,"default")          /* theme - gameplay elements */  \
+CONFIGITEM(string,selthm_Stage,"rf-mod")        /* theme - stage (play)   */  \
+CONFIGITEM(string,selthm_Menus,"default")       /* theme - main menu      */  \
+CONFIGITEM(string,selthm_Playg,"default")       /* theme - gameplay elements */  \
 CONFIGITEM(string,themeNeckname,"Default")      /* theme - neck name      */  \
 CONFIGITEM(int,themeNecktransparency,0)         /* theme - neck alpha     */  \
 CONFIGITEM(GLfloat,neckpos_extend,0)            /* neck - extend          */  \
