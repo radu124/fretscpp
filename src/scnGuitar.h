@@ -6,6 +6,8 @@
 #include "scnMenu.h"
 #include "midiparser.h"
 
+class tPlayer;
+
 class tSceneGuitar:public tScnMenuBase
 {
 public:
@@ -19,11 +21,9 @@ public:
 	int timenow;
 	int timelasthit;
 	int timelastmiss;
-	int cplayer;
-	int cinstrument;
-	int cdifficulty;
 	int statsmode;
 	int shouldstillstart;
+	tPlayer *pp;
 	vector<notestatusst> *lane;
 	void enter();
 	void init();

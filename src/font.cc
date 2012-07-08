@@ -165,7 +165,7 @@ void TFont::reloadAll()
 		DBG(FONT,"Bitmap size char %c, W:%3d, h:%3d, v%3d, ->%d, adv:%f\n"
 			,((ch<32)?'?':ch)
 			,bmp.width
-    		,bmp.rows &disp_v &disp_h
+    		,bmp.rows ,disp_v ,disp_h
 			,(face->glyph->advance.x/64.0f));
 	}
 }

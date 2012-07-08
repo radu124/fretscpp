@@ -84,7 +84,7 @@ int main( int argc, char* argv[] )
 	playgfx  ->load(datadir+"/playgfx/"  +selthm_Playg);
 	st_mainm ->load(datadir+"/menutheme/"+selthm_Menus, "mainmenu.ini");
 	st_sopts ->load(datadir+"/menutheme/"+selthm_Menus, "startsongmenu.ini");
-	st_slist ->load(datadir+"/menutheme/"+selthm_Menus, "songlist.ini");
+	st_slist ->load(datadir+"/menutheme/"+selthm_Menus, "songslist.ini");
 	st_score ->load(datadir+"/menutheme/"+selthm_Menus, "scoremenu.ini");
 	st_settm ->load(datadir+"/menutheme/"+selthm_Menus, "settingsmenu.ini");
 

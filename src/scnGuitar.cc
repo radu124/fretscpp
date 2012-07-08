@@ -54,7 +54,7 @@ void tSceneGuitar::render()
 {
 //	fprintf(stderr,"P%d:S%d:E%d:Pl%d %d/%d-%d-%d--%d-%d-%d\n",playing.pause,playing.stalled,playing.songended,playing.playing,playing.playpos,
 //		playing.stopsat[0],playing.stopsat[1],playing.stopsat[2],playing.decodepos[0],playing.decodepos[1],playing.decodepos[2]);
-
+	int cplayer;
 	if (playing.songended)
 	{
 		fadetoscene(SCN_SCORE);
@@ -66,9 +66,8 @@ void tSceneGuitar::render()
 	updatetime();
 	for (cplayer=0; cplayer<numplayers; cplayer++)
 	{
-		cinstrument=player[cplayer].instrument;
-		cdifficulty=player[cplayer].difficulty;
-		lane=&player[cplayer].lane;
+		pp  =&player[cplayer];
+		lane=&pp->lane;
 		scene_setNeck(cplayer,numplayers);
 		noteRegion();
 		player[cplayer].passtime(timenow);
@@ -84,9 +83,8 @@ void tSceneGuitar::render()
 	for (cplayer=0; cplayer<numplayers; cplayer++)
 	{
 		activeneckpos=cplayer+numplayers*(numplayers-1)/2;
-		cinstrument=player[cplayer].instrument;
-		cdifficulty=player[cplayer].difficulty;
-		lane=&player[cplayer].lane;
+		pp  =&player[cplayer];
+		lane=&pp->lane;
 		renderMultiplierVal();
 		renderStats();
 	}

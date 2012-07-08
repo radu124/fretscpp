@@ -25,10 +25,9 @@ GNU General Public License for more details.
 
 void tSceneGuitar::renderMultiplier()
 {
-	tPlayer &pp=player[cplayer];
-	if (timenow-pp.timemultiplier<40000)
+	if (timenow-pp->timemultiplier<40000)
 	{
-		GLfloat sv=(timenow-pp.timemultiplier)/8000.0;
+		GLfloat sv=(timenow-pp->timemultiplier)/8000.0;
 		glPushMatrix();
 		glTranslatef(0, 2, 0);
 		glRotatef(60, 1, 0, 0);
@@ -36,9 +35,9 @@ void tSceneGuitar::renderMultiplier()
 		glScalef(sv,sv,1);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-		if (pp.stat_streak>=30) texDraw(sp_m4);
-		else if (pp.stat_streak>=20) texDraw(sp_m3);
-		else if (pp.stat_streak>=10) texDraw(sp_m2);
+		if (pp->stat_streak>=30) texDraw(sp_m4);
+		else if (pp->stat_streak>=20) texDraw(sp_m3);
+		else if (pp->stat_streak>=10) texDraw(sp_m2);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPopMatrix();
 	}
@@ -51,12 +50,10 @@ void tSceneGuitar::renderFlame(int col, GLfloat sz)
 void tSceneGuitar::renderFlames()
 {
 	int i;
-	tPlayer &pp=player[cplayer];
-
 	for (i=0; i<5; i++)
 	{
-		if ((pp.hitactive && pp.lastkeys[i])
-			|| (pp.lasthit[i]+10000>timenow))
+		if ((pp->hitactive && pp->lastkeys[i])
+			|| (pp->lasthit[i]+10000>timenow))
 		{
 			rfFlame(i,1);
 		}
@@ -170,12 +167,11 @@ void tSceneGuitar::rfFlames2()
 	int i,j;
 	const int flameLimit = 10.0;
 	const int flameLimitHalf = flameLimit/2;
-    tPlayer &pp=player[cplayer];
 	int evfc=0; //event.flameCount
-    GLfloat sang=60;
-    glBlendFunc(GL_ONE, GL_ONE);
-    MESSAGE("\n");
-    for (i=pp.crtnote-1; i>=0; i--)
+	GLfloat sang=60;
+	glBlendFunc(GL_ONE, GL_ONE);
+	MESSAGE("\n");
+	for (i=pp->crtnote-1; i>=0; i--)
 	{
 		MESSAGE(".");
 		int nts=lane[0][i].timestamp;
@@ -197,9 +193,9 @@ void tSceneGuitar::rfFlames2()
 			ff = 1.25;
 			y = -boardline; //-ff / 6; //v +
 
-			flameSize = (10-9/(3+pp.stat_streak))*((timenow-nts)/10000000.0);
+			flameSize = (10-9/(3+pp->stat_streak))*((timenow-nts)/10000000.0);
 
-			mult=pp.stat_streak/10;
+			mult=pp->stat_streak/10;
 			if (mult>3) mult=3;
 			flameColor[0] = keycolors[mult][0]; // ev.number
 			flameColor[1] = keycolors[mult][1];

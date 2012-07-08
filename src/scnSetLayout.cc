@@ -87,7 +87,8 @@ void tScnSetLayout::render()
 	scene_setOrtho();
 	for (cplayer=0; cplayer<np; cplayer++)
 	{
-		guitarScene.cplayer=cplayer;
+		guitarScene.pp=&player[MAX_PLAYERS];
+		guitarScene.lane=&player[MAX_PLAYERS].lane;
 		guitarScene.activeneckpos=cplayer+np*(np-1)/2;
 		guitarScene.renderMultiplierVal();
 		guitarScene.renderStats();

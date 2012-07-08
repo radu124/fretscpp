@@ -22,7 +22,8 @@ GNU General Public License for more details.
 #include "configuration.h"
 #include "audiosfx.h"
 
-tPlayer player[MAX_PLAYERS];
+// + 1 dummy player
+tPlayer player[MAX_PLAYERS+1];
 
 void tPlayer::whammyaxis(int v)
 {

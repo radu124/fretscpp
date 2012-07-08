@@ -25,24 +25,23 @@ GNU General Public License for more details.
 
 GLfloat tSceneGuitar::notePos(int timestamp)
 {
-	GLfloat velo=player[cplayer].neckvelocity;
+	GLfloat velo=pp->neckvelocity;
 	if (timestamp<0) return -boardline;
 	return (timestamp-timenow)/44100.0*2.2*velo-boardline;
 }
 
 void tSceneGuitar::noteRegion()
 {
-	tPlayer &pp=player[cplayer];
-	pp.nextnote=pp.crtnote;
-	while (pp.nextnote<lane->size())
+	pp->nextnote=pp->crtnote;
+	while (pp->nextnote<lane->size())
 	{
-		if (lane[0][pp.nextnote].timestamp>timenow) break;
-		pp.nextnote++;
+		if (lane[0][pp->nextnote].timestamp>timenow) break;
+		pp->nextnote++;
 	}
 	//INFO(SCNGUITAR,"note %d\n" &crtnote);
-	for (pp.farrnote=pp.nextnote; pp.farrnote<lane->size(); pp.farrnote++)
+	for (pp->farrnote=pp->nextnote; pp->farrnote<lane->size(); pp->farrnote++)
 	{
-		if (lane[0][pp.farrnote].timestamp>timenow+120000) break;
+		if (lane[0][pp->farrnote].timestamp>timenow+120000) break;
 	}
 }
 
@@ -70,7 +69,7 @@ int tSceneGuitar::renderNote(int col, int ts, int flags)
 	glRotatef(60,1,0,0);
 	glScalef(sz,sz,sz);
 	texDraw(playgfx->note[col]);
-	if (playgfx->notehl[col] && (flags & ENS_TAPPABLE) && player[cplayer].maytap)
+	if (playgfx->notehl[col] && (flags & ENS_TAPPABLE) && pp->maytap)
 	{
 		// not nice that I hardcoded this, maybe it would be better
 		// to defer it to the layer for display, this way we can also
@@ -86,15 +85,14 @@ int tSceneGuitar::renderNote(int col, int ts, int flags)
 
 void tSceneGuitar::renderNoteLine(int col, GLfloat from, GLfloat to, int flags)
 {
-	tPlayer &pp=player[cplayer];
 	int i;
 	GLfloat c0,c1,c2;
 	c0=keycolors[col][0];
 	c1=keycolors[col][1];
 	c2=keycolors[col][2];
 
-	if (flags==2 && !pp.hitactive) c0=c1=c2=0.5;
-	if (flags==2 && pp.hitactive)
+	if (flags==2 && !pp->hitactive) c0=c1=c2=0.5;
+	if (flags==2 && pp->hitactive)
 	{
 		c0=1; c1=1; c2=0;
 	}
@@ -105,7 +103,7 @@ void tSceneGuitar::renderNoteLine(int col, GLfloat from, GLfloat to, int flags)
 	col-=2;
 	glBegin(GL_TRIANGLE_STRIP);
 	glColor4f(c0,c1,c2,0.7f);
-	if (flags==2 && pp.hitactive)
+	if (flags==2 && pp->hitactive)
 	{
 		glTexCoord2f(0.0f,1); glVertex3f(col-lw,from,0);
 		glTexCoord2f(1.0f,1); glVertex3f(col+lw,from,0);
@@ -114,7 +112,7 @@ void tSceneGuitar::renderNoteLine(int col, GLfloat from, GLfloat to, int flags)
 			if (from+i*0.2+0.2>to) break;
 			GLfloat a1=0.1*sin(timenow*0.0001+i*0.3)+0.1*sin(timenow*0.0001754-i*0.3)+0.1*sin(timenow*0.0001754);
 			GLfloat a2=0;
-			if (pp.whammyon) a2=0.1*sin(i*0.5-timenow*0.0001);
+			if (pp->whammyon) a2=0.1*sin(i*0.5-timenow*0.0001);
 			glTexCoord2f(0.0f,1); glVertex3f(col-lw-a1+a2,from+i*0.2,0);
 			glTexCoord2f(1.0f,1); glVertex3f(col+lw+a1+a2,from+i*0.2,0);
 		}
@@ -139,15 +137,14 @@ void tSceneGuitar::renderNoteLine(int col, GLfloat from, GLfloat to, int flags)
 
 void tSceneGuitar::renderNoteLines()
 {
-	tPlayer &pp=player[cplayer];
 	GLfloat startNote[5];
 	int active[5];
 	int activecount=0;
 	int i,j;
 	startNote[0]=notePos(-1);
 	notestatusst v;
-	if (pp.nextnote>0)
-		v=lane[0][pp.nextnote-1];
+	if (pp->nextnote>0)
+		v=lane[0][pp->nextnote-1];
 	for (i=0; i<5; i++)
 	{
 		char ch=v.val[i];
@@ -155,8 +152,8 @@ void tSceneGuitar::renderNoteLines()
 		if (active[i]) activecount++;
 		startNote[i]=startNote[0];
 	}
-	if (!activecount) pp.hitactive=0;
-	for (j=pp.nextnote; j<pp.farrnote; j++)
+	if (!activecount) pp->hitactive=0;
+	for (j=pp->nextnote; j<pp->farrnote; j++)
 	{
 		v=lane[0][j];
 		GLfloat lend=notePos(v.timestamp);
@@ -184,9 +181,8 @@ void tSceneGuitar::renderNoteLines()
 void tSceneGuitar::renderNotes()
 {
 	int i,j;
-	tPlayer &pp=player[cplayer];
-	//MESSAGE("notes: %d %d" &pp.nextnote &pp.farrnote);
-	for (i=pp.farrnote-1; i>=pp.nextnote; i--)
+	//MESSAGE("notes: %d %d" &pp->nextnote &pp->farrnote);
+	for (i=pp->farrnote-1; i>=pp->nextnote; i--)
 	{
 		notestatusst v=lane[0][i];
 		int res;

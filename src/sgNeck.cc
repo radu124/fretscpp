@@ -23,7 +23,7 @@ GNU General Public License for more details.
 void tSceneGuitar::renderNeck()
 {
 	GLfloat s0,s1,s3;
-	GLfloat velo=player[cplayer].neckvelocity;
+	GLfloat velo=pp->neckvelocity;
 	GLfloat stretch=1;
 	s0=timenow*0.00001*velo;
 	s0=s0-(int) s0;

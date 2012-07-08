@@ -311,7 +311,8 @@ public:
 
 const int MAX_PLAYERS=4;
 
-extern tPlayer player[MAX_PLAYERS];
+// + 1 dummy player for theme menus
+extern tPlayer player[MAX_PLAYERS+1];
 
 
 #endif

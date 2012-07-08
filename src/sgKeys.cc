@@ -50,8 +50,8 @@ void tSceneGuitar::renderKey(int col, int flags)
 void tSceneGuitar::renderKeys()
 {
 	int i;
-	tPlayer &pp=player[cplayer];
-	for (i=0; i<5; i++) renderKey(i,pp.lastkeys[i] | pp.lastkeys[5]*2);
+	for (i=0; i<5; i++)
+		renderKey(i,pp->lastkeys[i] | pp->lastkeys[5]*2);
 }
 
 
