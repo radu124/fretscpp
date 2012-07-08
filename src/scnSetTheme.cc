@@ -61,10 +61,10 @@ void tScnSetTheme::init()
 	//themesSlist=listDirContents(datadir+"/st_slist",3);
 	//themesSopts=listDirContents(datadir+"/st_sopts",3);
 	//themesSettm=listDirContents(datadir+"/st_settm",3);
-	additem(new tSIlist("Neck"        ,themeNecknames,&themeNeckidx));
-	additem(new tSIlist("Stage"       ,themes_Stage,&selthm_Stage));
-	additem(new tSIlist("Main Menu"   ,themes_Menus,&selthm_Menus));
-	additem(new tSIlist("Gameplay Elements", themes_Playg, &selthm_Playg));
+	additem(new tSIlist("Neck"      ,themeNecknames,&themeNeckidx));
+	additem(new tSIlist("Stage"     ,themes_Stage,&selthm_Stage));
+	additem(new tSIlist("Menus"     ,themes_Menus,&selthm_Menus));
+	additem(new tSIlist("Game Items", themes_Playg, &selthm_Playg));
 	additem(new tSIintrange("Neck transparency",0,90,&themeNecktransparency,10));
 	tScnSetBase::init();
 }
@@ -100,14 +100,18 @@ void tScnSetTheme::render()
 {
 	int cplayer;
 
-	glPushMatrix();
-	glLoadIdentity();
-	glTranslatef(8,0,0);
-	glScalef(0.75,1,1);
-	stagePlay->render();
-	glPopMatrix();
+	st_settm->render();
 
-	scene_setNeck(0,5);
+	glViewport( (int) (scr_width*0.35), (int) (scr_height*0.05),
+		(int) (scr_width*0.6), (int) (scr_height*0.6) );
+	scene_setOrtho();
+
+	glLoadIdentity();
+	video_globalcleardisabled=1;
+	stagePlay->render();
+	video_globalcleardisabled=0;
+
+	scene_setNeck(0,1);
 	guitarScene.renderNeck();
 	guitarScene.renderTracks();
 
@@ -118,10 +122,11 @@ void tScnSetTheme::render()
 
 	glPushMatrix();
 	glLoadIdentity();
-	glTranslatef(8,0,0);
-	glScalef(0.75,1,1);
 	stagePlay->renderForeground();
 	glPopMatrix();
+
+	glViewport( 0, 0, scr_width, scr_height );
+	scene_setOrtho();
 
 	rendertext();
 }

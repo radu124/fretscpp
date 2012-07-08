@@ -39,8 +39,22 @@ void StageLayer::render()
 	int i;
 	if (isBackground)
 	{
-		glClearColor( lv_color.Red, lv_color.Green, lv_color.Blue, 0 );
-		glClear( GL_COLOR_BUFFER_BIT );
+		if (video_globalcleardisabled)
+		{
+			glColor4f( lv_color.Red, lv_color.Green, lv_color.Blue, 1.0 );
+			glBegin(GL_TRIANGLE_STRIP);
+			glVertex3f(-scr_lrlim, -scr_tblim, 0);
+			glVertex3f( scr_lrlim, -scr_tblim, 0);
+			glVertex3f(-scr_lrlim,  scr_tblim, 0);
+			glVertex3f( scr_lrlim,  scr_tblim, 0);
+			glEnd();
+		}
+		else
+		{
+			// plain clear, this may be faster?
+			glClearColor( lv_color.Red, lv_color.Green, lv_color.Blue, 0 );
+			glClear( GL_COLOR_BUFFER_BIT );
+		}
 		return;
 	}
 	glPushMatrix();

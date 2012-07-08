@@ -53,5 +53,5 @@ struct tVideoMode:public tConfigurable
 extern vector<tConfigurable*> videomodes;
 extern tVideoMode *fsvideomode;
 
-
+extern int video_globalcleardisabled;
 #endif

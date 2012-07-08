@@ -27,7 +27,7 @@ public:
 	char getMarker(int i, int j); // first letter of title
 	int groupStart(int i,int g);
 	void touch(int i, int j);
-	
+
 	/**
 	 * remember what the last command was so that we can skip in
 	 * the direction of the selection
@@ -46,7 +46,7 @@ public:
 	 * 4 = disabled
 	 */
 	vvint opt; // per item flags
-	
+
 	int selx, sely;
 	int baseh;
 	GLfloat colsize;
@@ -54,7 +54,7 @@ public:
 	int colsvisible;
 	int fixedcols;
 	int mustregenopt;
-	
+
 };
 
 

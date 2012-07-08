@@ -77,7 +77,7 @@ void tScnSetLayout::init()
 void tScnSetLayout::render()
 {
 	int cplayer;
-	st_settm->render();
+	stagePlay->render();
 	for (cplayer=0; cplayer<np; cplayer++)
 	{
 		scene_setNeck(cplayer,np);
