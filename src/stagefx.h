@@ -18,7 +18,6 @@ enum FXPROFILE { FXP_NONE=0, FXP_STEP, FXP_LINSTEP, FXP_SMOOTHSTEP, FXP_SINSTEP 
 #define FXINI_LIST \
 FXPD(FXTRIGGER,trigger,FXT_NONE) \
 FXPD(FXPROFILE,profile,FXP_NONE) \
-FXPD(int,light_number,0) \
 FXPD(GLfloat,xmagnitude,0.1) \
 FXPD(GLfloat,ymagnitude,0.1) \
 FXPD(GLfloat,ambient,0.5) \
@@ -38,13 +37,12 @@ class tStageElem;
 class tStageFx
 {
 public:
-	FXTYPE fx_type;
 	string name;
-	void apply(tStageElem *el);
+	virtual void apply(tStageElem *el);
+	virtual void read(char *line);
 	float trigval();
 	float trigprofiled();
 	tStageFx();
-	void read(char *line);
 #define FXPD FXPD_DECLARE
 	FXINI_LIST
 #undef FXPD

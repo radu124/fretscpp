@@ -61,12 +61,15 @@ void Stage::load(string dir, string filename)
 	cleanup();
 	tStageElem *crtl=NULL;
 	tStageFx *crtf=NULL;
+	INFO(STAGE,"Loading Stage : %s/%s\n",dir,filename);
 	FILE *fc=fopen((dir+"/"+filename).c_str(),"r");
 	if (!fc) return;
 
 	while (!feof(fc))
 	{
+		line[0]=0;
 		fgets(line,999,fc);
+		if (!strlen(line)) continue;
 		char *p, *sav, *fxs;
 		// eliminate CR,LF at the end of line
 		p=line+strlen(line)-1;
@@ -77,6 +80,8 @@ void Stage::load(string dir, string filename)
 		}
 		p=line;
 		while (*p==' ' || *p=='\t') p++;
+		if (*p==';' || *p=='#' || *p==0)
+			continue;
 		if (*p=='[')
 		{
 			sav=++p;
@@ -105,8 +110,6 @@ void Stage::load(string dir, string filename)
 			}
 			continue;
 		}
-		if (*p==';' || *p=='#')
-			continue;
 		if (mode==1) crtl->read(p);
 		if (mode==2) crtf->read(p);
 	}
@@ -174,6 +177,4 @@ void Stage::renderForeground()
 		elem[i]->render();
 	}
 }
-
-
 

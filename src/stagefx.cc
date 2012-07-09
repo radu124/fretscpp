@@ -20,13 +20,6 @@ GNU General Public License for more details.
 MULTIRDR(FXTRIGGER,"none,pick,miss,beat");
 MULTIRDR(FXPROFILE,"none,step,linstep,smoothstep,sinstep");
 
-tStageFx* createStageFx(string vtyp)
-{
-	tStageFx *fx=new tStageFx();
-	fx->fx_type=(FXTYPE) multiplechoice(vtyp.c_str(),"none,scale,light,wiggle,rotoback,jumpinleft,wobble,tvfade,rotate");
-	return fx;
-}
-
 tStageFx::tStageFx()
 {
 #define FXPD FXPD_INIT
@@ -39,6 +32,7 @@ void tStageFx::read(char *line)
 #define FXPD FXPD_READ
 	FXINI_LIST
 #undef FXPD
+	WARN(STAGEFX,"Unknown parameter %s\n",line);
 }
 
 float tStageFx::trigval()
@@ -78,54 +72,103 @@ float beatprofile(float x)
 	return 1.25-x*1.25;
 }
 
-void tStageFx::apply(tStageElem *el)
+class tFXrotoback:public tStageFx
 {
-	GLfloat t,s,v;
-	switch (fx_type)
+public:
+	void apply(tStageElem *el)
 	{
-	case FX_ROTOBACK:
-		t=scn.timesc*0.33;
+		GLfloat t=scn.timesc*0.33;
 		glTranslatef(cos(t/2)*16, sin(t)*16, 0);
 		glRotatef(t*53.3f+30,0.0,0.0,1.0);
-		s=(2+sin(t/8))/2;
+		GLfloat s=(2+sin(t/8))/2;
 		glScalef(s, s, 1.0);
-		break;
-	case FX_WOBBLE:
-		v=scn.fade*2;
+	}
+};
+
+class tFXwobble:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+		GLfloat v=scn.fade*2;
 		v=(v>1)?1:v*v;
-		t=scn.timesc*0.33;
+		GLfloat t=scn.timesc*0.33;
 		glScalef(1+0.025*sin(t*16), 1+0.025*sin(t*17),1.0);
-		break;
-	case FX_TVFADE:
-		v=scn.fade*2;
+	}
+};
+
+class tFXtvfade:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+		GLfloat v=scn.fade*2;
 		v=(v>1)?1:v*v;
 		glScalef(1,1-v*v*v,1.0);
 		if (v>0.95) el->color.Alpha=0;
-		break;
-	case FX_JUMPINLEFT:
-		v=scn.fade*2;
+	}
+};
+
+class tFXjumpinleft:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+		GLfloat v=scn.fade*2;
 		v=(v>1)?1:v*v;
 		glTranslatef(v*v*80, 0, 0);
-		break;
-	case FX_WIGGLE:
-		v=sin(trigval()*1.57);
+	}
+};
+
+class tFXwiggle:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+		GLfloat v=sin(trigval()*1.57);
 		glTranslatef(sin(6.28*v)*fx_xmagnitude*el->lv_xscale*10,cos(6.28*v)*fx_ymagnitude*el->lv_yscale*10,0);
-		break;
-	case FX_SCALE:
-		v=beatprofile(trigval());
+	}
+};
+
+class tFXscale:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+		GLfloat v=beatprofile(trigval());
 		glScalef(1+v*fx_xmagnitude,1+v*fx_ymagnitude,0);
-		break;
-	case FX_ROTATE:
-		v=trigprofiled();
+	}
+};
+
+class tFXrotate:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+		GLfloat v=trigprofiled();
 		glRotatef(v*fx_angle,0.0,0.0,1.0);
-		break;
-	case FX_LIGHT:
-		if (guitarScene.timenow<=fx_light_number*44100)
+	}
+};
+
+class tFXlight:public tStageFx
+{
+public:
+	GLfloat fx_offbefore;
+	tFXlight():fx_offbefore(0)
+		{;}
+	void read(char *line)
+	{
+		FXPD_READ(GLfloat,offbefore,);
+		tStageFx::read(line);
+	}
+	void apply(tStageElem *el)
+	{
+		if (guitarScene.timenow<=fx_offbefore*44100)
 		{
 			el->color=C_TRANSPARENT;
 			return;
 		}
-		v=trigval()*0.9;
+		GLfloat v=trigval()*0.9;
 		if (v<0) v=0;
 		else if (v<0.2) v=v*8;
 		else if (v<1) v=2-v*2;
@@ -133,9 +176,33 @@ void tStageFx::apply(tStageElem *el)
 		if (v<0.01) return;
 		mcolor efcolor(1,1,0.8,0.8);
 		el->color.weight(el->color,efcolor,v*fx_intensity);
-		break;
 	}
+};
+
+
+class tFXdummy:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+	}
+};
+
+void tStageFx::apply(tStageElem *el) {};
+
+tStageFx* createStageFx(string vtyp)
+{
+	if (vtyp=="scale")  { return new tFXscale(); }
+	if (vtyp=="rotate") { return new tFXrotate(); }
+	if (vtyp=="light")  { return new tFXlight(); }
+
+	if (vtyp=="rotoback") { return new tFXrotoback(); }
+	if (vtyp=="jumpinleft") { return new tFXjumpinleft(); }
+	if (vtyp=="wobble") { return new tFXwobble(); }
+	if (vtyp=="wiggle") { return new tFXwiggle(); }
+	if (vtyp=="tvfade") { return new tFXtvfade(); }
+//	if (vtyp=="") { return new tFX(); }
+	WARN(STAGEFX,"Unknown effect: %s\n",vtyp);
+	return new tStageFx();
 }
-
-
 
