@@ -28,6 +28,8 @@ public:
 
 #define __COND_DBG_OUT(cond,...) do { if (!(cond)) break; { MESSAGEWRITER __MW(stderr); __MW , __VA_ARGS__; }} while(0)
 
+#define __COND_DBG_OUT_COLOR(cond,...) do { if (!(cond)) break; { fprintf(stderr,"\033[35m"); MESSAGEWRITER __MW(stderr); __MW , __VA_ARGS__; fprintf(stderr,"\033[0m"); }} while(0)
+
 #define __FILE_OUT(fou,...) do { {MESSAGEWRITER __MW(fou); __MW , __VA_ARGS__;} } while(0)
 
 #define assume(cond,...) \

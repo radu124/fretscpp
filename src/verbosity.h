@@ -41,11 +41,12 @@ const int MSG_SONGINI     = LEV_INFO   ;
 const int MSG_SCORES      = LEV_DBG    ;
 const int MSG_CONFIG      = LEV_DBG    ;
 const int MSG_STAGE       = LEV_DBG    ;
+const int MSG_STAGEFX     = LEV_DBG    ;
 const int MSG_PNGREAD     = LEV_DBG    ;
 const int MSG_TEXMAN      = LEV_INFO   ;
 
 #define INFO(tgt,...)    __COND_DBG_OUT(MSG_##tgt >= MSG_BIAS+LEV_INFO,__VA_ARGS__)
-#define WARN(tgt,...)    __COND_DBG_OUT(MSG_##tgt >= MSG_BIAS+LEV_WARN,__VA_ARGS__)
+#define WARN(tgt,...)    __COND_DBG_OUT_COLOR(MSG_##tgt >= MSG_BIAS+LEV_WARN,__VA_ARGS__)
 #define DBG(tgt,...)     __COND_DBG_OUT(MSG_##tgt >= MSG_BIAS+LEV_DBG, __VA_ARGS__)
 #define VDBG(tgt,...)    __COND_DBG_OUT(MSG_##tgt >= MSG_BIAS+LEV_VDBG, __VA_ARGS__)
 
