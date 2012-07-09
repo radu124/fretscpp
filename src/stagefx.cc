@@ -22,13 +22,24 @@ MULTIRDR(FXPROFILE,"none,step,linstep,smoothstep,sinstep");
 
 tStageFx::tStageFx()
 {
+	fx_profile=FXP_NONE;
+	fx_trigger=FXT_NONE;
 #define FXPD FXPD_INIT
+	FXINI_LIST
+#undef FXPD
+}
+
+tStageFx::~tStageFx()
+{
+#define FXPD FXPD_DELETE
 	FXINI_LIST
 #undef FXPD
 }
 
 void tStageFx::read(char *line)
 {
+	if (tsimatch(line,"profile")) { CONFREAD_FXPROFILE(line,fx_profile); return; }
+	if (tsimatch(line,"trigger")) { CONFREAD_FXTRIGGER(line,fx_trigger); return; }
 #define FXPD FXPD_READ
 	FXINI_LIST
 #undef FXPD
@@ -41,13 +52,13 @@ float tStageFx::trigval()
 	switch (fx_trigger)
 	{
 	case FXT_BEAT:
-		return modf(guitarScene.timenow*0.000024*fx_frequency,&temp);
+		return modf(guitarScene.timenow*0.000024*fx_frequency->val(),&temp);
 	case FXT_MISS:
-		return (guitarScene.timenow-guitarScene.timelastmiss)*2.267e-02/fx_period;
+		return (guitarScene.timenow-guitarScene.timelastmiss)*2.267e-02/fx_period->val();
 	case FXT_PICK:
-		return (guitarScene.timenow-guitarScene.timelasthit)*2.267e-02/fx_period;
+		return (guitarScene.timenow-guitarScene.timelasthit)*2.267e-02/fx_period->val();
 	}
-	return 0;
+	return 1;
 }
 
 float tStageFx::trigprofiled()
@@ -126,7 +137,7 @@ public:
 	void apply(tStageElem *el)
 	{
 		GLfloat v=sin(trigval()*1.57);
-		glTranslatef(sin(6.28*v)*fx_xmagnitude*el->lv_xscale*10,cos(6.28*v)*fx_ymagnitude*el->lv_yscale*10,0);
+		glTranslatef(sin(6.28*v)*fx_xmagnitude->val()*el->lv_xscale*10,cos(6.28*v)*fx_ymagnitude->val()*el->lv_yscale*10,0);
 	}
 };
 
@@ -136,7 +147,7 @@ public:
 	void apply(tStageElem *el)
 	{
 		GLfloat v=beatprofile(trigval());
-		glScalef(1+v*fx_xmagnitude,1+v*fx_ymagnitude,0);
+		glScalef(1+v*fx_xmagnitude->val(),1+v*fx_ymagnitude->val(),0);
 	}
 };
 
@@ -146,7 +157,7 @@ public:
 	void apply(tStageElem *el)
 	{
 		GLfloat v=trigprofiled();
-		glRotatef(v*fx_angle,0.0,0.0,1.0);
+		glRotatef(v*fx_angle->val(),0.0,0.0,1.0);
 	}
 };
 
@@ -158,7 +169,7 @@ public:
 		{;}
 	void read(char *line)
 	{
-		FXPD_READ(GLfloat,offbefore,);
+		if (tsimatch(line,"offbefore")) { CONFREAD_GLfloat(line,fx_offbefore); return; }
 		tStageFx::read(line);
 	}
 	void apply(tStageElem *el)
@@ -175,7 +186,7 @@ public:
 		else v=0;
 		if (v<0.01) return;
 		mcolor efcolor(1,1,0.8,0.8);
-		el->color.weight(el->color,efcolor,v*fx_intensity);
+		el->color.weight(el->color,efcolor,v*fx_intensity->val());
 	}
 };
 

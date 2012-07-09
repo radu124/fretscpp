@@ -10,14 +10,13 @@
 #include "confrw.h"
 #include "message.h"
 #include "verbosity.h"
+#include "numexpr.h"
 
 enum FXTYPE    { FX_NONE=0, FX_SCALE, FX_LIGHT, FX_WIGGLE, FX_ROTOBACK, FX_JUMPINLEFT, FX_WOBBLE, FX_TVFADE, FX_ROTATE};
 enum FXTRIGGER { FXT_NONE=0, FXT_PICK, FXT_MISS, FXT_BEAT };
 enum FXPROFILE { FXP_NONE=0, FXP_STEP, FXP_LINSTEP, FXP_SMOOTHSTEP, FXP_SINSTEP };
 
 #define FXINI_LIST \
-FXPD(FXTRIGGER,trigger,FXT_NONE) \
-FXPD(FXPROFILE,profile,FXP_NONE) \
 FXPD(GLfloat,xmagnitude,0.1) \
 FXPD(GLfloat,ymagnitude,0.1) \
 FXPD(GLfloat,ambient,0.5) \
@@ -28,9 +27,10 @@ FXPD(GLfloat,angle,0) \
 FXPD(GLfloat,period,500) \
 FXPD(GLfloat,intensity,1)
 
-#define FXPD_DECLARE(a,b,c) a fx_##b;
-#define FXPD_INIT(a,b,c) fx_##b = c;
-#define FXPD_READ(a,b,c) if (tsimatch(line,"" #b)) { CONFREAD_##a(line,fx_##b); return; }
+#define FXPD_DECLARE(a,b,c) tNumExpr * fx_##b;
+#define FXPD_INIT(a,b,c) fx_##b = parseNumExpression(#c);
+#define FXPD_READ(a,b,c) if (tsimatch(line,"" #b)) { delete fx_##b; fx_##b=parseNumExpression(line); return; }
+#define FXPD_DELETE(a,b,c) delete fx_##b;
 
 class tStageElem;
 
@@ -43,6 +43,9 @@ public:
 	float trigval();
 	float trigprofiled();
 	tStageFx();
+	~tStageFx();
+	FXTRIGGER fx_trigger;
+	FXPROFILE fx_profile;
 #define FXPD FXPD_DECLARE
 	FXINI_LIST
 #undef FXPD
