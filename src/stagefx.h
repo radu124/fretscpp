@@ -25,7 +25,8 @@ FXPD(GLfloat,delay,0) \
 FXPD(GLfloat,frequency,6) \
 FXPD(GLfloat,angle,0) \
 FXPD(GLfloat,period,500) \
-FXPD(GLfloat,intensity,1)
+FXPD(GLfloat,intensity,1) \
+FXPD(GLfloat,drive,sin t)
 
 #define FXPD_DECLARE(a,b,c) tNumExpr * fx_##b;
 #define FXPD_INIT(a,b,c) fx_##b = parseNumExpression(#c);
@@ -44,8 +45,6 @@ public:
 	float trigprofiled();
 	tStageFx();
 	~tStageFx();
-	FXTRIGGER fx_trigger;
-	FXPROFILE fx_profile;
 #define FXPD FXPD_DECLARE
 	FXINI_LIST
 #undef FXPD

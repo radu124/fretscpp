@@ -43,9 +43,17 @@ public:
 class tNXtrigmiss:public tNumExpr
 {
 public:
-	GLfloat val() { return (guitarScene.timenow-guitarScene.timelastmiss)*2.267e-04; }
+	GLfloat val() { return (guitarScene.timenow-guitarScene.timelastmiss)*2.267e-05; }
 	void print() { DBG(NUMEXPR,"trigmiss"); }
 };
+
+class tNXtrigpick:public tNumExpr
+{
+public:
+	GLfloat val() { return (guitarScene.timenow-guitarScene.timelasthit)*2.267e-05; }
+	void print() { DBG(NUMEXPR,"trigpick"); }
+};
+
 
 class tNXsin:public tNumExpr
 {
@@ -66,6 +74,28 @@ public:
 	tNXsinstep(tNumExpr *op1):tNXsin(op1){;}
 	GLfloat val() { GLfloat tv=operand1->val(); return tv<1?sin(tv*3.14):0; }
 	void print() { DBG(NUMEXPR,"sinstep("); operand1->print(); DBG(NUMEXPR,")"); }
+};
+
+class tNXbeatprofile:public tNXsin
+{
+public:
+	tNXbeatprofile(tNumExpr *op1):tNXsin(op1){;}
+	GLfloat val() {
+		GLfloat x=operand1->val();
+		if (x<0) return 0;
+		if (x>1) return 0;
+		if (x<0.2) return x*5;
+		return 1.25-x*1.25;
+	}
+	void print() { DBG(NUMEXPR,"beatprofile("); operand1->print(); DBG(NUMEXPR,")"); }
+};
+
+class tNXmodf:public tNXsin
+{
+public:
+	tNXmodf(tNumExpr *op1):tNXsin(op1){;}
+	GLfloat val() { double u; double tv=operand1->val(); return modf(tv,&u); }
+	void print() { DBG(NUMEXPR,"modf("); operand1->print(); DBG(NUMEXPR,")"); }
 };
 
 class tNXplus:public tNumExpr
@@ -104,8 +134,11 @@ enum NX_TOK_TYPE {
 	NXTT_VALUE,
 	NXTT_SIN,
 	NXTT_SINSTEP,
+	NXTT_MODF,
+	NXTT_BEATPROFILE,
 	NXTT_time,
 	NXTT_trigmiss,
+	NXTT_trigpick,
 	NXTT_ERR};
 
 char NXgetnexttok(const char *&expr, string &res)
@@ -134,9 +167,11 @@ char NXgetnexttok(const char *&expr, string &res)
 		}
 		if (res=="sin") return NXTT_SIN;
 		if (res=="trigmiss") return NXTT_trigmiss;
+		if (res=="trigpick") return NXTT_trigpick;
 		if (res=="sinstep") return NXTT_SINSTEP;
+		if (res=="beatprofile") return NXTT_BEATPROFILE;
 		if (res=="t" || res=="time") return NXTT_time;
-
+		if (res=="frac" || res=="modf") return NXTT_MODF;
 		return NXTT_ERR;
 	}
 	if (*expr=='-') { expr++; return '-'; }
@@ -180,9 +215,12 @@ tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 	if (tok==NXTT_VALUE) stored=new tNXconst(atof(v.c_str()));
 	else if (tok==NXTT_time) stored=new tNXreference(&scn.time);
 	else if (tok==NXTT_trigmiss) stored=new tNXtrigmiss();
+	else if (tok==NXTT_trigpick) stored=new tNXtrigpick();
 	else if (tok=='(') stored=parseNumExpressionInternal(expr,0);
 	else if (tok==NXTT_SIN) stored=new tNXsin(parseNumExpressionInternal(expr,2));
+	else if (tok==NXTT_BEATPROFILE) stored=new tNXbeatprofile(parseNumExpressionInternal(expr,2));
 	else if (tok==NXTT_SINSTEP) stored=new tNXsinstep(parseNumExpressionInternal(expr,2));
+	else if (tok==NXTT_MODF) stored=new tNXmodf(parseNumExpressionInternal(expr,2));
 	else if (tok=='-') stored=new tNXminus(new tNumExpr(),parseNumExpressionInternal(expr,1));
 	else {
 		WARN(NUMEXPR,"error reading expression, expecting value. rest: %s\n", expr);

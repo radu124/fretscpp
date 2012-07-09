@@ -17,13 +17,9 @@ GNU General Public License for more details.
 #include "scnGuitar.h"
 #include "stage.h"
 
-MULTIRDR(FXTRIGGER,"none,pick,miss,beat");
-MULTIRDR(FXPROFILE,"none,step,linstep,smoothstep,sinstep");
 
 tStageFx::tStageFx()
 {
-	fx_profile=FXP_NONE;
-	fx_trigger=FXT_NONE;
 #define FXPD FXPD_INIT
 	FXINI_LIST
 #undef FXPD
@@ -38,49 +34,10 @@ tStageFx::~tStageFx()
 
 void tStageFx::read(char *line)
 {
-	if (tsimatch(line,"profile")) { CONFREAD_FXPROFILE(line,fx_profile); return; }
-	if (tsimatch(line,"trigger")) { CONFREAD_FXTRIGGER(line,fx_trigger); return; }
 #define FXPD FXPD_READ
 	FXINI_LIST
 #undef FXPD
 	WARN(STAGEFX,"Unknown parameter %s\n",line);
-}
-
-float tStageFx::trigval()
-{
-	double temp;
-	switch (fx_trigger)
-	{
-	case FXT_BEAT:
-		return modf(guitarScene.timenow*0.000024*fx_frequency->val(),&temp);
-	case FXT_MISS:
-		return (guitarScene.timenow-guitarScene.timelastmiss)*2.267e-02/fx_period->val();
-	case FXT_PICK:
-		return (guitarScene.timenow-guitarScene.timelasthit)*2.267e-02/fx_period->val();
-	}
-	return 1;
-}
-
-float tStageFx::trigprofiled()
-{
-	float tv=trigval();
-	if (tv<0) tv=0;
-	switch (fx_profile)
-	{
-	case FXP_NONE: return tv;
-	case FXP_STEP: return tv<1?1:0;
-	case FXP_LINSTEP: return tv<1?tv:1;
-	case FXP_SMOOTHSTEP: return tv<1?0.5*(1-cos(tv*3.14)):1;
-	case FXP_SINSTEP: return tv<1?sin(tv*3.14):0;
-	}
-}
-
-float beatprofile(float x)
-{
-	if (x<0) return 0;
-	if (x>1) return 0;
-	if (x<0.2) return x*5;
-	return 1.25-x*1.25;
 }
 
 class tFXrotoback:public tStageFx
@@ -136,7 +93,7 @@ class tFXwiggle:public tStageFx
 public:
 	void apply(tStageElem *el)
 	{
-		GLfloat v=sin(trigval()*1.57);
+		GLfloat v=sin(fx_drive->val()*1.57);
 		glTranslatef(sin(6.28*v)*fx_xmagnitude->val()*el->lv_xscale*10,cos(6.28*v)*fx_ymagnitude->val()*el->lv_yscale*10,0);
 	}
 };
@@ -146,8 +103,17 @@ class tFXscale:public tStageFx
 public:
 	void apply(tStageElem *el)
 	{
-		GLfloat v=beatprofile(trigval());
-		glScalef(1+v*fx_xmagnitude->val(),1+v*fx_ymagnitude->val(),0);
+		glScalef(fx_xmagnitude->val(),fx_ymagnitude->val(),1);
+	}
+};
+
+class tFXzoom:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+		GLfloat x=fx_xmagnitude->val();
+		glScalef(x,x,x);
 	}
 };
 
@@ -156,8 +122,7 @@ class tFXrotate:public tStageFx
 public:
 	void apply(tStageElem *el)
 	{
-		GLfloat v=trigprofiled();
-		glRotatef(v*fx_angle->val(),0.0,0.0,1.0);
+		glRotatef(fx_angle->val(),0.0,0.0,1.0);
 	}
 };
 
@@ -179,7 +144,7 @@ public:
 			el->color=C_TRANSPARENT;
 			return;
 		}
-		GLfloat v=trigval()*0.9;
+		GLfloat v=fx_drive->val()*0.9;
 		if (v<0) v=0;
 		else if (v<0.2) v=v*8;
 		else if (v<1) v=2-v*2;
@@ -204,6 +169,7 @@ void tStageFx::apply(tStageElem *el) {};
 tStageFx* createStageFx(string vtyp)
 {
 	if (vtyp=="scale")  { return new tFXscale(); }
+	if (vtyp=="zoom")   { return new tFXzoom(); }
 	if (vtyp=="rotate") { return new tFXrotate(); }
 	if (vtyp=="light")  { return new tFXlight(); }
 
