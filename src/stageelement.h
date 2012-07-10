@@ -17,14 +17,13 @@ SLPD(int, players, 255) \
 SLPD(string, texture, "") \
 SLPD(string, effects, "") \
 SLPD(mcolor, color, C_WHITE) \
-SLPD(GLfloat, xscale, 1) \
-SLPD(GLfloat, scale, 1) \
-SLPD(GLfloat, yscale, 1) \
-SLPD(GLfloat, xpos, 0) \
-SLPD(GLfloat, ypos, 0) \
-SLPD(GLfloat, xcenter, 0) \
-SLPD(GLfloat, ycenter, 0) \
-SLPD(GLfloat, angle, 0) \
+SLPD(string, xscale, "1") \
+SLPD(string, scale, "1") \
+SLPD(string, yscale, "1") \
+SLPD(string, xpos, "0") \
+SLPD(string, ypos, "0") \
+SLPD(string, rotate, "0") \
+SLPD(string, children, "") \
 SLPD(SLBLENDTYPE, src_blending, SLB_DEFAULT) \
 SLPD(SLBLENDTYPE, dst_blending, SLB_DEFAULT) \
 SLPD(int, foreground, 0)
@@ -39,18 +38,22 @@ class tStageElem
 {
 public:
 	string name;
-	Stage *parent;
+	vector<tStageElem*> children;
 	int texid;
 	mcolor color;
 	int isBackground;
 	vector<tStageFx*> fx;
 	tStageElem();
 	void read(char *line);
-	void render();
+	virtual void render(int depth=0);
 #define SLPD SLPD_DECLARE
 	SLINI_LIST
 #undef SLPD
 };
 
+class tStageBackground:public tStageElem
+{
+	void render(int depth=0);
+};
 
 #endif

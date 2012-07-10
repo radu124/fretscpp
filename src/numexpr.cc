@@ -199,7 +199,7 @@ tNumExpr *parseNumExpression(const char *expr)
 	tNumExpr *res=parseNumExpressionInternal(p);
 	DBG(NUMEXPR,"expr:");
 	res->print();
-	DBG(NUMEXPR,"\n");
+	DBG(NUMEXPR,"=%f\n",res->val());
 	if (res) return res;
 	return new tNumExpr();
 }

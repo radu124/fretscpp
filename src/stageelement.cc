@@ -33,38 +33,39 @@ void tStageElem::read(char *line)
 #undef SLPD
 }
 
-void tStageElem::render()
+void tStageBackground::render(int depth)
+{
+	if (video_globalcleardisabled)
+	{
+		glColor4f( lv_color.Red, lv_color.Green, lv_color.Blue, 1.0 );
+		glBegin(GL_TRIANGLE_STRIP);
+		glVertex3f(-scr_lrlim, -scr_tblim, 0);
+		glVertex3f( scr_lrlim, -scr_tblim, 0);
+		glVertex3f(-scr_lrlim,  scr_tblim, 0);
+		glVertex3f( scr_lrlim,  scr_tblim, 0);
+		glEnd();
+	}
+	else
+	{
+		// plain clear, this may be faster?
+		glClearColor( lv_color.Red, lv_color.Green, lv_color.Blue, 0 );
+		glClear( GL_COLOR_BUFFER_BIT );
+	}
+	return;
+}
+
+void tStageElem::render(int depth)
 {
 	int i;
-	if (isBackground)
-	{
-		if (video_globalcleardisabled)
-		{
-			glColor4f( lv_color.Red, lv_color.Green, lv_color.Blue, 1.0 );
-			glBegin(GL_TRIANGLE_STRIP);
-			glVertex3f(-scr_lrlim, -scr_tblim, 0);
-			glVertex3f( scr_lrlim, -scr_tblim, 0);
-			glVertex3f(-scr_lrlim,  scr_tblim, 0);
-			glVertex3f( scr_lrlim,  scr_tblim, 0);
-			glEnd();
-		}
-		else
-		{
-			// plain clear, this may be faster?
-			glClearColor( lv_color.Red, lv_color.Green, lv_color.Blue, 0 );
-			glClear( GL_COLOR_BUFFER_BIT );
-		}
-		return;
-	}
 	glPushMatrix();
 	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	color=lv_color;
-	glTranslatef(40*lv_xpos,30*lv_ypos,0);
 	for (i=0; i<fx.size(); i++) fx[i]->apply(this);
-	glScalef(10*lv_xscale,-10*lv_yscale,0);
-	if (lv_angle!=0) glRotatef(-lv_angle,0,0,1);
 	color.set();
 	texDraw(texid);
+	if (depth<15)
+		for (i=0; i<children.size(); i++)
+			children[i]->render(depth+1);
 	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPopMatrix();
 }

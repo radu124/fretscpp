@@ -50,6 +50,50 @@ public:
 #undef FXPD
 };
 
+/**
+ * Translate effect, default initializer uses stage coordinates (40x30)
+ */
+class tFXtranslate:public tStageFx
+{
+public:
+	tFXtranslate();
+	tFXtranslate (string x, string y);
+	void apply(tStageElem *el);
+};
+
+/**
+ * Scale effect
+ */
+class tFXscale:public tStageFx
+{
+public:
+	tFXscale();
+	tFXscale (string x, string y);
+	void apply(tStageElem *el);
+};
+
+/**
+ * Rotate in the screen plane effect
+ */
+class tFXrotate:public tStageFx
+{
+public:
+	tFXrotate();
+	tFXrotate (string x);
+	void apply(tStageElem *el);
+};
+
+/**
+ * Rotate in the screen plane effect
+ */
+class tFXzoom:public tStageFx
+{
+public:
+	tFXzoom();
+	tFXzoom (string x);
+	void apply(tStageElem *el);
+};
+
 tStageFx* createStageFx(string typ);
 
 #endif

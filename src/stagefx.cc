@@ -94,38 +94,87 @@ public:
 	void apply(tStageElem *el)
 	{
 		GLfloat v=sin(fx_drive->val()*1.57);
-		glTranslatef(sin(6.28*v)*fx_xmagnitude->val()*el->lv_xscale*10,cos(6.28*v)*fx_ymagnitude->val()*el->lv_yscale*10,0);
+		glTranslatef(sin(6.28*v)*fx_xmagnitude->val(),cos(6.28*v)*fx_ymagnitude->val(),0);
 	}
 };
 
-class tFXscale:public tStageFx
+/*======================================================================
+ * Scale effect
+ */
+tFXscale::tFXscale(){;}
+
+tFXscale::tFXscale(string x, string y)
 {
-public:
-	void apply(tStageElem *el)
-	{
-		glScalef(fx_xmagnitude->val(),fx_ymagnitude->val(),1);
-	}
-};
+	delete fx_xmagnitude;
+	delete fx_ymagnitude;
+	fx_xmagnitude=parseNumExpression(x.c_str());
+	fx_ymagnitude=parseNumExpression(y.c_str());
+}
 
-class tFXzoom:public tStageFx
+void tFXscale::apply(tStageElem *el)
 {
-public:
-	void apply(tStageElem *el)
-	{
-		GLfloat x=fx_xmagnitude->val();
-		glScalef(x,x,x);
-	}
-};
+	glScalef(fx_xmagnitude->val(),fx_ymagnitude->val(),1);
+}
 
-class tFXrotate:public tStageFx
+
+/*======================================================================
+ * Translate effect
+ */
+tFXtranslate::tFXtranslate(){;}
+
+tFXtranslate::tFXtranslate (string x, string y)
 {
-public:
-	void apply(tStageElem *el)
-	{
-		glRotatef(fx_angle->val(),0.0,0.0,1.0);
-	}
-};
+	delete fx_xmagnitude;
+	delete fx_ymagnitude;
+	fx_xmagnitude=parseNumExpression(x.c_str());
+	fx_ymagnitude=parseNumExpression(y.c_str());
+}
 
+void tFXtranslate::apply(tStageElem *el)
+{
+	glTranslatef(fx_xmagnitude->val(),fx_ymagnitude->val(),0);
+}
+
+/*======================================================================
+ * Rotate in the screen plane effect
+ */
+
+tFXrotate::tFXrotate(){;}
+
+tFXrotate::tFXrotate(string x)
+{
+	delete fx_angle;
+	fx_angle=parseNumExpression(x.c_str());
+}
+
+
+void tFXrotate::apply(tStageElem *el)
+{
+	glRotatef(fx_angle->val(),0.0,0.0,1.0);
+}
+
+
+/*======================================================================
+ * Zoom effect, same as scale, but with equal values on all axes
+ */
+
+tFXzoom::tFXzoom() {;}
+
+tFXzoom::tFXzoom(string x)
+{
+	delete fx_xmagnitude;
+	fx_xmagnitude=parseNumExpression(x.c_str());
+}
+
+void tFXzoom::apply(tStageElem *el)
+{
+	GLfloat x=fx_xmagnitude->val();
+	glScalef(x,x,x);
+}
+
+/*======================================================================
+ * Light effect
+ */
 class tFXlight:public tStageFx
 {
 public:
@@ -171,6 +220,7 @@ tStageFx* createStageFx(string vtyp)
 	if (vtyp=="scale")  { return new tFXscale(); }
 	if (vtyp=="zoom")   { return new tFXzoom(); }
 	if (vtyp=="rotate") { return new tFXrotate(); }
+	if (vtyp=="translate") { return new tFXtranslate(); }
 	if (vtyp=="light")  { return new tFXlight(); }
 
 	if (vtyp=="rotoback") { return new tFXrotoback(); }
