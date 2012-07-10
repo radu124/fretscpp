@@ -158,19 +158,24 @@ void Stage::load(string dir, string filename)
 	{
 		char ya[32];
 		if (elem[i]->name=="background") continue;
-		INFO(STAGE,"Setting scale %s\n", elem[i]->name);
 		sprintf(ya,"%f",elem[i]->lv_aspect);
-		string xe=string("(")+elem[i]->lv_xscale+")";
-		string ye=string("(")+elem[i]->lv_yscale+")";
-		if (elem[i]->lv_aspect != 1) ye=ye+"*("+ya+")";
-		if (elem[i]->lv_scale!="1")
+		if (elem[i]->lv_xscale!="1" || elem[i]->lv_yscale!="1"
+			|| elem[i]->lv_scale!="1" || elem[i]->lv_aspect!=1)
 		{
-			ye=ye+"*("+elem[i]->lv_scale+")";
-			xe=xe+"*("+elem[i]->lv_scale+")";
+			INFO(STAGE,"Setting scale %s\n", elem[i]->name);
+			string xe=string("(")+elem[i]->lv_xscale+")";
+			string ye=string("(")+elem[i]->lv_yscale+")";
+			if (elem[i]->lv_aspect != 1) ye=ye+"*("+ya+")";
+			if (elem[i]->lv_scale!="1")
+			{
+				ye=ye+"*("+elem[i]->lv_scale+")";
+				xe=xe+"*("+elem[i]->lv_scale+")";
+			}
+			elem[i]->fx.push_back(new tFXscale(xe,ye));
 		}
-		elem[i]->fx.push_back(new tFXscale(xe,ye));
 		if (elem[i]->lv_rotate!="0")
 		{
+			INFO(STAGE,"Setting rotation %s\n", elem[i]->name);
 			elem[i]->fx.push_back(new tFXrotate(elem[i]->lv_rotate));
 		}
 	}
