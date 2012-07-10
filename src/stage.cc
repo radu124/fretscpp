@@ -134,8 +134,8 @@ void Stage::load(string dir, string filename)
 	for (i=0; i<elem.size(); i++) if (elem[i]->lv_xpos!="0" | elem[i]->lv_ypos!="0")
 	{
 		INFO(STAGE,"Applying translation to %s\n", elem[i]->name);
-		string xe=string("40*(")+elem[i]->lv_xpos+")";
-		string ye=string("30*(")+elem[i]->lv_ypos+")";
+		string xe=string("4*(")+elem[i]->lv_xpos+")";
+		string ye=string("3*(")+elem[i]->lv_ypos+")";
 		elem[i]->fx.push_back(new tFXtranslate(xe,ye));
 	}
 	/*
@@ -162,8 +162,8 @@ void Stage::load(string dir, string filename)
 		if (elem[i]->name=="background") continue;
 		INFO(STAGE,"Setting scale %s\n", elem[i]->name);
 		sprintf(ya,"%f",texAspect(elem[i]->texid));
-		string xe=string("10*(")+elem[i]->lv_xscale+")";
-		string ye=string("-10*(")+elem[i]->lv_yscale+")";
+		string xe=string("(")+elem[i]->lv_xscale+")";
+		string ye=string("-(")+elem[i]->lv_yscale+")";
 		if (texAspect(elem[i]->texid)!=1) ye=ye+"*("+ya+")";
 		if (elem[i]->lv_scale!="1")
 		{
@@ -208,16 +208,21 @@ void Stage::cleanup()
 void Stage::render()
 {
 	int i;
+	glPushMatrix();
+	glScalef(10,10,10);
 	for (i=0; i<elem.size(); i++)
 	{
 		if (elem[i]->lv_foreground) continue;
 		if (!(elem[i]->lv_players & (1<<(numplayers-1)))) continue;
 		elem[i]->render();
 	}
+	glPopMatrix();
 }
 
 void Stage::renderForeground()
 {
+	glPushMatrix();
+	glScalef(10,10,10);
 	int i;
 	for (i=0; i<elem.size(); i++)
 	{
@@ -225,5 +230,6 @@ void Stage::renderForeground()
 		if (!(elem[i]->lv_players & (1<<(numplayers-1)))) continue;
 		elem[i]->render();
 	}
+	glPopMatrix();
 }
 

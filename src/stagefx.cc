@@ -46,7 +46,7 @@ public:
 	void apply(tStageElem *el)
 	{
 		GLfloat t=scn.timesc*0.33;
-		glTranslatef(cos(t/2)*16, sin(t)*16, 0);
+		glTranslatef(cos(t/2)*1.6, sin(t)*1.6, 0);
 		glRotatef(t*53.3f+30,0.0,0.0,1.0);
 		GLfloat s=(2+sin(t/8))/2;
 		glScalef(s, s, 1.0);
