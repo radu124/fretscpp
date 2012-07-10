@@ -161,7 +161,7 @@ void Stage::load(string dir, string filename)
 		INFO(STAGE,"Setting scale %s\n", elem[i]->name);
 		sprintf(ya,"%f",elem[i]->lv_aspect);
 		string xe=string("(")+elem[i]->lv_xscale+")";
-		string ye=string("-(")+elem[i]->lv_yscale+")";
+		string ye=string("(")+elem[i]->lv_yscale+")";
 		if (elem[i]->lv_aspect != 1) ye=ye+"*("+ya+")";
 		if (elem[i]->lv_scale!="1")
 		{
@@ -207,7 +207,7 @@ void Stage::render()
 {
 	int i;
 	glPushMatrix();
-	glScalef(10,10,10);
+	glScalef(10,-10,10);
 	for (i=0; i<elem.size(); i++)
 	{
 		if (elem[i]->lv_foreground) continue;
@@ -220,7 +220,7 @@ void Stage::render()
 void Stage::renderForeground()
 {
 	glPushMatrix();
-	glScalef(10,10,10);
+	glScalef(10,-10,10);
 	int i;
 	for (i=0; i<elem.size(); i++)
 	{
