@@ -53,6 +53,15 @@ public:
 	}
 };
 
+class tFXrotz:public tStageFx
+{
+public:
+	void apply(tStageElem *el)
+	{
+		glRotatef(fx_angle->val(),1.0,0.0,0.0);
+	}
+};
+
 class tFXwobble:public tStageFx
 {
 public:
@@ -223,6 +232,8 @@ tStageFx* createStageFx(string vtyp)
 	if (vtyp=="translate") { return new tFXtranslate(); }
 	if (vtyp=="light")  { return new tFXlight(); }
 
+// quick and dirty
+	if (vtyp=="rotz") { return new tFXrotz(); }
 	if (vtyp=="rotoback") { return new tFXrotoback(); }
 	if (vtyp=="jumpinleft") { return new tFXjumpinleft(); }
 	if (vtyp=="wobble") { return new tFXwobble(); }

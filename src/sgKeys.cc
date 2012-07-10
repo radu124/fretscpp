@@ -25,7 +25,6 @@ GNU General Public License for more details.
 void tSceneGuitar::renderKey(int col, int flags)
 {
 	GLfloat sz,c0,c1,c2,yy=-0.02;
-	sz=0.45;
 	c0=keycolors[col][0]*0.5;
 	c1=keycolors[col][1]*0.5;
 	c2=keycolors[col][2]*0.5;
@@ -41,9 +40,13 @@ void tSceneGuitar::renderKey(int col, int flags)
 	glColor4f(c0,c1,c2,1);
 	glPushMatrix();
 	glTranslatef(col-2,notePos(-1),yy);
-	glRotatef(60,1,0,0);
-	glScalef(sz,sz,1);
-	texDraw(playgfx->key[col]);
+	glScalef(0.5,0.5,0.5);
+	if (flags & 1)
+	{
+		if (flags & 2) playgfx->keystrummed[col]->render();
+		else playgfx->keypressed[col]->render();
+	} else playgfx->key[col]->render();
+
 	glPopMatrix();
 }
 

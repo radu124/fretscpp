@@ -3,8 +3,25 @@
 #include "verbosity.h"
 #include "message.h"
 
+tStageElem *playGfx::ffallback(const char *preferred, const char *fallback, int num)
+{
+	char name1[64];
+	char name2[64];
+	sprintf(name1,preferred,num);
+	sprintf(name2,fallback,num);
+	int v=-1,i;
+	if (name1[0])
+		for (i=0; i<elem.size(); i++)
+			if (elem[i]->name==name1) v=i;
+	if (v>=0) return elem[v];
+	// create if necessary
+	return findElem(name2);
+}
+
+
 void playGfx::load(string dir, string filename)
 {
+	int i;
 	INFO(THEME,"Loading gameplay elements: %s %s\n",dir,filename);
 	Stage::load(dir,filename);
 	note[0]=findElem("note0")->texid;
@@ -17,9 +34,10 @@ void playGfx::load(string dir, string filename)
 	notehl[2]=findElem("notehl2")->texid;
 	notehl[3]=findElem("notehl3")->texid;
 	notehl[4]=findElem("notehl4")->texid;
-	key[0]=findElem("key0")->texid;
-	key[1]=findElem("key1")->texid;
-	key[2]=findElem("key2")->texid;
-	key[3]=findElem("key3")->texid;
-	key[4]=findElem("key4")->texid;
+	for (i=0; i<5; i++)
+	{
+		key[i]=ffallback("","key%d",i);
+		keypressed[i]=ffallback("keypressed%d","key%d",i);
+		keystrummed[i]=ffallback("keystrummed%d","key%d",i);
+	}
 }

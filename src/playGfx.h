@@ -17,9 +17,15 @@ public:
 	 * easily accessed
 	 */
 	void load(string dir, string filename="stage.ini");
+	/**
+	 * find with fallback
+	 */
+	tStageElem *ffallback(const char *preferred, const char *fallback, int num=0);
 	int note[5];
 	int notehl[5];
-	int key[5];
+	tStageElem *key[5];
+	tStageElem *keypressed[5];
+	tStageElem *keystrummed[5];
 };
 
 #endif
