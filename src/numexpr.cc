@@ -129,24 +129,13 @@ public:
 	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,"*"); operand2->print(); DBG(NUMEXPR,")"); }
 };
 
-enum NX_TOK_TYPE {
-	NXTT_NULL,
-	NXTT_VALUE,
-	NXTT_SIN,
-	NXTT_SINSTEP,
-	NXTT_MODF,
-	NXTT_BEATPROFILE,
-	NXTT_time,
-	NXTT_trigmiss,
-	NXTT_trigpick,
-	NXTT_ERR};
-
-char NXgetnexttok(const char *&expr, string &res)
+string NXgetnexttok(const char *&expr, GLfloat &val)
 {
+	string res="";
 	char c;
 	res="";
 	while (*expr==' ' || *expr=='\t') expr++;
-	if (!*expr) return NXTT_NULL;
+	if (!*expr) return "";
 	c=*expr;
 	if ((*expr>='0' && *expr<='9') || *expr=='.')
 	{
@@ -155,7 +144,8 @@ char NXgetnexttok(const char *&expr, string &res)
 			res+=*expr;
 			expr++;
 		}
-		return NXTT_VALUE;
+		val=atof(res.c_str());
+		return "1";
 	}
 	if ((*expr>='a' && *expr<='z') || (*expr>='A' && *expr<='Z') || *expr=='_')
 	{
@@ -165,28 +155,24 @@ char NXgetnexttok(const char *&expr, string &res)
 			res+=*expr;
 			expr++;
 		}
-		if (res=="sin") return NXTT_SIN;
-		if (res=="trigmiss") return NXTT_trigmiss;
-		if (res=="trigpick") return NXTT_trigpick;
-		if (res=="sinstep") return NXTT_SINSTEP;
-		if (res=="beatprofile") return NXTT_BEATPROFILE;
-		if (res=="t" || res=="time") return NXTT_time;
-		if (res=="frac" || res=="modf") return NXTT_MODF;
-		return NXTT_ERR;
+		if (res=="time") return "t";
+		if (res=="frac") return "modf";
+		return res;
 	}
-	if (*expr=='-') { expr++; return '-'; }
-	if (*expr=='+') { expr++; return '+'; }
-	if (*expr=='*') { expr++; return '*'; }
-	if (*expr=='(') { expr++; return '('; }
-	if (*expr==')') { expr++; return ')'; }
-
-	return NXTT_ERR;
+	res=*expr;
+	if (*expr=='-'
+		||*expr=='+'
+		||*expr=='*'
+		||*expr=='('
+		||*expr==')'
+		) { expr++; return res; }
+	return "ERR";
 }
 
-char NXpeeknexttok(const char *expr)
+string NXpeeknexttok(const char *expr)
 {
 	// not efficient, but since it's init only...
-	string unused;
+	GLfloat unused;
 	return NXgetnexttok(expr,unused);
 }
 
@@ -197,7 +183,7 @@ tNumExpr *parseNumExpression(const char *expr)
 {
 	const char *p=expr;
 	tNumExpr *res=parseNumExpressionInternal(p);
-	DBG(NUMEXPR,"expr:");
+	DBG(NUMEXPR,"expr:%s =>",expr);
 	res->print();
 	DBG(NUMEXPR,"=%f\n",res->val());
 	if (res) return res;
@@ -206,56 +192,56 @@ tNumExpr *parseNumExpression(const char *expr)
 
 tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 {
-	char tok;
+	string tok;
 	tNumExpr *stored=NULL, *swp;
 	const char *p=expr;
-	string v;
+	GLfloat v;
 
 	tok=NXgetnexttok(expr,v);
-	if (tok==NXTT_VALUE) stored=new tNXconst(atof(v.c_str()));
-	else if (tok==NXTT_time) stored=new tNXreference(&scn.time);
-	else if (tok==NXTT_trigmiss) stored=new tNXtrigmiss();
-	else if (tok==NXTT_trigpick) stored=new tNXtrigpick();
-	else if (tok=='(') stored=parseNumExpressionInternal(expr,0);
-	else if (tok==NXTT_SIN) stored=new tNXsin(parseNumExpressionInternal(expr,2));
-	else if (tok==NXTT_BEATPROFILE) stored=new tNXbeatprofile(parseNumExpressionInternal(expr,2));
-	else if (tok==NXTT_SINSTEP) stored=new tNXsinstep(parseNumExpressionInternal(expr,2));
-	else if (tok==NXTT_MODF) stored=new tNXmodf(parseNumExpressionInternal(expr,2));
-	else if (tok=='-') stored=new tNXminus(new tNumExpr(),parseNumExpressionInternal(expr,1));
+	if (tok=="1") stored=new tNXconst(v);
+	else if (tok=="t") stored=new tNXreference(&scn.time);
+	else if (tok=="trigmiss")    stored=new tNXtrigmiss();
+	else if (tok=="trigpick")    stored=new tNXtrigpick();
+	else if (tok=="(")           stored=parseNumExpressionInternal(expr,0);
+	else if (tok=="sin")         stored=new tNXsin(parseNumExpressionInternal(expr,2));
+	else if (tok=="beatprofile") stored=new tNXbeatprofile(parseNumExpressionInternal(expr,2));
+	else if (tok=="sinstep")     stored=new tNXsinstep(parseNumExpressionInternal(expr,2));
+	else if (tok=="modf")        stored=new tNXmodf(parseNumExpressionInternal(expr,2));
+	else if (tok=="-")           stored=new tNXminus(new tNumExpr(),parseNumExpressionInternal(expr,1));
 	else {
-		WARN(NUMEXPR,"error reading expression, expecting value. rest: %s\n", expr);
+		WARN(NUMEXPR,"NUMEXP: expecting value, got %s before %s\n", tok, expr);
 		return new tNumExpr();
 	}
 	while (1)
 	{
 		tok=NXpeeknexttok(expr);
-		if (tok=='+' && pri>=1) return stored;
-		if (tok=='-' && pri>=1) return stored;
-		if (tok=='*' && pri>=2) return stored;
-		if (tok==NXTT_NULL) return stored;
-		if (tok==NXTT_ERR)
+		if (tok=="+" && pri>=1) return stored;
+		if (tok=="-" && pri>=1) return stored;
+		if (tok=="*" && pri>=2) return stored;
+		if (tok=="") return stored;
+		if (tok=="ERR")
 		{
-			WARN(NUMEXPR,"erroneous token: %s\n",expr);
+			WARN(NUMEXPR,"NUMEXP: erroneous token: %s before %s\n", tok, expr);
 			return stored;
 		}
 		NXgetnexttok(expr,v);
-		if (tok==')') { return stored; }
-		if (tok=='+')
+		if (tok==")") { return stored; }
+		if (tok=="+")
 		{
 			stored=new tNXplus(stored,parseNumExpressionInternal(expr,1));
 			continue;
 		}
-		if (tok=='-')
+		if (tok=="-")
 		{
 			stored=new tNXminus(stored,parseNumExpressionInternal(expr,1));
 			continue;
 		}
-		if (tok=='*')
+		if (tok=="*")
 		{
 			stored=new tNXmult(stored,parseNumExpressionInternal(expr,1));
 			continue;
 		}
-		WARN(NUMEXPR,"expecting operand, got: %s\n",expr);
+		WARN(NUMEXPR,"NUMEXP: expecting operand, got: %s before %s\n", tok, expr);
 	}
 }
 
