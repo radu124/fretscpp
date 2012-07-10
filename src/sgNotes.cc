@@ -53,38 +53,24 @@ void tSceneGuitar::noteRegion()
 
 int tSceneGuitar::renderNote(int col, int ts, int flags)
 {
-	GLfloat y,sz,nfade;
-	GLfloat c1,c2,c0;
+	GLfloat y,nfade;
 	y=notePos(ts);
 	nfade=1.0f;
 	if (y>1) nfade=2-y;
 	//if (pos>0) nfade=1-pos;
 	if (nfade<0) nfade=0;
 	if (y>2) return 1;
-	sz=0.4;
-	c0=c1=c2=1;
-
 	int tt=0;
-	//if (y>-2) tt=1;
-	//if (y>-1) tt=2;
-	//if (y>0) tt=3;
 
-	glColor4f(c0,c1,c2,nfade);
+	//glColor4f(1,1,1,nfade);
 	glPushMatrix();
 	glTranslatef(col-2,y,0);
-	glRotatef(60,1,0,0);
-	glScalef(sz,sz,sz);
-	texDraw(playgfx->note[col]);
+	glScalef(0.5,0.5,0.5);
 	if (playgfx->notehl[col] && (flags & ENS_TAPPABLE) && pp->maytap)
-	{
-		// not nice that I hardcoded this, maybe it would be better
-		// to defer it to the layer for display, this way we can also
-		// apply effects
-		glColor4f(1.0,1.0,1.0,1.0);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		texDraw(playgfx->notehl[col]);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
+		playgfx->notehl[col]->render();
+	else
+		playgfx->note[col]->render();
+
 	glPopMatrix();
 	return 0;
 }

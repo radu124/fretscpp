@@ -24,22 +24,8 @@ GNU General Public License for more details.
 
 void tSceneGuitar::renderKey(int col, int flags)
 {
-	GLfloat sz,c0,c1,c2,yy=-0.02;
-	c0=keycolors[col][0]*0.5;
-	c1=keycolors[col][1]*0.5;
-	c2=keycolors[col][2]*0.5;
-	if (flags & 1)
-	{
-		c0=1.2;
-		c1=1.2;
-		c2=1.2;
-		yy+=0.08;
-		//yy=0.2;
-		if (flags & 2) yy+=0.1;
-	}
-	glColor4f(c0,c1,c2,1);
 	glPushMatrix();
-	glTranslatef(col-2,notePos(-1),yy);
+	glTranslatef(col-2,notePos(-1),0);
 	glScalef(0.5,0.5,0.5);
 	if (flags & 1)
 	{

@@ -19,6 +19,7 @@ enum FXPROFILE { FXP_NONE=0, FXP_STEP, FXP_LINSTEP, FXP_SMOOTHSTEP, FXP_SINSTEP 
 #define FXINI_LIST \
 FXPD(GLfloat,xmagnitude,0.1) \
 FXPD(GLfloat,ymagnitude,0.1) \
+FXPD(GLfloat,deltaz,0) \
 FXPD(GLfloat,ambient,0.5) \
 FXPD(GLfloat,contrast,0.5) \
 FXPD(GLfloat,delay,0) \

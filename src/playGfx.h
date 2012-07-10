@@ -21,8 +21,8 @@ public:
 	 * find with fallback
 	 */
 	tStageElem *ffallback(const char *preferred, const char *fallback, int num=0);
-	int note[5];
-	int notehl[5];
+	tStageElem *note[5];
+	tStageElem *notehl[5];
 	tStageElem *key[5];
 	tStageElem *keypressed[5];
 	tStageElem *keystrummed[5];

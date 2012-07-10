@@ -24,18 +24,10 @@ void playGfx::load(string dir, string filename)
 	int i;
 	INFO(THEME,"Loading gameplay elements: %s %s\n",dir,filename);
 	Stage::load(dir,filename);
-	note[0]=findElem("note0")->texid;
-	note[1]=findElem("note1")->texid;
-	note[2]=findElem("note2")->texid;
-	note[3]=findElem("note3")->texid;
-	note[4]=findElem("note4")->texid;
-	notehl[0]=findElem("notehl0")->texid;
-	notehl[1]=findElem("notehl1")->texid;
-	notehl[2]=findElem("notehl2")->texid;
-	notehl[3]=findElem("notehl3")->texid;
-	notehl[4]=findElem("notehl4")->texid;
 	for (i=0; i<5; i++)
 	{
+		note[i]=ffallback("","note%d",i);
+		notehl[i]=ffallback("notehl%d","note%d",i);
 		key[i]=ffallback("","key%d",i);
 		keypressed[i]=ffallback("keypressed%d","key%d",i);
 		keystrummed[i]=ffallback("keystrummed%d","key%d",i);

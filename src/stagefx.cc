@@ -141,7 +141,7 @@ tFXtranslate::tFXtranslate (string x, string y)
 
 void tFXtranslate::apply(tStageElem *el)
 {
-	glTranslatef(fx_xmagnitude->val(),fx_ymagnitude->val(),0);
+	glTranslatef(fx_xmagnitude->val(),fx_ymagnitude->val(),fx_deltaz->val());
 }
 
 /*======================================================================
