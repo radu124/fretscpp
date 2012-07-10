@@ -84,7 +84,7 @@ public:
 	{
 		GLfloat v=scn.fade*2;
 		v=(v>1)?1:v*v;
-		glTranslatef(v*v*80, 0, 0);
+		glTranslatef(v*v*8, 0, 0);
 	}
 };
 

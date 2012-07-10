@@ -123,9 +123,7 @@ void Stage::load(string dir, string filename)
 		else if (txname[0]=='/') elem[i]->texid=texLoad(txname.substr(1,999));
 		else elem[i]->texid=texLoad(dir+"/"+txname,1);
 
-//		elem[i]->lv_yscale=elem[i]->lv_yscale*texAspect(elem[i]->texid);
-//		elem[i]->lv_yscale*=elem[i]->lv_scale;
-//		elem[i]->lv_xscale*=elem[i]->lv_scale;
+		if (elem[i]->lv_aspect==0) elem[i]->lv_aspect=texAspect(elem[i]->texid);
 	}
 	/*
 	 * translate comes before the other effects
@@ -161,10 +159,10 @@ void Stage::load(string dir, string filename)
 		char ya[32];
 		if (elem[i]->name=="background") continue;
 		INFO(STAGE,"Setting scale %s\n", elem[i]->name);
-		sprintf(ya,"%f",texAspect(elem[i]->texid));
+		sprintf(ya,"%f",elem[i]->lv_aspect);
 		string xe=string("(")+elem[i]->lv_xscale+")";
 		string ye=string("-(")+elem[i]->lv_yscale+")";
-		if (texAspect(elem[i]->texid)!=1) ye=ye+"*("+ya+")";
+		if (elem[i]->lv_aspect != 1) ye=ye+"*("+ya+")";
 		if (elem[i]->lv_scale!="1")
 		{
 			ye=ye+"*("+elem[i]->lv_scale+")";

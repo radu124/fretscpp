@@ -20,6 +20,7 @@ SLPD(mcolor, color, C_WHITE) \
 SLPD(string, xscale, "1") \
 SLPD(string, scale, "1") \
 SLPD(string, yscale, "1") \
+SLPD(GLfloat, aspect, 0) \
 SLPD(string, xpos, "0") \
 SLPD(string, ypos, "0") \
 SLPD(string, rotate, "0") \
