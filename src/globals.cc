@@ -48,4 +48,4 @@ vector<tConfigurable*> videomodes;
 tVideoMode *fsvideomode;
 
 int video_globalcleardisabled=0;
-
+int crtpp_streak;

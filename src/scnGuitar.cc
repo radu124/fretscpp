@@ -68,6 +68,7 @@ void tSceneGuitar::render()
 	{
 		pp  =&player[cplayer];
 		lane=&pp->lane;
+		crtpp_streak=pp->stat_streak;
 		scene_setNeck(cplayer,numplayers);
 		noteRegion();
 		player[cplayer].passtime(timenow);
@@ -85,6 +86,7 @@ void tSceneGuitar::render()
 		activeneckpos=cplayer+numplayers*(numplayers-1)/2;
 		pp  =&player[cplayer];
 		lane=&pp->lane;
+		crtpp_streak=pp->stat_streak;
 		renderMultiplierVal();
 		renderStats();
 	}

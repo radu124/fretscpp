@@ -74,28 +74,30 @@ void tStageElem::render(int depth)
 	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	color=lv_color;
 	for (i=0; i<fx.size(); i++) fx[i]->apply(this);
-	color.set();
 	// optimize with and without crop since crop is so wasteful
-	if (!cropmode)
+	if (texid>=0)
 	{
-		texDraw(texid);
+		color.set();
+		if (!cropmode)
+		{
+			texDraw(texid);
+		}
+		else
+		{
+			GLfloat txhe,txwi;
+			texBindGetSize(texid,txhe,txwi);
+			glBegin(GL_TRIANGLE_STRIP);
+			glTexCoord2f(txwi*cropleft     , txhe*(1-cropbtm)); glVertex3f(-1+2*cropleft , -1+2*cropbtm, 0);
+			glTexCoord2f(txwi*(1-cropright), txhe*(1-cropbtm)); glVertex3f( 1-2*cropright, -1+2*cropbtm, 0);
+			glTexCoord2f(txwi*cropleft     , txhe*croptop);     glVertex3f(-1+2*cropleft ,  1-2*croptop, 0);
+			glTexCoord2f(txwi*(1-cropright), txhe*croptop);     glVertex3f( 1-2*cropright,  1-2*croptop, 0);
+			glEnd();
+			glBindTexture(GL_TEXTURE_2D,0);
+		}
 	}
-	else
-	{
-		GLfloat txhe,txwi;
-		texBindGetSize(texid,txhe,txwi);
-		glBegin(GL_TRIANGLE_STRIP);
-		glTexCoord2f(txwi*cropleft     , txhe*(1-cropbtm)); glVertex3f(-1+2*cropleft , -1+2*cropbtm, 0);
-		glTexCoord2f(txwi*(1-cropright), txhe*(1-cropbtm)); glVertex3f( 1-2*cropright, -1+2*cropbtm, 0);
-		glTexCoord2f(txwi*cropleft     , txhe*croptop);     glVertex3f(-1+2*cropleft ,  1-2*croptop, 0);
-		glTexCoord2f(txwi*(1-cropright), txhe*croptop);     glVertex3f( 1-2*cropright,  1-2*croptop, 0);
-		glEnd();
-		glBindTexture(GL_TEXTURE_2D,0);
-	}
-
+	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (depth<15)
 		for (i=0; i<children.size(); i++)
 			children[i]->render(depth+1);
-	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPopMatrix();
 }

@@ -124,7 +124,7 @@ void Stage::load(string dir, string filename)
 		else elem[i]->texid=texLoad(dir+"/"+txname,1);
 
 		if (elem[i]->lv_aspect==0) elem[i]->lv_aspect=texAspect(elem[i]->texid);
-	}
+	} else elem[i]->lv_aspect=1;
 	/*
 	 * translate comes before the other effects
 	 * translate equals positioning into the stage

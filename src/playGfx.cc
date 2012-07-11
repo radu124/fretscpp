@@ -32,4 +32,5 @@ void playGfx::load(string dir, string filename)
 		keypressed[i]=ffallback("keypressed%d","key%d",i);
 		keystrummed[i]=ffallback("keystrummed%d","key%d",i);
 	}
+	multiplierbar=findElem("multiplierbar");
 }

@@ -112,14 +112,6 @@ void init_sprites()
 	sp_m2        = texLoad("2x.png");
 	sp_m3        = texLoad("3x.png");
 	sp_m4        = texLoad("4x.png");
-	sp_guitar[0] = texLoad("guitar1ok.png");
-	sp_guitar[1] = texLoad("guitar1gs.png");
-	sp_guitar[2] = texLoad("guitar2ok.png");
-	sp_guitar[3] = texLoad("guitar2gs.png");
-	sp_guitar[4] = texLoad("guitar3ok.png");
-	sp_guitar[5] = texLoad("guitar3gs.png");
-	sp_guitar[6] = texLoad("guitar4ok.png");
-	sp_guitar[7] = texLoad("guitar4gs.png");
 	sp_star1     = texLoad("star1.png");
 	sp_star2     = texLoad("star2.png");
 }

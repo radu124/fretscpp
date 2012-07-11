@@ -26,6 +26,7 @@ public:
 	tStageElem *key[5];
 	tStageElem *keypressed[5];
 	tStageElem *keystrummed[5];
+	tStageElem *multiplierbar;
 };
 
 #endif

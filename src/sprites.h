@@ -55,7 +55,6 @@ extern int sp_glow;
 extern int sp_hitg1, sp_hitg2;
 extern int sp_hitf1, sp_hitf2;
 extern int sp_noteline, sp_thinline;
-extern int sp_guitar[8];
 extern int sp_star1, sp_star2;
 extern int sp_m2, sp_m3, sp_m4;
 

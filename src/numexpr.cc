@@ -17,6 +17,7 @@ GNU General Public License for more details.
 #include "verbosity.h"
 #include "message.h"
 #include "scnGuitar.h"
+#include "globals.h"
 
 GLfloat tNumExpr::val() { return 0; }
 void tNumExpr::print() { DBG(NUMEXPR,"0"); }
@@ -39,6 +40,16 @@ public:
 	GLfloat val() { return *v; }
 	void print() { DBG(NUMEXPR,"ptr"); }
 };
+
+class tNXintref:public tNumExpr
+{
+public:
+	int *v;
+	tNXintref(int *vv):v(vv) {;}
+	GLfloat val() { return (GLfloat) *v; }
+	void print() { DBG(NUMEXPR,"ptr"); }
+};
+
 
 class tNXtrigmiss:public tNumExpr
 {
@@ -278,6 +289,7 @@ tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 	else if (tok=="t") stored=new tNXreference(&scn.time);
 	else if (tok=="trigmiss")    stored=new tNXtrigmiss();
 	else if (tok=="trigpick")    stored=new tNXtrigpick();
+	else if (tok=="streak")      stored=new tNXintref(&crtpp_streak);
 	else if (tok=="(")           stored=parseNumExpressionInternal(expr,0);
 	else if (tok=="sin")         stored=new tNXsin(parseNumExpressionInternal(expr,9));
 	else if (tok=="beatprofile") stored=new tNXbeatprofile(parseNumExpressionInternal(expr,9));

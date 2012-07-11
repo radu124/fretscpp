@@ -23,6 +23,7 @@ GNU General Public License for more details.
 #include "configuration.h"
 #include "texManager.h"
 #include "audiosong.h"
+#include "playGfx.h"
 
 void tSceneGuitar::statPosition()
 {
@@ -62,25 +63,8 @@ void tSceneGuitar::renderMultiplierVal()
 	glPushMatrix();
 	statPosition();
 	glTranslatef(multvalx,multvaly,0);
-	glScalef(multvalscale*5,-multvalscale*10,0);
-
-	//deffont.displayString(".",0,1,1,0);
-	texBind(sp_guitar[mult]);
-	glColor4f(1,1,1,1);
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0, 1.0); glVertex3f(-1, -1, 0);
-	glTexCoord2f(1.0, 1.0); glVertex3f( 1, -1, 0);
-	glTexCoord2f(0.0, 1.0-mr/10.0); glVertex3f(-1, mr/5.0-1, 0);
-	glTexCoord2f(1.0, 1.0-mr/10.0); glVertex3f( 1, mr/5.0-1, 0);
-	glEnd();
-	texBind(sp_guitar[mult+1]);
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0, 1.0-mr/10.0); glVertex3f(-1, mr/5.0-1, 0);
-	glTexCoord2f(1.0, 1.0-mr/10.0); glVertex3f( 1, mr/5.0-1, 0);
-	glTexCoord2f(0.0, 0.0); glVertex3f(-1, 1, 0);
-	glTexCoord2f(1.0, 0.0); glVertex3f( 1, 1, 0);
-	glEnd();
-	texUnbind();
+	glScalef(multvalscale*5,-multvalscale*5,0);
+	playgfx->multiplierbar->render();
 	glPopMatrix();
 }
 

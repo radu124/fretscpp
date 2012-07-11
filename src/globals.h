@@ -39,6 +39,8 @@ extern const SDL_VideoInfo *origmode;
 extern vstring videomodenames;
 extern int redefining;
 
+extern int crtpp_streak;
+
 struct tConfigurable
 {
 	int idx;
