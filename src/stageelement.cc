@@ -28,6 +28,11 @@ tStageElem::tStageElem()
 
 void tStageElem::read(char *line)
 {
+	cropleft=0;
+	cropright=0;
+	cropbtm=0;
+	croptop=0;
+	cropmode=0;
 #define SLPD SLPD_READ
 	SLINI_LIST
 #undef SLPD
@@ -62,7 +67,24 @@ void tStageElem::render(int depth)
 	color=lv_color;
 	for (i=0; i<fx.size(); i++) fx[i]->apply(this);
 	color.set();
-	texDraw(texid);
+	// optimize with and without crop since crop is so wasteful
+	if (!cropmode)
+	{
+		texDraw(texid);
+	}
+	else
+	{
+		GLfloat txhe,txwi;
+		texBindGetSize(texid,txhe,txwi);
+		glBegin(GL_TRIANGLE_STRIP);
+		glTexCoord2f(txwi*cropleft     , txhe*(1-cropbtm)); glVertex3f(-1+2*cropleft , -1+2*cropbtm, 0);
+		glTexCoord2f(txwi*(1-cropright), txhe*(1-cropbtm)); glVertex3f( 1-2*cropright, -1+2*cropbtm, 0);
+		glTexCoord2f(txwi*cropleft     , txhe*croptop);     glVertex3f(-1+2*cropleft ,  1-2*croptop, 0);
+		glTexCoord2f(txwi*(1-cropright), txhe*croptop);     glVertex3f( 1-2*cropright,  1-2*croptop, 0);
+		glEnd();
+		glBindTexture(GL_TEXTURE_2D,0);
+	}
+
 	if (depth<15)
 		for (i=0; i<children.size(); i++)
 			children[i]->render(depth+1);

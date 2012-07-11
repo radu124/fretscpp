@@ -231,6 +231,7 @@ tStageFx* createStageFx(string vtyp)
 	if (vtyp=="rotate") { return new tFXrotate(); }
 	if (vtyp=="translate") { return new tFXtranslate(); }
 	if (vtyp=="light")  { return new tFXlight(); }
+	if (vtyp=="crop") { return new tFXcrop(); }
 
 // quick and dirty
 	if (vtyp=="rotz") { return new tFXrotz(); }
@@ -244,3 +245,35 @@ tStageFx* createStageFx(string vtyp)
 	return new tStageFx();
 }
 
+tFXcrop::tFXcrop()
+{
+	fx_left=new tNumExpr();
+	fx_right=new tNumExpr();
+	fx_top=new tNumExpr();
+	fx_bottom=new tNumExpr();
+}
+
+tFXcrop::~tFXcrop()
+{
+	delete fx_left;
+	delete fx_right;
+	delete fx_top;
+	delete fx_bottom;
+}
+
+void tFXcrop::read(char *line)
+{
+	FXPD_READ(,left,)
+	FXPD_READ(,right,)
+	FXPD_READ(,top,)
+	FXPD_READ(,bottom,)
+}
+
+void tFXcrop::apply(tStageElem *el)
+{
+	el->cropmode=1;
+	el->cropleft=fx_left->val();
+	el->cropright=fx_right->val();
+	el->croptop=fx_top->val();
+	el->cropbtm=fx_bottom->val();
+}

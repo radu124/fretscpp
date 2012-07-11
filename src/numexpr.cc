@@ -129,6 +129,44 @@ public:
 	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,"*"); operand2->print(); DBG(NUMEXPR,")"); }
 };
 
+class tNXdiv:public tNXplus
+{
+public:
+	tNXdiv(tNumExpr *op1,tNumExpr *op2):tNXplus(op1,op2){;}
+	GLfloat val()
+	{
+		GLfloat dv=operand2->val();
+		// have to avoid division by 0 but preserve sign
+		if (dv<0)
+		{ if (dv>-1e-6) dv=-1e-6; }
+		else if (dv<1e-6) dv=1e-6;
+		return operand1->val()/dv;
+	}
+	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,"/"); operand2->print(); DBG(NUMEXPR,")"); }
+};
+
+class tNXmodulo:public tNXplus
+{
+public:
+	tNXmodulo(tNumExpr *op1,tNumExpr *op2):tNXplus(op1,op2){;}
+	GLfloat val()
+	{
+		double op1=operand1->val();
+		double dv=operand2->val();
+		double unused;
+
+		// have to avoid division by 0 but preserve sign
+		if (dv<0)
+		{ if (dv>-1e-6) dv=-1e-6; }
+		else if (dv<1e-6) dv=1e-6;
+		op1+=1e-6;
+		op1/=dv;
+		op1=modf(op1,&unused);
+		return op1*dv+1e-6;
+	}
+	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,"/"); operand2->print(); DBG(NUMEXPR,")"); }
+};
+
 string NXgetnexttok(const char *&expr, GLfloat &val)
 {
 	string res="";
@@ -163,6 +201,8 @@ string NXgetnexttok(const char *&expr, GLfloat &val)
 	if (*expr=='-'
 		||*expr=='+'
 		||*expr=='*'
+		||*expr=='/'
+		||*expr=='%'
 		||*expr=='('
 		||*expr==')'
 		) { expr++; return res; }
@@ -206,7 +246,7 @@ tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 	else if (tok=="sin")         stored=new tNXsin(parseNumExpressionInternal(expr,2));
 	else if (tok=="beatprofile") stored=new tNXbeatprofile(parseNumExpressionInternal(expr,2));
 	else if (tok=="sinstep")     stored=new tNXsinstep(parseNumExpressionInternal(expr,2));
-	else if (tok=="modf")        stored=new tNXmodf(parseNumExpressionInternal(expr,2));
+	else if (tok=="modf" || tok=="frac" || tok=="saw") stored=new tNXmodf(parseNumExpressionInternal(expr,2));
 	else if (tok=="-")           stored=new tNXminus(new tNumExpr(),parseNumExpressionInternal(expr,1));
 	else {
 		WARN(NUMEXPR,"NUMEXP: expecting value, got %s before %s\n", tok, expr);
@@ -218,6 +258,8 @@ tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 		if (tok=="+" && pri>=1) return stored;
 		if (tok=="-" && pri>=1) return stored;
 		if (tok=="*" && pri>=2) return stored;
+		if (tok=="/" && pri>=2) return stored;
+		if (tok=="%" && pri>=2) return stored;
 		if (tok=="") return stored;
 		if (tok=="ERR")
 		{
@@ -238,7 +280,17 @@ tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 		}
 		if (tok=="*")
 		{
-			stored=new tNXmult(stored,parseNumExpressionInternal(expr,1));
+			stored=new tNXmult(stored,parseNumExpressionInternal(expr,2));
+			continue;
+		}
+		if (tok=="/")
+		{
+			stored=new tNXdiv(stored,parseNumExpressionInternal(expr,2));
+			continue;
+		}
+		if (tok=="%")
+		{
+			stored=new tNXmodulo(stored,parseNumExpressionInternal(expr,2));
 			continue;
 		}
 		WARN(NUMEXPR,"NUMEXP: expecting operand, got: %s before %s\n", tok, expr);

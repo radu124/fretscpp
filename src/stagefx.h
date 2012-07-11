@@ -74,6 +74,22 @@ public:
 };
 
 /**
+ * Crop effect
+ */
+class tFXcrop:public tStageFx
+{
+public:
+	tNumExpr *fx_left;
+	tNumExpr *fx_right;
+	tNumExpr *fx_top;
+	tNumExpr *fx_bottom;
+	tFXcrop();
+	~tFXcrop();
+	void read(char *line);
+	void apply(tStageElem *el);
+};
+
+/**
  * Rotate in the screen plane effect
  */
 class tFXrotate:public tStageFx

@@ -72,6 +72,15 @@ void texBind(int i)
 	tmag[i]->boundframesago=0;
 }
 
+void texBindGetSize(int i, GLfloat &he, GLfloat &wi)
+{
+	if (i<0) return;
+	glBindTexture(GL_TEXTURE_2D,tmag[i]->tex);
+	he=tmag[i]->txhe;
+	wi=tmag[i]->txwi;
+	tmag[i]->boundframesago=0;
+}
+
 void texUnbind()
 {
 	glBindTexture(GL_TEXTURE_2D,0);

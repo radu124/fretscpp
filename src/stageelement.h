@@ -38,6 +38,11 @@ class Stage;
 class tStageElem
 {
 public:
+	GLfloat cropleft;
+	GLfloat cropright;
+	GLfloat croptop;
+	GLfloat cropbtm;
+	int cropmode;
 	string name;
 	vector<tStageElem*> children;
 	int texid;

@@ -34,6 +34,11 @@ void texRelease(int i);
 void texBind(int i);
 
 /**
+ * bind the texture and get its size
+ */
+void texBindGetSize(int i, GLfloat &he, GLfloat &wi);
+
+/**
  * glBindTexture(GL_TEXTURE_2D,NULL);
  */
 void texUnbind();
@@ -61,6 +66,9 @@ void texReloadAll();
  */
 void texStepAVIs();
 
+/**
+ * Get the height/width ratio of a texture
+ */
 GLfloat texAspect(int i);
 
 
