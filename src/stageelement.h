@@ -50,8 +50,10 @@ public:
 	int isBackground;
 	vector<tStageFx*> fx;
 	tStageElem();
+	~tStageElem();
 	void read(char *line);
 	virtual void render(int depth=0);
+	tNumExpr * lv_showif;
 #define SLPD SLPD_DECLARE
 	SLINI_LIST
 #undef SLPD

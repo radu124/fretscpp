@@ -21,18 +21,25 @@ MULTIRDR(SLBLENDTYPE,"default,one")
 
 tStageElem::tStageElem()
 {
-#define SLPD SLPD_INIT
-	SLINI_LIST
-#undef SLPD
-}
-
-void tStageElem::read(char *line)
-{
 	cropleft=0;
 	cropright=0;
 	cropbtm=0;
 	croptop=0;
 	cropmode=0;
+	lv_showif=parseNumExpression("1");
+#define SLPD SLPD_INIT
+	SLINI_LIST
+#undef SLPD
+}
+
+tStageElem::~tStageElem()
+{
+	delete lv_showif;
+}
+
+void tStageElem::read(char *line)
+{
+	if (tsimatch(line,"showif")) { delete lv_showif; lv_showif=parseNumExpression(line); return; }
 #define SLPD SLPD_READ
 	SLINI_LIST
 #undef SLPD
@@ -62,6 +69,7 @@ void tStageBackground::render(int depth)
 void tStageElem::render(int depth)
 {
 	int i;
+	if (lv_showif->val()<0.5) return;
 	glPushMatrix();
 	if (lv_src_blending) glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	color=lv_color;
