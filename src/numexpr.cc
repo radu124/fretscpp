@@ -121,6 +121,38 @@ public:
 	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,"-"); operand2->print(); DBG(NUMEXPR,")"); }
 };
 
+class tNXgreater:public tNXplus
+{
+public:
+	tNXgreater(tNumExpr *op1,tNumExpr *op2):tNXplus(op1,op2){;}
+	GLfloat val() { return operand1->val()>operand2->val(); }
+	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,">"); operand2->print(); DBG(NUMEXPR,")"); }
+};
+
+class tNXlesser:public tNXplus
+{
+public:
+	tNXlesser(tNumExpr *op1,tNumExpr *op2):tNXplus(op1,op2){;}
+	GLfloat val() { return operand1->val()<operand2->val(); }
+	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,">"); operand2->print(); DBG(NUMEXPR,")"); }
+};
+
+class tNXand:public tNXplus
+{
+public:
+	tNXand(tNumExpr *op1,tNumExpr *op2):tNXplus(op1,op2){;}
+	GLfloat val() { return (operand1->val()>0.5)&&(operand2->val()>0.5); }
+	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,">"); operand2->print(); DBG(NUMEXPR,")"); }
+};
+
+class tNXor:public tNXplus
+{
+public:
+	tNXor(tNumExpr *op1,tNumExpr *op2):tNXplus(op1,op2){;}
+	GLfloat val() { return (operand1->val()>0.5)||(operand2->val()>0.5); }
+	void print() { DBG(NUMEXPR,"("); operand1->print(); DBG(NUMEXPR,">"); operand2->print(); DBG(NUMEXPR,")"); }
+};
+
 class tNXmult:public tNXplus
 {
 public:
@@ -203,6 +235,10 @@ string NXgetnexttok(const char *&expr, GLfloat &val)
 		||*expr=='*'
 		||*expr=='/'
 		||*expr=='%'
+		||*expr=='<'
+		||*expr=='>'
+		||*expr=='&'
+		||*expr=='|'
 		||*expr=='('
 		||*expr==')'
 		) { expr++; return res; }
@@ -243,11 +279,11 @@ tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 	else if (tok=="trigmiss")    stored=new tNXtrigmiss();
 	else if (tok=="trigpick")    stored=new tNXtrigpick();
 	else if (tok=="(")           stored=parseNumExpressionInternal(expr,0);
-	else if (tok=="sin")         stored=new tNXsin(parseNumExpressionInternal(expr,2));
-	else if (tok=="beatprofile") stored=new tNXbeatprofile(parseNumExpressionInternal(expr,2));
-	else if (tok=="sinstep")     stored=new tNXsinstep(parseNumExpressionInternal(expr,2));
-	else if (tok=="modf" || tok=="frac" || tok=="saw") stored=new tNXmodf(parseNumExpressionInternal(expr,2));
-	else if (tok=="-")           stored=new tNXminus(new tNumExpr(),parseNumExpressionInternal(expr,1));
+	else if (tok=="sin")         stored=new tNXsin(parseNumExpressionInternal(expr,9));
+	else if (tok=="beatprofile") stored=new tNXbeatprofile(parseNumExpressionInternal(expr,9));
+	else if (tok=="sinstep")     stored=new tNXsinstep(parseNumExpressionInternal(expr,9));
+	else if (tok=="modf" || tok=="frac" || tok=="saw") stored=new tNXmodf(parseNumExpressionInternal(expr,9));
+	else if (tok=="-")           stored=new tNXminus(new tNumExpr(),parseNumExpressionInternal(expr,3));
 	else {
 		WARN(NUMEXPR,"NUMEXP: expecting value, got %s before %s\n", tok, expr);
 		return new tNumExpr();
@@ -255,11 +291,15 @@ tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 	while (1)
 	{
 		tok=NXpeeknexttok(expr);
-		if (tok=="+" && pri>=1) return stored;
-		if (tok=="-" && pri>=1) return stored;
-		if (tok=="*" && pri>=2) return stored;
-		if (tok=="/" && pri>=2) return stored;
-		if (tok=="%" && pri>=2) return stored;
+		if (tok=="|" && pri>=1) return stored;
+		if (tok=="&" && pri>=1) return stored;
+		if (tok=="<" && pri>=2) return stored;
+		if (tok==">" && pri>=2) return stored;
+		if (tok=="+" && pri>=3) return stored;
+		if (tok=="-" && pri>=3) return stored;
+		if (tok=="*" && pri>=4) return stored;
+		if (tok=="/" && pri>=4) return stored;
+		if (tok=="%" && pri>=4) return stored;
 		if (tok=="") return stored;
 		if (tok=="ERR")
 		{
@@ -268,29 +308,49 @@ tNumExpr *parseNumExpressionInternal(const char *&expr, int pri)
 		}
 		NXgetnexttok(expr,v);
 		if (tok==")") { return stored; }
+		if (tok=="|")
+		{
+			stored=new tNXor(stored,parseNumExpressionInternal(expr,1));
+			continue;
+		}
+		if (tok=="&")
+		{
+			stored=new tNXand(stored,parseNumExpressionInternal(expr,1));
+			continue;
+		}
+		if (tok=="<")
+		{
+			stored=new tNXlesser(stored,parseNumExpressionInternal(expr,2));
+			continue;
+		}
+		if (tok==">")
+		{
+			stored=new tNXgreater(stored,parseNumExpressionInternal(expr,2));
+			continue;
+		}
 		if (tok=="+")
 		{
-			stored=new tNXplus(stored,parseNumExpressionInternal(expr,1));
+			stored=new tNXplus(stored,parseNumExpressionInternal(expr,3));
 			continue;
 		}
 		if (tok=="-")
 		{
-			stored=new tNXminus(stored,parseNumExpressionInternal(expr,1));
+			stored=new tNXminus(stored,parseNumExpressionInternal(expr,3));
 			continue;
 		}
 		if (tok=="*")
 		{
-			stored=new tNXmult(stored,parseNumExpressionInternal(expr,2));
+			stored=new tNXmult(stored,parseNumExpressionInternal(expr,4));
 			continue;
 		}
 		if (tok=="/")
 		{
-			stored=new tNXdiv(stored,parseNumExpressionInternal(expr,2));
+			stored=new tNXdiv(stored,parseNumExpressionInternal(expr,4));
 			continue;
 		}
 		if (tok=="%")
 		{
-			stored=new tNXmodulo(stored,parseNumExpressionInternal(expr,2));
+			stored=new tNXmodulo(stored,parseNumExpressionInternal(expr,4));
 			continue;
 		}
 		WARN(NUMEXPR,"NUMEXP: expecting operand, got: %s before %s\n", tok, expr);
