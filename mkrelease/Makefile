@@ -55,6 +55,17 @@ build-%/fretscpp: $(SOURCEDEPS)
 	cd $(ACHROOTB)/build-$(TGTDIST); schroot -c $(TGTDIST) make oneshot-opt
 	-ln -s $(DATADIR) build-$(TGTDIST)/data
 
+source: push/fretscpp-$(THEVER)-source.zip
+
+.PHONY: push/fretscpp-$(THEVER)-source.zip
+push/fretscpp-$(THEVER)-source.zip:
+	rm -rf fretscpp-$(THEVER)
+	mkdir -p push
+	rm -f $@
+	mkdir fretscpp-$(THEVER); cd fretscpp-$(THEVER); git clone ../.. .
+	rm -rf fretscpp-$(THEVER)/.git
+	zip -r push/fretscpp-$(THEVER)-source.zip fretscpp-$(THEVER)
+
 win: build-win/fretscpp.exe
 wininst: build-wininst/setup_fretscpp.exe
 
@@ -95,6 +106,11 @@ clean:
 	rm -rf build-* push
 
 push-win: build-wininst/setup_fretscpp.exe
+	[ "$(THEVER)" != "TEMPORARY" ]
 	mkdir -p push
 	cp $< push/fretscpp-$(THEVER)-setup.exe
 	googlecode_upload -s "Fretscpp $(THEVER) Windows Setup" -p fretscpp -u $(GOOGLECODE_USER) -w $(GOOGLECODE_PASS) -l Featured push/fretscpp-$(THEVER)-setup.exe
+
+push-source: push/fretscpp-$(THEVER)-source.zip
+	[ "$(THEVER)" != "TEMPORARY" ]
+	googlecode_upload -s "Fretscpp $(THEVER) Source" -p fretscpp -u $(GOOGLECODE_USER) -w $(GOOGLECODE_PASS) -l Featured $<
