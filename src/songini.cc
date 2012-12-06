@@ -30,7 +30,7 @@ int tSongini::load(string filename)
 	{
 		char *l=buf;
 		if (NULL==fgets(buf,16383,f)) break;
-		buf[16384]=0;
+		buf[16383]=0;
 		while (*l==' ' || *l=='t')  l++;
 		#define SIPD(a,b) tsiMA##a(b);
 		SONGINI_LIST
