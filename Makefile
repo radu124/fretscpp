@@ -59,13 +59,16 @@ fretscpp: $(OBJECTS_RELEASE)
 	g++ -o $@ $^ $(LIBS)
 
 oneshot: $(SOURCES) $(HEADERS)
-	for i in $(SOURCES); do echo "#include \"$$i\""; done | g++ -g3 -ggdb -O0 -x c++ -o oneshot $(CFLAGS) - $(LIBS)
+	for i in $(SOURCES); do echo "#include \"$$i\""; done | g++ -g3 -ggdb -O0 -x c++ -o $@ $(CFLAGS) - $(LIBS)
+
+oneshot-clang: $(SOURCES) $(HEADERS)
+	for i in $(SOURCES); do echo "#include \"$$i\""; done | clang++ -x c++ -o $@ $(CFLAGS) - $(LIBS)
 
 oneshot-opt: $(SOURCES) $(HEADERS)
 	for i in $(SOURCES); do echo "#include \"$$i\""; done | g++ -O3 -DDISABLEMESSAGES -x c++ -o oneshot $(CFLAGS) - $(LIBS)
 
 ubudeps:
-	sudo apt-get install build-essential libsdl-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev
+	sudo apt-get install build-essential libsdl-dev libvorbis-dev libfreetype6-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev libvpx-dev
 
 archdeps:
 	pacman -S gcc libgl mesa sdl sdl_sound freetype2 libpng
