@@ -30,10 +30,11 @@ int song_start(string path, int paused)
 	INFO(AUDIO,"Song start: >%s<\n", path);
 	strncpy(songctrl.songname,path.c_str(),len);
 	songctrl.songname[len]=0;
-	songctrl.songname[2048]=0;
+	songctrl.songname[2047]=0;
 	songctrl.refreshsong=1;
 	// TODO: need some thread protection here, in case we read this string at the same time
 	// not a problem until we move audio decode to another thread
+	return 0;
 }
 
 void song_stop()

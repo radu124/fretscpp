@@ -16,7 +16,7 @@ int tsimatch(char *&s, const char *v);
 string toString_int(int i);
 
 template <typename T>
-T* dorealloc(T* &adr,int len)
+void dorealloc(T* &adr,int len)
 {
 	T* res=(T*) realloc(adr,len*sizeof(T));
 	if (!res) exit(1);

@@ -99,7 +99,9 @@ int tAudioFile::open(const char *filename)
 	{
 		isopen=1;
 		stopsat=1000000000;
+		return 1;
 	}
+	return 0;
 }
 
 

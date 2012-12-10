@@ -74,6 +74,7 @@ int TFont::open(string fname)
 	opened=1;
 	initializeGlyphs();
 	reloadAll();
+	return 1;
 }
 
 void TFont::initializeGlyphs()

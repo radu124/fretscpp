@@ -133,4 +133,6 @@ int vpxplayer::load_next_frame(int gltexture, uint64_t time, int flags)
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, glbufwidth, glbufheight, 0, GL_RGB, GL_UNSIGNED_BYTE, decodeddata);
 //	for (i=0; i<glbufwidth*glbufheight*3; i+=1237) DBG(VPXDEC,"%d ",decodeddata[i]);
+	return 0;
+// TODO: return status
 }

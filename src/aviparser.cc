@@ -147,6 +147,8 @@ int avifile::parse_containers(string path, uint64_t offset, uint64_t end)
 		offset+=effective_len;
 		f.seek(offset);
 	}
+	// TODO: report error when necessary
+	return 0;
 }
 
 void avifile::reset()
