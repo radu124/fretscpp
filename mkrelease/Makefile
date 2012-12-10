@@ -6,14 +6,14 @@ GOOGLECODE_PASS=$(shell cat $(HOME)/.config/googlecode/pass)
 FOFMYBASE=$(shell readlink -f ..)
 
 
-UNCOMMITTED:=$(shell git diff-index --quiet HEAD; echo $$?)
-ifeq ($(UNCOMMITTED),1)
-  THEVER:=TEMPORARY
-else
+#UNCOMMITTED:=$(shell git diff-index --quiet HEAD; echo $$?)
+#ifeq ($(UNCOMMITTED),1)
+#  THEVER:=TEMPORARY
+#else
   VERDATE:=$(shell TZ=UTC git log -n 1 --format="format:%cd" --date=short)
   VERMINOR:=$(shell TZ=UTC git log --since $(VERDATE):00:00:00 --format="oneline" | wc -l)
   THEVER=$(subst -,.,$(VERDATE)).$(VERMINOR)
-endif
+#endif
 
 
 WINEBDIR:=$(HOME)/wine/build
@@ -66,6 +66,15 @@ push/fretscpp-$(THEVER)-source.zip:
 	rm -rf fretscpp-$(THEVER)/.git
 	zip -r push/fretscpp-$(THEVER)-source.zip fretscpp-$(THEVER)
 
+.PHONY: push/fretscpp-$(THEVER)-source.tar.gz
+push/fretscpp-$(THEVER)-source.tar.gz:
+	rm -rf fretscpp-$(THEVER)
+	mkdir -p push
+	rm -f $@
+	mkdir fretscpp-$(THEVER); cd fretscpp-$(THEVER); git clone ../.. .
+	rm -rf fretscpp-$(THEVER)/.git
+	tar -czvf $@ fretscpp-$(THEVER)
+
 win: build-win/fretscpp.exe
 wininst: build-wininst/setup_fretscpp.exe
 
@@ -111,6 +120,6 @@ push-win: build-wininst/setup_fretscpp.exe
 	cp $< push/fretscpp-$(THEVER)-setup.exe
 	googlecode_upload -s "Fretscpp $(THEVER) Windows Setup" -p fretscpp -u $(GOOGLECODE_USER) -w $(GOOGLECODE_PASS) -l Featured push/fretscpp-$(THEVER)-setup.exe
 
-push-source: push/fretscpp-$(THEVER)-source.zip
+push-source: push/fretscpp-$(THEVER)-source.tar.gz
 	[ "$(THEVER)" != "TEMPORARY" ]
 	googlecode_upload -s "Fretscpp $(THEVER) Source" -p fretscpp -u $(GOOGLECODE_USER) -w $(GOOGLECODE_PASS) -l Featured $<
