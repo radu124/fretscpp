@@ -29,7 +29,7 @@ runopt: fretscpp
 	./fretscpp
 
 clean:
-	-rm -rf game game-r fretscpp .build
+	-rm -rf game game-r fretscpp .build oneshot*
 
 release: fretscpp
 
