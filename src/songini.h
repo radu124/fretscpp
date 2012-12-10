@@ -35,13 +35,19 @@ SIPD(int,preview_start_time) \
 SIPD(string,cover) \
 SIPD(string,background) \
 
+#define SIPD_init_string(a)
+#define SIPD_init_int(a) a=0;
 
 struct tSongini
 {
 #define SIPD(a,b) a b;
 	SONGINI_LIST
 #undef SIPD
-	
+	tSongini(){
+#define SIPD(a,b) SIPD_init_##a(b);
+	SONGINI_LIST
+#undef SIPD
+		}
 	int load(string filename);
 };
 
