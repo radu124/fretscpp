@@ -10,6 +10,7 @@
 struct notestatus
 {
 	int timestamp;
+	int timeticks;
 	/**
 	 * Each character represents a difficulty level (with spares)
 	 * levels separated by 12 characters 0-4=easy
@@ -19,6 +20,17 @@ struct notestatus
 	 * B - both an end and a beginning
 	 */
 	char val[64]; // " O-XB"
+};
+
+/**
+ * BPM setting changes
+ */
+struct midiBPMsetting
+{
+	midiBPMsetting():timeticks(0),newspt(0){;}
+	midiBPMsetting(int t,double s):timeticks(t),newspt(s){;}
+	int timeticks; /// the time when this becomes active
+	double newspt; /// the number of samples/tick
 };
 
 enum notestatusflags
@@ -146,6 +158,10 @@ protected:
 	 * last state of the note was "hit" the new state will change to "-"
 	 */
 	void timeincrement(int delta);
+	/**
+	 * Recompute timestamps after all tracks are read
+	 */
+	void recomputetimestamps();
 public:
 	int lastevent;
 	/**
@@ -156,6 +172,10 @@ public:
 	 * delay all notes by the given amount
 	 */
 	void applydelay(int delay);
+	/**
+	 * List of BPM changes
+	 */
+	vector<midiBPMsetting> bpmseq;
 	/**
 	 * vector of tracks, which in turn are vectors of notestatus
 	 */

@@ -192,13 +192,12 @@ string processInstrumentName(string m)
 
 void MidiParser::timeincrement(int delta)
 {
-	// FIX: this loss of precision can potentially accumulate
-	int newtimestamp=a.timestamp+(int) (44100*tickduration*delta);
-	if (newtimestamp>lastevent) lastevent=newtimestamp;
+	a.timeticks+=delta;
+	// provisional, will be updated on second pass
+	a.timestamp+=(int) (44100*tickduration*delta); 
 	DBG(READMID,"Time increment %5d,  1000ticks=%3.3fs, time is now %7.3fs    ",
-		delta, (tickduration*1000), (newtimestamp/44100.0));
+		delta, (tickduration*1000), (a.timestamp/44100.0));
 	score.push_back(a);
-	a.timestamp=newtimestamp;
 	int i,j;
 	for (i=0; i<48; i++) switch (a.val[i])
 	{
@@ -209,6 +208,49 @@ void MidiParser::timeincrement(int delta)
 
 		default:
 			a.val[i]=' ';
+	}
+}
+
+bool bpmscompare(const midiBPMsetting &i,const midiBPMsetting &j) 
+{ 
+	return (i.timeticks<j.timeticks); 
+}
+
+void MidiParser::recomputetimestamps()
+{
+	int trki,i;
+	// just in case
+	sort(bpmseq.begin(),bpmseq.end(),bpmscompare);
+	for (i=0; i<bpmseq.size(); i++)
+		INFO(READMID,"MIDI tempo change @%d %d\n",bpmseq[i].timeticks,(int)(1000000*bpmseq[i].newspt));
+	for (trki=0; trki<trk_notes.size(); trki++)
+	{
+		double ts=0;
+		int ticksbefore=0;
+		int nextbpmevent;
+		int delta;
+		int crtbpm=0; // the current bpm index
+		if (bpmseq.size()>1) nextbpmevent=bpmseq[1].timeticks;
+		else nextbpmevent=1000000000;
+		for (i=0; i<trk_notes[trki].size(); i++)
+		{
+			notestatus &s=trk_notes[trki][i];
+			while (s.timeticks>nextbpmevent)
+			{
+				delta=nextbpmevent-ticksbefore;
+				ts+=44100*bpmseq[crtbpm].newspt*delta;
+				ticksbefore=nextbpmevent;
+				if (bpmseq.size()>crtbpm+1)
+					nextbpmevent=bpmseq[++crtbpm+1].timeticks;
+				else
+					nextbpmevent=1000000000;
+			}
+			delta=s.timeticks-ticksbefore;
+			ticksbefore=s.timeticks;
+			ts+=44100*bpmseq[crtbpm].newspt*delta;
+			s.timestamp=(int) ts;
+			if (s.timestamp>lastevent) lastevent=s.timestamp;
+		}
 	}
 }
 
@@ -242,9 +284,11 @@ int MidiParser::doparse()
 	}
 	else
 	{
+		// = clock ticks / quarter note of music
 		ticksperbeat=bp0*256+bp1;
+		// 120 bpm is standard if we get no other info = 1 beat/2 seconds
+		// a quarter beat=0.5 seconds
 		tickduration=0.5f/ticksperbeat;
-		// 120 bpm is standard if we get no other info
 		INFO(READMID,"Midi ticks/beat %d  1000ticks=%2.3fs\n", ticksperbeat, (tickduration*1000));
 	}
 	pos=savedpos+chunklen;
@@ -252,6 +296,8 @@ int MidiParser::doparse()
 	assret(pos<size,"Header size sent us past end-of-file");
 	INFO(READMID,"Midi file has %d tracks, format is %d\n", tracks, format);
 	savedpos=pos;
+	bpmseq.resize(0);
+	bpmseq.push_back(midiBPMsetting(-1,tickduration));
 	trk_notes.resize(0);
 	trk_difficulties.resize(0);
 	trk_instrument.resize(0);
@@ -267,6 +313,7 @@ int MidiParser::doparse()
 		int difficulties=0;
 		memset(a.val,' ',sizeof(a.val));
 		a.timestamp=0;
+		a.timeticks=0;
 		a.val[63]=0;
 		score.resize(0);
 		string instrument="Guitar";
@@ -321,14 +368,18 @@ int MidiParser::doparse()
 					uspqn=65536*readbyte();
 					uspqn+=256*readbyte();
 					uspqn+=readbyte();
-					tickduration=uspqn/1000000.0/ticksperbeat;
+					
+					tickduration=uspqn/1200000.0/ticksperbeat;
+					bpmseq.push_back(midiBPMsetting(a.timeticks,tickduration));
 					INFO(READMID,"MIDI Set tempo us/qnote %d, ticks/beat %d  1000ticks=%2.3fs\n",
 						uspqn, ticksperbeat, (tickduration*1000));
+					
 					break;
 				case 84:
 					INFO(READMID,"MIDI End of track\n");
 					break;
 				case 88:
+				// This is an unholy mess, but does it actually affect the interpretation of time?
 					ts_numer=readbyte();
 					ts_denom=readbyte();
 					ts_metro=readbyte();
@@ -412,6 +463,7 @@ int MidiParser::doparse()
 		savedpos=pos;
 		tracks--;
 	}
+	recomputetimestamps();
 	return 1;
 }
 
