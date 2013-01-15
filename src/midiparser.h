@@ -11,6 +11,7 @@ struct notestatus
 {
 	int timestamp;
 	int timeticks;
+	double tickduration;
 	/**
 	 * Each character represents a difficulty level (with spares)
 	 * levels separated by 12 characters 0-4=easy
@@ -23,14 +24,17 @@ struct notestatus
 };
 
 /**
- * BPM setting changes
+ * tempo setting changes
  */
-struct midiBPMsetting
+struct tempoMarker
 {
-	midiBPMsetting():timeticks(0),newspt(0){;}
-	midiBPMsetting(int t,double s):timeticks(t),newspt(s){;}
-	int timeticks; /// the time when this becomes active
-	double newspt; /// the number of samples/tick
+	tempoMarker():time(0),bpm(0){;}
+	tempoMarker(double t,double b):time(t),bpm(b) {;}
+	/**
+	 * the time when this becomes active, in ticks
+	 */
+	double time;   
+	double bpm;    /// new BPM
 };
 
 enum notestatusflags
@@ -109,6 +113,11 @@ class MidiParser
 	int ticksperbeat;
 	int ts_numer, ts_denom, ts_metro, ts_32nds;
 	double tickduration;
+	/**
+	 * bpm from fof, used indiscriminately across tracks, 
+	 * latest parsed counts - in Track:update
+	 */
+	double fofbpm;
 	notestatus a;
 	vector<notestatus> score;
 protected:
@@ -173,9 +182,18 @@ public:
 	 */
 	void applydelay(int delay);
 	/**
-	 * List of BPM changes
+	 * return time, corrected by tempo markers if they exist (from FoF)
+	 * @param timestamp
 	 */
-	vector<midiBPMsetting> bpmseq;
+	double abs_time(double ts);
+	/**
+	 * ticks-to-beats conversion from FoF
+	 */
+	double ticksToBeats(double ticks, double bpm);
+	/**
+	 * List of tempo changes
+	 */
+	vector<tempoMarker> tempoMarkers;
 	/**
 	 * vector of tracks, which in turn are vectors of notestatus
 	 */

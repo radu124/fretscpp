@@ -192,12 +192,14 @@ string processInstrumentName(string m)
 
 void MidiParser::timeincrement(int delta)
 {
-	a.timeticks+=delta;
-	// provisional, will be updated on second pass
-	a.timestamp+=(int) (44100*tickduration*delta); 
-	DBG(READMID,"Time increment %5d,  1000ticks=%3.3fs, time is now %7.3fs    ",
-		delta, (tickduration*1000), (a.timestamp/44100.0));
 	score.push_back(a);
+	a.timeticks+=delta;
+	double at=abs_time(a.timeticks);
+	// scale by bpm and convert in wave samples @44.1KHz
+	a.timestamp=at*44.1;
+	if (a.timestamp>lastevent) lastevent=a.timestamp;
+	DBG(READMID,"Timestamp:  %8d,  time=%3.3fs, time is now %8.3fs    ",
+		a.timeticks, at, (a.timestamp/44100.0));
 	int i,j;
 	for (i=0; i<48; i++) switch (a.val[i])
 	{
@@ -211,47 +213,32 @@ void MidiParser::timeincrement(int delta)
 	}
 }
 
-bool bpmscompare(const midiBPMsetting &i,const midiBPMsetting &j) 
-{ 
-	return (i.timeticks<j.timeticks); 
+double MidiParser::ticksToBeats(double ticks,double bpm)
+{
+	return (60000.0 * ticks) / (bpm * ticksperbeat);
 }
 
-void MidiParser::recomputetimestamps()
+double MidiParser::abs_time(double ts)
 {
-	int trki,i;
-	// just in case
-	sort(bpmseq.begin(),bpmseq.end(),bpmscompare);
-	for (i=0; i<bpmseq.size(); i++)
-		INFO(READMID,"MIDI tempo change @%d %d\n",bpmseq[i].timeticks,(int)(1000000*bpmseq[i].newspt));
-	for (trki=0; trki<trk_notes.size(); trki++)
+	if (tempoMarkers.size()==0) return 0;
+	// this could be done better, but we do it just like in f-o-f
+	double scaledTime=0;
+	double tempoMarkerTime=0; // in ticks
+	double currentBpm=tempoMarkers[0].bpm;
+	int i;
+	for (i=0; i<tempoMarkers.size(); i++)
 	{
-		double ts=0;
-		int ticksbefore=0;
-		int nextbpmevent;
-		int delta;
-		int crtbpm=0; // the current bpm index
-		if (bpmseq.size()>1) nextbpmevent=bpmseq[1].timeticks;
-		else nextbpmevent=1000000000;
-		for (i=0; i<trk_notes[trki].size(); i++)
-		{
-			notestatus &s=trk_notes[trki][i];
-			while (s.timeticks>nextbpmevent)
-			{
-				delta=nextbpmevent-ticksbefore;
-				ts+=44100*bpmseq[crtbpm].newspt*delta;
-				ticksbefore=nextbpmevent;
-				if (bpmseq.size()>crtbpm+1)
-					nextbpmevent=bpmseq[++crtbpm+1].timeticks;
-				else
-					nextbpmevent=1000000000;
-			}
-			delta=s.timeticks-ticksbefore;
-			ticksbefore=s.timeticks;
-			ts+=44100*bpmseq[crtbpm].newspt*delta;
-			s.timestamp=(int) ts;
-			if (s.timestamp>lastevent) lastevent=s.timestamp;
-		}
+		double time=tempoMarkers[i].time;
+		double bpm=tempoMarkers[i].bpm;
+		if (time>ts) break;
+		scaledTime+=ticksToBeats(time - tempoMarkerTime, currentBpm);
+		//DBG(READMID," Marker: %3d, time: %9.3f, scaled time: %9.3f\n", i, time, scaledTime);
+		tempoMarkerTime=time;
+		currentBpm=bpm;
 	}
+	double result=scaledTime + ticksToBeats(ts - tempoMarkerTime, currentBpm);
+	//DBG(READMID," Marker-res:                   scaled time: %3.3f\n", result);
+	return result;
 }
 
 int MidiParser::doparse()
@@ -291,13 +278,14 @@ int MidiParser::doparse()
 		tickduration=0.5f/ticksperbeat;
 		INFO(READMID,"Midi ticks/beat %d  1000ticks=%2.3fs\n", ticksperbeat, (tickduration*1000));
 	}
+	// frets-on-fire actually does not give it a default
+	fofbpm=120;
 	pos=savedpos+chunklen;
 	assret(!FAIL,"Could not read entire header, probably end-of-file");
 	assret(pos<size,"Header size sent us past end-of-file");
 	INFO(READMID,"Midi file has %d tracks, format is %d\n", tracks, format);
 	savedpos=pos;
-	bpmseq.resize(0);
-	bpmseq.push_back(midiBPMsetting(-1,tickduration));
+	tempoMarkers.resize(0);
 	trk_notes.resize(0);
 	trk_difficulties.resize(0);
 	trk_instrument.resize(0);
@@ -370,10 +358,15 @@ int MidiParser::doparse()
 					uspqn+=readbyte();
 					
 					tickduration=uspqn/1200000.0/ticksperbeat;
-					bpmseq.push_back(midiBPMsetting(a.timeticks,tickduration));
-					INFO(READMID,"MIDI Set tempo us/qnote %d, ticks/beat %d  1000ticks=%2.3fs\n",
-						uspqn, ticksperbeat, (tickduration*1000));
-					
+					{
+						double t=abs_time(a.timeticks);
+						double bpm=60000000.0/uspqn;
+						fofbpm=bpm; 
+						// hopefully this has the same effect here
+						// because in fof it is used on a second pass
+						tempoMarkers.push_back(tempoMarker(a.timeticks,bpm));
+						INFO(READMID,"tempoMarker time:%f bpm:%f\n",t,bpm);
+					}
 					break;
 				case 84:
 					INFO(READMID,"MIDI End of track\n");
@@ -463,7 +456,6 @@ int MidiParser::doparse()
 		savedpos=pos;
 		tracks--;
 	}
-	recomputetimestamps();
 	return 1;
 }
 
