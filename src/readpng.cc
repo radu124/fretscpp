@@ -75,7 +75,7 @@ GLuint loadImage(const char *filename, GLuint &texture, int &imgwidth, int &imgh
 	}
 	png_byte sig[8];
 
-	fread(&sig, 8, sizeof(png_byte), pngFile);
+	unusedint=fread(&sig, 8, sizeof(png_byte), pngFile);
 	rewind(pngFile);//so when we init io it won't bitch
 	if(!png_check_sig(sig, 8))
 	{

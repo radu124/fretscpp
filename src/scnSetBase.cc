@@ -135,6 +135,7 @@ int tSIintrange::handleevent(SDL_Event &event)
 		*val+=step;
 		if (*val>max) *val=max;
 		return 1;
+	default:;
 	}
 	return 0;
 }
@@ -152,6 +153,7 @@ int tSIlist::handleevent(SDL_Event &event)
 	case SDLK_RIGHT:
 		*val+=1;
 		return capval();
+	default:;
 	}
 	return 0;
 }
@@ -169,6 +171,7 @@ int tSIclist::handleevent(SDL_Event &event)
 	case SDLK_RIGHT:
 		idx++;
 		return capval();
+	default:;
 	}
 	return 0;
 }
@@ -184,6 +187,7 @@ int tSIrange::handleevent(SDL_Event &event)
 	case SDLK_RIGHT:
 		*val+=step;
 		return capval();
+	default:;
 	}
 	return 0;
 }
@@ -208,9 +212,8 @@ void tScnSetBase::additem(tSettingsItem *a)
 
 void tScnSetBase::handleevent(SDL_Event &event)
 {
-	switch (event.type)
+	if (event.type==SDL_KEYDOWN)
 	{
-	case SDL_KEYDOWN:
 		switch (event.key.keysym.sym)
 		{
 			case SDLK_ESCAPE:
@@ -244,7 +247,6 @@ void tScnSetBase::handleevent(SDL_Event &event)
 					itemAdjusted(selected);
 				break;
 		}
-		break;
 	}
 	// fix view offset
 	if (selected<viewOffset) viewOffset=selected;

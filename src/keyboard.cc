@@ -167,6 +167,7 @@ void menukey(SDL_Event &event, int flags)
 		case SDLK_PAGEUP:
 		case SDLK_PAGEDOWN:
 		return;
+		default:;
 	}
 	// string input
 	if (event.key.keysym.sym>='a' && event.key.keysym.sym<='z' && (flags&1))

@@ -44,9 +44,8 @@ void tScnMenuBase::renderback()
 
 void tScnMenuBase::handleevent(SDL_Event &event)
 {
-	switch (event.type)
+	if (event.type==SDL_KEYDOWN)
 	{
-	case SDL_KEYDOWN:
 		switch (event.key.keysym.sym)
 		{
 			case SDLK_ESCAPE:
@@ -76,8 +75,8 @@ void tScnMenuBase::handleevent(SDL_Event &event)
 				selected+=viewSize;
 				if (selected>=item.size()) selected=item.size()-1;
 				break;
+			default:;
 		}
-		break;
 	}
 	// fix view offset
 	if (selected<viewOffset) viewOffset=selected;

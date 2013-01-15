@@ -68,7 +68,7 @@ void Stage::load(string dir, string filename)
 	while (!feof(fc))
 	{
 		line[0]=0;
-		fgets(line,999,fc);
+		unusedcp=fgets(line,999,fc);
 		if (!strlen(line)) continue;
 		char *p, *sav, *fxs;
 		// eliminate CR,LF at the end of line
